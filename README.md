@@ -1,5 +1,5 @@
 # Gugumoe-bot
-![https://github.com/GooGuJiang/Gugumoe-bot]( https://s3.bmp.ovh/imgs/2021/09/f8a6ac30978367d6.jpg )
+![https://github.com/GooGuJiang/Gugumoe-bot]( https://i0.hdslb.com/bfs/album/18f28e3a7b5c74dbe628166ddeadc02516d3c5ce.jpg )
  
  这是咕谷酱的Telegram机器人 (咕小酱)
  是基于 [pyTelegramBotAPI](https://github.com/eternnoir/pyTelegramBotAPI) 的一个 Python 机器人。
