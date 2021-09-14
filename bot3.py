@@ -38,7 +38,11 @@ try:
             }
 
 
-            url="https://osu.ppy.sh/api/get_user?k=b4b40fae3dd57dfe2f031ae5a5f2b82b4b4fc3b5&u="+str(id)
+            with open('bot.yaml', 'r') as f: #读取配置文件?
+                bottok = yaml.load(f.read(),Loader=yaml.FullLoader)
+                token = bottok['osuToken']
+
+            url="https://osu.ppy.sh/api/get_user?k="+token+"&u="+str(id)
             
 
             res = requests.get(url, proxies=proxies)
