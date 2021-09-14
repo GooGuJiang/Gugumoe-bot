@@ -1,2 +1,31 @@
 # Gugumoe-bot
- 咕小酱
+![](https://z3.ax1x.com/2021/09/14/4A1wbd.jpg)
+ 
+ 这是咕谷酱的Telegram机器人 (咕小酱)
+ 是基于 [pyTelegramBotAPI](https://github.com/eternnoir/pyTelegramBotAPI) 的一个 Python 机器人。
+ 
+ ~~同时会有一堆运行Bug~~
+ 
+ ## 功能
+| 功能 | 是否实现 |
+| ------- | ------- |
+| 今日人品 |    √    |
+|咕       |     √    |
+|Ping|√|
+|鸽子养成|X|
+|OSU信息查询| 10% |
+|微博热搜|√|
+|百度热搜|X|
+
+## 指令列表
+
+|功能|指令|
+| ------- | ------- |
+|今日人品|/jrrp|
+|咕|/gu|
+|Ping|/ping [Ping地址]|
+|领养鸽子|/getpigeons|
+|炖鸽子|/killpigeons|
+|微博热搜|/guweibo|
+|百度热搜|/gubaid|
+|OSU信息查询|/guosu [游戏名或者个人ID]|
