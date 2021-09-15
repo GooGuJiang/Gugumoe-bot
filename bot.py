@@ -3,7 +3,6 @@
 from telebot import types
 from PIL import ImageGrab
 from telebot import apihelper
-import win32gui, win32ui, win32con
 from ctypes import windll
 from PIL import ImageFont, ImageDraw, Image
 from bs4 import BeautifulSoup
