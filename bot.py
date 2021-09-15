@@ -443,7 +443,7 @@ try:
     @bot.message_handler(commands=['guosuinfo'])
     def send_infopho(message):
         if out_osuinfo(str(message.from_user.id),3) == None:
-            bot.reply_to(message,"你的 Telegram ID 未绑定了 OSU 用户名\n请使用: \n/guosu-bind [OSU用户名/OSU ID] \n来绑定吧!")
+            bot.reply_to(message,"你的 Telegram ID 未绑定了 OSU 用户名\n请使用: \n/guosubind [OSU用户名/OSU ID] \n来绑定吧!")
         else:
             try:
                 chatjson_img = bot.reply_to(message,"正在查询生成图片请稍后....")
