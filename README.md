@@ -16,6 +16,7 @@
 |OSU信息查询| 70% |
 |微博热搜|√|
 |百度热搜|X|
+|原神抽卡|X|
 
 ## 指令列表
 
@@ -23,7 +24,7 @@
 | ------- | ------- |
 |今日人品|/jrrp|
 |咕|/gu|
-|Ping|/ping [Ping地址]|
+|Ping|/guping [Ping地址]|
 |领养鸽子|/getpigeons|
 |炖鸽子|/killpigeons|
 |微博热搜|/guweibo|
