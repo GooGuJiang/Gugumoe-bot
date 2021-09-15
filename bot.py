@@ -2,7 +2,6 @@
 
 from telebot import types
 from PIL import ImageGrab
-from MyEncoder import MyEncoder
 from telebot import apihelper
 import win32gui, win32ui, win32con
 from ctypes import windll
@@ -324,11 +323,15 @@ try:
             if osu_user_outimg(howpingip(message.text)) == False:
                 pass
             else:
-                chatjson_img = bot.edit_message_text("正在上传图片请稍后....",chatjson_img.chat.id, chatjson_img.message_id)
-                phpget = open('./tmp/osu/'+str(out)+'.png','rb')
-                bot.send_photo(message.chat.id, phpget)
+                try:
+                    chatjson_img = bot.edit_message_text("正在上传图片请稍后....",chatjson_img.chat.id, chatjson_img.message_id)
+                    phpget = open('./tmp/osu/'+str(out)+'.png','rb')
+                    bot.send_photo(message.chat.id, phpget)
+                    bot.edit_message_text('图片上传完成!', chatjson_img.chat.id, chatjson_img.message_id)
+                except Exception as gubot:
+                    bot.edit_message_text('上传时出错了惹...\n错误日志: '+str(gubot),chatjson_img.chat.id, chatjson_img.message_id)
         except Exception as boterr:
-            bot.reply_to(message, '呜呜呜...指令有问题......\n错误日志: '+str(boterr))
+            bot.edit_message_text('呜呜呜...指令有问题......\n错误日志: '+str(boterr),chatjson_img.chat.id, chatjson_img.message_id)
 
     if __name__ == '__main__':
         bot.polling()
