@@ -10,6 +10,7 @@ from bs4 import BeautifulSoup
 from lxml import etree
 from lxml import html
 from ping3 import ping
+import sqlite3
 import platform
 import requests
 import numpy as np
@@ -29,6 +30,78 @@ try:
 
     apihelper.proxy = {'https':'socks5://127.0.0.1:8089'}
 
+    def get_osuid(name):
+
+        proxies = {
+                'http': 'socks5://127.0.0.1:8089',
+                'https': 'socks5://127.0.0.1:8089'
+            }
+
+        with open('bot.yaml', 'r') as f: #读取配置文件?
+            bottok = yaml.load(f.read(),Loader=yaml.FullLoader)
+            token = bottok['osuToken']
+        
+        url="https://osu.ppy.sh/api/get_user?k="+token+"&u="+str(name)
+
+        res = requests.get(url, proxies=proxies)
+
+        uesr_text = json.loads(res.text)
+
+        ok_userjson = eval(json.dumps(uesr_text[0]))
+
+        return ok_userjson['user_id']
+
+    def inpu_osuinfo(teleid,userosuid): #数据文件写入
+        try:
+            osu = sqlite3.connect("./osu/osu.db")
+            cur = osu.cursor()
+            sql = "CREATE TABLE IF NOT EXISTS osuinfo(telid INTEGER PRIMARY KEY,osuid INTEGER)"
+            cur.execute(sql)
+            cur.execute("INSERT INTO osuinfo values(?,?)", (teleid, userosuid))
+            osu.commit()
+            # 关闭游标
+            cur.close()
+            # 断开数据库连接
+            osu.close()
+            return True
+        except Exception as ree:
+            print('数据库处理出错!\n错误日志: '+str(ree))
+            cur.close()
+            # 断开数据库连接
+            osu.close()
+            return False
+
+    def out_osuinfo(teleid,oid):
+        osu = sqlite3.connect("./osu/osu.db")
+        cur = osu.cursor()
+        sql = "CREATE TABLE IF NOT EXISTS osuinfo(telid INTEGER PRIMARY KEY,osuid INTEGER)"
+        cur.execute(sql)
+        osu.commit()
+        cur.execute("select * from osuinfo")
+        sence = cur.fetchall()
+        if oid == 1:
+            for i in range(len(sence)): #TG取OSU ID
+                #print(sence[i][0])
+                if str(sence[i][0]) == teleid:
+                    return sence[i][1]
+        elif oid == 0:
+            for i in range(len(sence)): #TG取OSU ID
+                #print(sence[i][0])
+                if str(sence[i][1]) == teleid:
+                    return sence[i][0]                                             #写的头疼（
+        elif oid == 2:
+            for i in range(len(sence)): #OSU ID取OSU ID
+                #print(sence[i][0])
+                if str(sence[i][1]) == teleid:
+                    return sence[i][1]
+        elif oid == 3:
+            for i in range(len(sence)): #TG取TG
+                #print(sence[i][0])
+                if str(sence[i][0]) == teleid:
+                    return sence[i][0]
+        else:
+            return False
+
     def osu_user_outimg(id): #获取osu用户json信息
         try:
             proxies = {
@@ -46,7 +119,7 @@ try:
 
             res = requests.get(url, proxies=proxies)
 
-            uesr_text = json.loads(res.text)
+            uesr_text = json.loads(res.text) #json解析
 
             ok_userjson = eval(json.dumps(uesr_text[0]))
 
@@ -114,13 +187,22 @@ try:
             
         # 下面两行新增的
 
-    def howpingip(textlt): #ping指令识别
-        textcomm = textlt
-        char_1=' '
-        commkgkg=textcomm.find(char_1)
-        outip = textcomm[commkgkg+1:len(textcomm)]
-        return outip
-
+    def howpingip(textlt): #指令提取
+        try:
+            textcomm = textlt
+            if ' ' in textlt:
+                char_1=' '
+                commkgkg=textcomm.find(char_1)
+                outip = textcomm[commkgkg+1:len(textcomm)]
+                if outip == None:
+                    return False
+                else:
+                    return outip
+            else:
+                return False
+        except:
+            return False
+        
     def jt_img(idimg):
         img = pyautogui.screenshot(region=[0,0,1920,1080]) # x,y,w,h
         img.save('./tmp/'+str(idimg)+'.png')
@@ -198,7 +280,7 @@ try:
         bottok = yaml.load(f.read(),Loader=yaml.FullLoader)
         token = bottok['botToken']
 
-    
+#----------------------👆函数区👆-------------------------------   
 
     bot = telebot.TeleBot(token)
 
@@ -288,42 +370,36 @@ try:
     def send_weibo(message):
         bot.reply_to(message,'微博热搜:\n'+weibo_hot())
 
-    @bot.message_handler(commands=['lookgu'])
-    def send_jtimg(message):
-        if message.from_user.id == 1431873495:
-            jt_img(message.from_user.id)
-            photo = open('./tmp/'+str(message.from_user.id)+'.png', 'rb')
-            bot.send_photo(message.chat.id, photo)
-            time.sleep(5)
-            #os.remove('./tmp/'+str(message.from_user.id)+'.png')
-        else:
-            bot.reply_to(message,'想什么呢你没权限(')
 
     @bot.message_handler(commands=['guping'])
     def send_jtimg(message):
         try:
-            if yesnocoom(message.text) == True:
-                pingipp = howpingip(message.text)
-                chatjson = bot.reply_to(message,'正在执行Ping '+str(pingipp))
-                if str(ping_host(str(pingipp))) == 'None':
-                    bot.edit_message_text('咕小酱Ping不通....呜呜呜\n', chatjson.chat.id, chatjson.message_id)
-                else:
-                    bot.edit_message_text(str(pingipp)+' 的延迟为: \n\n'+str(ping_host(str(pingipp))) + ' ms', chatjson.chat.id, chatjson.message_id)
-                #print(output_str)
+            if howpingip(message.text) == False:
+                bot.reply_to(message,"呜呜呜....你光发个指令干嘛让我Ping寂寞啊~\n(缺少参数/guping [Ping的地址])")
             else:
-                bot.reply_to(message,'想什么呢?\n你指令有问题.....')
+                if yesnocoom(message.text) == True:
+                    pingipp = howpingip(message.text)
+                    chatjson = bot.reply_to(message,'正在执行Ping '+str(pingipp))
+                    if str(ping_host(str(pingipp))) == 'None':
+                        bot.edit_message_text('咕小酱Ping不通....呜呜呜\n', chatjson.chat.id, chatjson.message_id)
+                    else:
+                        bot.edit_message_text(str(pingipp)+' 的延迟为: \n\n'+str(ping_host(str(pingipp))) + ' ms', chatjson.chat.id, chatjson.message_id)
+                    #print(output_str)
+                else:
+                    bot.reply_to(message,'想什么呢?\n你指令有问题.....')
         except Exception as pingerr:
             bot.reply_to(message, '呜呜呜....执行Ping指令时出错了\n错误日志: '+str(pingerr))
 
     @bot.message_handler(commands=['guosu'])
     def guosu(message):
         try:
-            chatjson_img = bot.reply_to(message,"正在生成图片请稍后....")
-            out = osu_user_outimg(howpingip(message.text))
-            if osu_user_outimg(howpingip(message.text)) == False:
-                pass
+            
+            if howpingip(message.text) == False:
+                bot.reply_to(message,"你指令不保熟啊!\n(缺少参数/guosu [OSU用户名/OSU ID])")
             else:
                 try:
+                    chatjson_img = bot.reply_to(message,"正在查询生成图片请稍后....")
+                    out = osu_user_outimg(howpingip(message.text))
                     chatjson_img = bot.edit_message_text("正在上传图片请稍后....",chatjson_img.chat.id, chatjson_img.message_id)
                     phpget = open('./tmp/osu/'+str(out)+'.png','rb')
                     bot.send_photo(message.chat.id, phpget)
@@ -331,7 +407,71 @@ try:
                 except Exception as gubot:
                     bot.edit_message_text('上传时出错了惹...\n错误日志: '+str(gubot),chatjson_img.chat.id, chatjson_img.message_id)
         except Exception as boterr:
-            bot.edit_message_text('呜呜呜...指令有问题......\n错误日志: '+str(boterr),chatjson_img.chat.id, chatjson_img.message_id)
+            bot.edit_message_text('呜呜呜...咕小酱遇到了严重问题......\n错误日志: '+str(boterr),chatjson_img.chat.id, chatjson_img.message_id)
+
+    @bot.message_handler(commands=['guosubind'])
+    def send_osuinfo(message):
+        outtext = howpingip(message.text)
+        #print(outtext) #指令输出
+        if outtext == False:
+            bot.reply_to(message,"呜呜呜....你光发指令干嘛 OSU 用户名呢???\n(缺少参数/guosubind [OSU用户名/OSU ID])")
+        else:
+            osuid = get_osuid(outtext)
+            try: 
+                #print(out_osuinfo(message.from_user.id,3)) #数据库检测
+                if out_osuinfo(str(message.from_user.id),3) == None:
+                    if out_osuinfo(str(osuid),2) == None:
+                        chatjson_sql = bot.reply_to(message,"正在绑定....")
+                        inpu_osuinfo(message.from_user.id,osuid)
+                        bot.edit_message_text('绑定 OSU 用户名成功啦!',chatjson_sql.chat.id, chatjson_sql.message_id)
+                    else:
+                        bot.reply_to(message,"此 OSU 用户名已经被其他 Telegram ID 绑定了惹...")
+                else:
+                    bot.reply_to(message,"你的Telegram ID 绑定了 OSU 用户名了的说...")
+                
+
+            except Exception as ooo:
+                #inpu_osuinfo(message.from_user.id,osuid)
+                bot.reply_to(message,'呜呜呜...咕小酱遇到了严重问题......\n错误日志: '+str(ooo))
+
+    #数据库读取函数后面参数? (自造)
+    # #0 OSU ID 取 Telegeam ID
+    # #1 Telegeam ID 取 OSU ID 
+    # #2 OSU ID 取 OSU ID 
+    # #3 Telegram ID取 TG
+
+
+    @bot.message_handler(commands=['guosuinfo'])
+    def send_infopho(message):
+        if out_osuinfo(str(message.from_user.id),3) == None:
+            bot.reply_to(message,"你的 Telegram ID 未绑定了 OSU 用户名\n请使用: \n/guosu-bind [OSU用户名/OSU ID] \n来绑定吧!")
+        else:
+            try:
+                chatjson_img = bot.reply_to(message,"正在查询生成图片请稍后....")
+                out = osu_user_outimg(out_osuinfo(str(message.from_user.id),1))
+                chatjson_img = bot.edit_message_text("正在上传图片请稍后....",chatjson_img.chat.id, chatjson_img.message_id)
+                phpget = open('./tmp/osu/'+str(out)+'.png','rb')
+                bot.send_photo(message.chat.id, phpget)
+                bot.edit_message_text('图片上传完成!', chatjson_img.chat.id, chatjson_img.message_id)
+            except Exception as gubot:
+                bot.edit_message_text('上传时出错了惹...\n错误日志: '+str(gubot),chatjson_img.chat.id, chatjson_img.message_id)
+    
+    @bot.message_handler(commands=['guosudel'])
+    def send_infopho(message):
+        if out_osuinfo(str(message.from_user.id),3) == None:
+            bot.reply_to(message,"你的 Telegram ID 未绑定 OSU 用户名\n请使用: \n/guosubind [OSU用户名/OSU ID] \n来绑定吧!")
+        else:
+            chatjson_del = bot.reply_to(message,"正在解绑 OSU 用户名中....")
+            osu = sqlite3.connect("./osu/osu.db")
+            cur = osu.cursor()
+            cur.execute("DELETE FROM osuinfo WHERE telid=?", (message.from_user.id,))
+            osu.commit()
+            # 关闭游标
+            cur.close()
+            # 断开数据库连接
+            osu.close()
+            bot.edit_message_text('OSU 用户名解绑完成!',chatjson_del.chat.id, chatjson_del.message_id)
+
 
     if __name__ == '__main__':
         bot.polling()
