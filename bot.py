@@ -1,5 +1,5 @@
 # -*- coding:utf-8 -*-
-
+import markdown as MARKDOWN
 from telebot import types
 from PIL import ImageGrab
 from telebot import apihelper
@@ -49,6 +49,21 @@ try:
         ok_userjson = eval(json.dumps(uesr_text[0]))
 
         return ok_userjson['user_id']
+
+    def get_random():
+
+        proxies = {
+                'http': 'socks5://127.0.0.1:8089',
+                'https': 'socks5://127.0.0.1:8089'
+            }
+
+        url='https://www.random.org/integers/?num=1&min=0&max=100&col=1&base=10&format=plain&rnd=new'
+
+        res = requests.get(url, proxies=proxies)
+
+        return res.text
+
+
 
     def inpu_osuinfo(teleid,userosuid): #数据文件写入
         try:
@@ -122,6 +137,8 @@ try:
 
             ok_userjson = eval(json.dumps(uesr_text[0]))
 
+            #print(ok_userjson)    
+
             down_url = "https://a.ppy.sh/"+ str(ok_userjson['user_id']) +"?img.jpeg" #下载地址合成
 
             down_res = requests.get(url=down_url,proxies=proxies)
@@ -172,14 +189,9 @@ try:
             return False
     
     def ping_host(ip):
-        """
-        获取节点的延迟的作用
-        :param node:
-        :return:
-        """
         ip_address = ip
         response = ping(ip_address)
-        print(response)
+        #print(response)
         if response is not None:
             delay = response * 1000
             return round(delay,3)
@@ -247,7 +259,8 @@ try:
             result = result + front
         return result
 
-    def jrrp_text(nub):
+    def jrrp_text(nub_in):
+        nub = int(nub_in)
         if nub >= 90:
             return "人品好评！"
         elif nub >= 70:
@@ -289,43 +302,50 @@ try:
             if fill_json(message.from_user.id) == False:
                 #print('创建用户储存文件')
                 file = open('./user/jrrp/'+str(message.from_user.id)+'.json','w')
-                jrrpp = random.randint(0,100)
+                jrrpp = get_random()
                 data1 = {
                 'jrrp' : jrrpp,
                 'time' : time.strftime("%d", time.localtime())
                         }
                 file.write(json.dumps(data1))
                 file.close()
+                bot.send_chat_action(message.chat.id, 'typing')
                 bot.reply_to(message, "你今天的人品是："+str(jrrpp)+'\n'+jrrp_text(jrrpp))
             else:
                 with open('./user/jrrp/'+str(message.from_user.id)+'.json', 'r') as timejrrp:
                     bottok = eval(json.loads(json.dumps(str(timejrrp.read()))))
                     if time.strftime("%d", time.localtime()) == bottok['time']:
+                        bot.send_chat_action(message.chat.id, 'typing')
                         bot.reply_to(message, "你今天的人品是："+str(bottok['jrrp'])+'\n'+jrrp_text(bottok['jrrp']))
                     else:
                         file = open('./user/jrrp/'+str(message.from_user.id)+'.json','w')
-                        jrrpp = random.randint(0,100)
+                        jrrpp = get_random()
                         data1 = {
                             'jrrp' : jrrpp,
                             'time' : time.strftime("%d", time.localtime())
                                 }
                         file.write(json.dumps(data1))
                         file.close()
+                        bot.send_chat_action(message.chat.id, 'typing')
                         bot.reply_to(message, "你今天的人品是："+str(jrrpp)+'\n'+jrrp_text(jrrpp))
         except Exception as errr:
+            bot.send_chat_action(message.chat.id, 'typing')
             bot.reply_to(message, '呜呜呜....程序出错了惹\n错误日志: '+str(errr))
 
     @bot.message_handler(commands=['gu'])
     def send_gu(message):
         try:
             if random.randint(0,10) >= 5:
+                bot.send_chat_action(message.chat.id, 'typing')
                 bot.reply_to(message, mult_times('咕', 1, random.randint(0,10)))
             else:
                 path_file_name=glob.glob(pathname='./img/*.webp') #获取当前文件夹下个数
                 sti = open(path_file_name[random.randint(0,len(path_file_name)-1)], 'rb')
+                bot.send_chat_action(message.chat.id, 'upload_photo')
                 bot.send_sticker(message.chat.id, sti)
         except Exception as errr:
-            bot.reply_to(message, '呜呜呜....图片没上传及时.......\n错误日志: '+str(errr))
+            bot.send_chat_action(message.chat.id, 'typing')
+            bot.reply_to(message, '呜呜呜....图片没上传及时.......')
         
     @bot.message_handler(commands=['getpigeons'])
     def send_feed(message): #领养鸽子
@@ -341,23 +361,29 @@ try:
                     }
             file.write(json.dumps(data_gu))
             file.close()
+            bot.send_chat_action(message.chat.id, 'typing')
             bot.reply_to(message, '你获得一只:'+ what_phi(guuu)+'\n-好感度: 100\n-饱食度: 100\n-饥渴度: 0')
         else:
+            bot.send_chat_action(message.chat.id, 'typing')
             bot.reply_to(message,"你已经领养了一只小鸽子(")
 
     @bot.message_handler(commands=['killpigeons'])
     def send_kill(message): #kill
         if ycxt_json(message.from_user.id) == False:
+            bot.send_chat_action(message.chat.id, 'typing')
             bot.reply_to(message,"你还没领养小鸽子(")
         else:
             os.remove('./user/ycxt/'+str(message.from_user.id)+'.json')
+            bot.send_chat_action(message.chat.id, 'typing')
             bot.reply_to(message,"小鸽子被你炖了吃了....")
 
     @bot.message_handler(commands=['gugugu'])
     def send_aaa(message): #互动
         if ycxt_json(message.from_user.id) == False:
+            bot.send_chat_action(message.chat.id, 'typing')
             bot.reply_to(message,"你还没领养小鸽子(")
         else:
+            bot.send_chat_action(message.chat.id, 'typing')
             bot.reply_to(message,"代码先咕咕咕了")
 
     @bot.message_handler(commands=['gubaidu'])
@@ -367,6 +393,7 @@ try:
 
     @bot.message_handler(commands=['guweibo'])
     def send_weibo(message):
+        bot.send_chat_action(message.chat.id, 'typing')
         bot.reply_to(message,'微博热搜:\n'+weibo_hot())
 
 
@@ -374,19 +401,25 @@ try:
     def send_jtimg(message):
         try:
             if howpingip(message.text) == False:
+                bot.send_chat_action(message.chat.id, 'typing')
                 bot.reply_to(message,"呜呜呜....你光发个指令干嘛让我Ping寂寞啊~\n(缺少参数/guping [Ping的地址])")
             else:
                 if yesnocoom(message.text) == True:
                     pingipp = howpingip(message.text)
+                    bot.send_chat_action(message.chat.id, 'typing')
                     chatjson = bot.reply_to(message,'正在执行Ping '+str(pingipp))
                     if str(ping_host(str(pingipp))) == 'None':
+                        bot.send_chat_action(message.chat.id, 'typing')
                         bot.edit_message_text('咕小酱Ping不通....呜呜呜\n', chatjson.chat.id, chatjson.message_id)
                     else:
+                        bot.send_chat_action(message.chat.id, 'typing')
                         bot.edit_message_text(str(pingipp)+' 的延迟为: \n\n'+str(ping_host(str(pingipp))) + ' ms', chatjson.chat.id, chatjson.message_id)
                     #print(output_str)
                 else:
+                    bot.send_chat_action(message.chat.id, 'typing')
                     bot.reply_to(message,'想什么呢?\n你指令有问题.....')
         except Exception as pingerr:
+            bot.send_chat_action(message.chat.id, 'typing')
             bot.reply_to(message, '呜呜呜....执行Ping指令时出错了\n错误日志: '+str(pingerr))
 
     @bot.message_handler(commands=['guosu'])
@@ -394,18 +427,24 @@ try:
         try:
             
             if howpingip(message.text) == False:
+                bot.send_chat_action(message.chat.id, 'typing')
                 bot.reply_to(message,"你指令不保熟啊!\n(缺少参数/guosu [OSU用户名/OSU ID])")
             else:
                 try:
+                    bot.send_chat_action(message.chat.id, 'typing')
                     chatjson_img = bot.reply_to(message,"正在查询生成图片请稍后....")
                     out = osu_user_outimg(howpingip(message.text))
                     chatjson_img = bot.edit_message_text("正在上传图片请稍后....",chatjson_img.chat.id, chatjson_img.message_id)
+                    bot.send_chat_action(message.chat.id, 'upload_photo')
                     phpget = open('./tmp/osu/'+str(out)+'.png','rb')
                     bot.send_photo(message.chat.id, phpget)
+                    bot.send_chat_action(message.chat.id, 'typing')
                     bot.edit_message_text('图片上传完成!', chatjson_img.chat.id, chatjson_img.message_id)
                 except Exception as gubot:
+                    bot.send_chat_action(message.chat.id, 'typing')
                     bot.edit_message_text('上传时出错了惹...\n错误日志: '+str(gubot),chatjson_img.chat.id, chatjson_img.message_id)
         except Exception as boterr:
+            bot.send_chat_action(message.chat.id, 'typing')
             bot.edit_message_text('呜呜呜...咕小酱遇到了严重问题......\n错误日志: '+str(boterr),chatjson_img.chat.id, chatjson_img.message_id)
 
     @bot.message_handler(commands=['guosubind'])
@@ -413,6 +452,7 @@ try:
         outtext = howpingip(message.text)
         #print(outtext) #指令输出
         if outtext == False:
+            bot.send_chat_action(message.chat.id, 'typing')
             bot.reply_to(message,"呜呜呜....你光发指令干嘛 OSU 用户名呢???\n(缺少参数/guosubind [OSU用户名/OSU ID])")
         else:
             osuid = get_osuid(outtext)
@@ -420,17 +460,22 @@ try:
                 #print(out_osuinfo(message.from_user.id,3)) #数据库检测
                 if out_osuinfo(str(message.from_user.id),3) == None:
                     if out_osuinfo(str(osuid),2) == None:
+                        bot.send_chat_action(message.chat.id, 'typing')
                         chatjson_sql = bot.reply_to(message,"正在绑定....")
                         inpu_osuinfo(message.from_user.id,osuid)
+                        bot.send_chat_action(message.chat.id, 'typing')
                         bot.edit_message_text('绑定 OSU 用户名成功啦!',chatjson_sql.chat.id, chatjson_sql.message_id)
                     else:
+                        bot.send_chat_action(message.chat.id, 'typing')
                         bot.reply_to(message,"此 OSU 用户名已经被其他 Telegram ID 绑定了惹...")
                 else:
+                    bot.send_chat_action(message.chat.id, 'typing')
                     bot.reply_to(message,"你的Telegram ID 绑定了 OSU 用户名了的说...")
                 
 
             except Exception as ooo:
                 #inpu_osuinfo(message.from_user.id,osuid)
+                bot.send_chat_action(message.chat.id, 'typing')
                 bot.reply_to(message,'呜呜呜...咕小酱遇到了严重问题......\n错误日志: '+str(ooo))
 
     #数据库读取函数后面参数? (自造)
@@ -443,23 +488,30 @@ try:
     @bot.message_handler(commands=['guosuinfo'])
     def send_infopho(message):
         if out_osuinfo(str(message.from_user.id),3) == None:
-            bot.reply_to(message,"你的 Telegram ID 未绑定了 OSU 用户名\n请使用: \n/guosubind [OSU用户名/OSU ID] \n来绑定吧!")
+            bot.send_chat_action(message.chat.id, 'typing')
+            bot.reply_to(message,"你的 Telegram ID 未绑定 OSU 用户名\n请使用: \n/guosubind [OSU用户名/OSU ID] \n来绑定吧!")
         else:
             try:
+                bot.send_chat_action(message.chat.id, 'typing')
                 chatjson_img = bot.reply_to(message,"正在查询生成图片请稍后....")
                 out = osu_user_outimg(out_osuinfo(str(message.from_user.id),1))
                 chatjson_img = bot.edit_message_text("正在上传图片请稍后....",chatjson_img.chat.id, chatjson_img.message_id)
+                bot.send_chat_action(message.chat.id, 'upload_photo')
                 phpget = open('./tmp/osu/'+str(out)+'.png','rb')
                 bot.send_photo(message.chat.id, phpget)
+                bot.send_chat_action(message.chat.id, 'typing')
                 bot.edit_message_text('图片上传完成!', chatjson_img.chat.id, chatjson_img.message_id)
             except Exception as gubot:
+                bot.send_chat_action(message.chat.id, 'typing')
                 bot.edit_message_text('上传时出错了惹...\n错误日志: '+str(gubot),chatjson_img.chat.id, chatjson_img.message_id)
     
     @bot.message_handler(commands=['guosudel'])
     def send_infopho(message):
         if out_osuinfo(str(message.from_user.id),3) == None:
+            bot.send_chat_action(message.chat.id, 'typing')
             bot.reply_to(message,"你的 Telegram ID 未绑定 OSU 用户名\n请使用: \n/guosubind [OSU用户名/OSU ID] \n来绑定吧!")
         else:
+            bot.send_chat_action(message.chat.id, 'typing')
             chatjson_del = bot.reply_to(message,"正在解绑 OSU 用户名中....")
             osu = sqlite3.connect("./osu/osu.db")
             cur = osu.cursor()
@@ -469,8 +521,47 @@ try:
             cur.close()
             # 断开数据库连接
             osu.close()
+            bot.send_chat_action(message.chat.id, 'typing')
             bot.edit_message_text('OSU 用户名解绑完成!',chatjson_del.chat.id, chatjson_del.message_id)
 
+    @bot.message_handler(commands=['guzhihu'])
+    def send_zhihu(message):
+        try:
+            bot.send_chat_action(message.chat.id, 'typing')
+            zhihu_text_go = bot.reply_to(message,'正在获取请稍后...')
+            zhihu_json_input = requests.get("https://tenapi.cn/zhihuresou")
+            zhihu_json_out = eval(json.dumps(json.loads(zhihu_json_input.text)))
+            zhihu_json_list = zhihu_json_out['list']
+            zhihu_text = '知乎热搜:\n'
+            for i in range(0, 10):
+                zhihu_text += '『'+str(i+1)+'.'+str(zhihu_json_list[i]['name'])+'』 - '+ str(zhihu_json_list[i]['query'])+'\n'
+            bot.edit_message_text(zhihu_text,zhihu_text_go.chat.id, zhihu_text_go.message_id)
+            #bot.reply_to(message,zhihu_text)
+        except:
+            bot.edit_message_text('呜呜呜....运行错误',zhihu_text_go.chat.id, zhihu_text_go.message_id)
+
+    @bot.message_handler(commands=['gubili'])
+    def send_bilibili(message):
+        try:
+            bot.send_chat_action(message.chat.id, 'typing')
+            bili_json_input = requests.get("https://hibiapi.aliserver.net/api/bilibili/v3/video_ranking")
+            if bili_json_input.status_code == 200:
+                try:
+                    bili_text_go = bot.reply_to(message,'正在获取请稍后...')
+                    bili_json_list = json.loads(bili_json_input.content)['rank']['list']
+                    #print(bili_json_list)
+                except:
+                    pass
+            #bili_json_out = eval(json.dumps(json.loads(bili_json_input.text)))
+            #print(bili_json_out)
+            #bili_json_list = bili_json_out['rank']['list']
+            bili_text = 'BiliBili热门视频排行榜Top10:\n'
+            for i in range(0, 10):
+                bili_text += '『'+str(i+1)+'.'+str(bili_json_list[i]['title'])+'』 |UP:'+ str(bili_json_list[i]['author'])+'\n'
+            bot.edit_message_text(bili_text,bili_text_go.chat.id, bili_text_go.message_id)
+            #bot.reply_to(message,bili_text)
+        except Exception as eeer:
+            bot.edit_message_text('呜呜呜....运行错误',bili_text_go.chat.id, bili_text_go.message_id)
 
     if __name__ == '__main__':
         bot.polling()
