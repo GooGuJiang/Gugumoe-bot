@@ -1,5 +1,4 @@
 # -*- coding:utf-8 -*-
-import markdown as MARKDOWN
 from telebot import types
 from PIL import ImageGrab
 from telebot import apihelper
