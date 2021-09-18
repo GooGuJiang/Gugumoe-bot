@@ -24,7 +24,6 @@ import yaml
 import random
 import os.path
 import glob
-import validators as yesurl
 
 try:
 
@@ -721,17 +720,21 @@ try:
                 bot.send_chat_action(message.chat.id, 'typing')
                 bot.reply_to(message,"指令出错啦!\n(缺少参数/guweb [http(s)://URL])")
         else:
-            if yesurl.url(howpingip(message.text)) == True:
+            try:
+                getimg = requests.get(howpingip(message.text))
+            except:
+                getimg = requests.get("http://"+str(howpingip(message.text)))
+            if getimg.status_code == 200:
                 bot.send_chat_action(message.chat.id, 'typing')
                 web_text = bot.reply_to(message,'正在获取网页请稍后...')
-                get_webpng(message.from_user.id,howpingip(message.text))
+                get_webpng(message.from_user.id,getimg.url)
                 bot.edit_message_text("正在上传图片请稍后....",web_text.chat.id, web_text.message_id)
                 bot.send_chat_action(message.chat.id, 'upload_photo')
                 phpget = open('./tmp/'+str(message.from_user.id)+'web.png','rb')
                 bot.send_photo(message.chat.id, phpget)
                 bot.edit_message_text("获取网页截图成功!",web_text.chat.id, web_text.message_id)
             else:
-                bot.reply_to(message,"指令出错啦!\n(缺少参数/guweb [http(s)://URL]")
+                bot.reply_to(message,"抱歉网页无法访问或者地址根本不是网页(\n参数/guweb [http(s)://URL])")
         
     if __name__ == '__main__':
         bot.polling()
