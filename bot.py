@@ -1,12 +1,14 @@
 # -*- coding:utf-8 -*-
 from telebot import types
 from PIL import ImageGrab
+from selenium import webdriver
 from telebot import apihelper
 from ctypes import windll
 from PIL import ImageFont, ImageDraw, Image
 from bs4 import BeautifulSoup
 from lxml import etree
 from lxml import html
+from decimal import Decimal
 from ping3 import ping
 import sqlite3
 import platform
@@ -22,11 +24,48 @@ import yaml
 import random
 import os.path
 import glob
-
+import validators as yesurl
 
 try:
 
     apihelper.proxy = {'https':'socks5://127.0.0.1:8089'}
+
+    def get_webpng(userid,url): #网页截图
+        try:
+            # 无界面
+            chrome_options = webdriver.ChromeOptions()
+            chrome_options.add_argument('--headless')
+            chrome_options.add_argument('--disable-gpu')
+            chrome_options.add_argument("--incognito")
+            chrome_options.add_argument('log-level=3')
+            driver = webdriver.Chrome(chrome_options=chrome_options)
+
+            # 访问
+            driver.implicitly_wait(180) 
+            driver.get(url)
+            driver.set_window_size(1920,1080)
+            driver.get_screenshot_as_file(r"./tmp/"+str(userid)+"web.png")
+            driver.quit()
+            return userid
+        except:
+            return False
+
+    def num_out(in1,in2): #减法
+        if str(in1) == str(in2):
+            return False
+        else:
+            return round(Decimal(in1),4) - round(Decimal(in2),4)
+
+    def PP(index_array,text_array): #百度排序
+        x = {}
+        i = 0
+        for index_a in index_array:
+            #index_a = int(index_a)
+            
+            x[index_a] = text_array[i]
+            i = i + 1
+        return x
+
 
     def get_osuid(name):
 
@@ -47,7 +86,7 @@ try:
 
         ok_userjson = eval(json.dumps(uesr_text[0]))
 
-        return ok_userjson['user_id']
+        return ok_userjson
 
     def get_random():
 
@@ -63,14 +102,92 @@ try:
         return res.text
 
 
+    def osu_user_outinfo(id): #TG绑定信息查询专用
+        try:
+            proxies = {
+                'http': 'socks5://127.0.0.1:8089',
+                'https': 'socks5://127.0.0.1:8089'
+            }
 
-    def inpu_osuinfo(teleid,userosuid): #数据文件写入
+
+            with open('bot.yaml', 'r') as f: #读取配置文件?
+                bottok = yaml.load(f.read(),Loader=yaml.FullLoader)
+                token = bottok['osuToken']
+
+            url="https://osu.ppy.sh/api/get_user?k="+token+"&u="+str(id)
+            res = requests.get(url, proxies=proxies)
+            uesr_text = json.loads(res.text) #json解析
+            ok_userjson = eval(json.dumps(uesr_text[0]))
+
+            osu_now_level = ok_userjson['level']
+            osu_now_pp = ok_userjson['pp_raw']
+
+            osu_out_level = num_out(osu_now_level,out_osuinfo(id,4)) #等级差计算
+            if osu_out_level == False:
+                osu_level_out = '-'
+            elif osu_out_level >0:
+                osu_level_out = str(osu_out_level)+'↑'
+            else:
+                osu_level_out = str(osu_out_level)+'↓'
+            
+            osu_out_pp = num_out(osu_now_pp,out_osuinfo(id,5)) #PP差计算
+            if osu_out_pp == False:
+                osu_pp_out = '-'
+            elif osu_out_pp >0:
+                osu_pp_out = str(osu_out_pp)+'↑'
+            else:
+                osu_pp_out = str(osu_out_pp)+'↓'
+
+            #------------------------
+            tg_sql_id = out_osuinfo(id,0)
+            osu = sqlite3.connect("./osu/osu.db")
+            cur = osu.cursor()
+            cur.execute("DELETE FROM osuinfo WHERE telid=?", (tg_sql_id,))
+            osu.commit()
+            # 关闭游标
+            cur.close()
+            # 断开数据库连接
+            osu.close()
+            inpu_osuinfo(tg_sql_id,id,osu_now_level,osu_now_pp)
+            #------------------------
+
+            down_url = "https://a.ppy.sh/"+ str(ok_userjson['user_id']) +"?img.jpeg" #下载地址合成
+            down_res = requests.get(url=down_url,proxies=proxies)
+            with open('./tmp/osu/'+str(ok_userjson['user_id'])+'.png',"wb") as code:
+                code.write(down_res.content)
+            im=Image.open('./osu/img/info.png')
+            im1=Image.open('./tmp/osu/'+str(ok_userjson['user_id'])+'.png')
+            #im1.thumbnail((700,400))
+            im.paste(im1,(279,184))
+            im.save('./tmp/osu/'+str(ok_userjson['user_id'])+'ok'+'.png')
+            bk_img = cv2.imread('./tmp/osu/'+str(ok_userjson['user_id'])+'ok'+'.png')
+            #设置需要显示的字体
+            fontpath = "./font/hyl.ttf"
+            font = ImageFont.truetype(fontpath, 40)
+            font_how = ImageFont.truetype(fontpath, 20)
+            img_pil = Image.fromarray(bk_img)
+            draw = ImageDraw.Draw(img_pil)
+            #绘制文字信息
+            draw.text((262, 510),  str(ok_userjson['username']), font = font, fill = (255, 255, 255)) #名字
+            draw.text((218, 601),  str(ok_userjson['level']), font = font, fill = (255, 255, 255)) #等级
+            draw.text((196, 675),  str(ok_userjson['pp_raw']), font = font, fill = (255, 255, 255)) #PP
+            draw.text((218, 585),  osu_level_out, font = font_how, fill = (255, 255, 255)) #等级差
+            draw.text((196, 660),  osu_pp_out, font = font_how, fill = (255, 255, 255)) #PP差
+            bk_img = np.array(img_pil)
+            cv2.imwrite('./tmp/osu/'+str(ok_userjson['user_id'])+'.png',bk_img)
+            os.remove('./tmp/osu/'+str(ok_userjson['user_id'])+'ok'+'.png')
+            return ok_userjson['user_id']
+        except Exception as errr:
+            print(errr)
+            return False
+
+    def inpu_osuinfo(teleid,userosuid,level,pp): #数据文件写入
         try:
             osu = sqlite3.connect("./osu/osu.db")
             cur = osu.cursor()
-            sql = "CREATE TABLE IF NOT EXISTS osuinfo(telid INTEGER PRIMARY KEY,osuid INTEGER)"
+            sql = "CREATE TABLE IF NOT EXISTS osuinfo(telid INTEGER PRIMARY KEY,osuid INTEGER,level INTEGER,pp INTEGER)"
             cur.execute(sql)
-            cur.execute("INSERT INTO osuinfo values(?,?)", (teleid, userosuid))
+            cur.execute("INSERT INTO osuinfo values(?,?,?,?)", (teleid, userosuid,level,pp))
             osu.commit()
             # 关闭游标
             cur.close()
@@ -87,7 +204,7 @@ try:
     def out_osuinfo(teleid,oid):
         osu = sqlite3.connect("./osu/osu.db")
         cur = osu.cursor()
-        sql = "CREATE TABLE IF NOT EXISTS osuinfo(telid INTEGER PRIMARY KEY,osuid INTEGER)"
+        sql = "CREATE TABLE IF NOT EXISTS osuinfo(telid INTEGER PRIMARY KEY,osuid INTEGER,level INTEGER,pp INTEGER)"
         cur.execute(sql)
         osu.commit()
         cur.execute("select * from osuinfo")
@@ -98,7 +215,7 @@ try:
                 if str(sence[i][0]) == teleid:
                     return sence[i][1]
         elif oid == 0:
-            for i in range(len(sence)): #TG取OSU ID
+            for i in range(len(sence)): # OSU ID取 TG
                 #print(sence[i][0])
                 if str(sence[i][1]) == teleid:
                     return sence[i][0]                                             #写的头疼（
@@ -112,6 +229,16 @@ try:
                 #print(sence[i][0])
                 if str(sence[i][0]) == teleid:
                     return sence[i][0]
+        elif oid == 4:
+            for i in range(len(sence)): #TG取OSU 等级
+                #print(sence[i][0])
+                if str(sence[i][1]) == teleid:
+                    return sence[i][2]
+        elif oid == 5:
+            for i in range(len(sence)): #TG取 PP
+                #print(sence[i][0])
+                if str(sence[i][1]) == teleid:
+                    return sence[i][3]
         else:
             return False
 
@@ -128,29 +255,19 @@ try:
                 token = bottok['osuToken']
 
             url="https://osu.ppy.sh/api/get_user?k="+token+"&u="+str(id)
-            
-
             res = requests.get(url, proxies=proxies)
-
             uesr_text = json.loads(res.text) #json解析
-
             ok_userjson = eval(json.dumps(uesr_text[0]))
-
             #print(ok_userjson)    
-
             down_url = "https://a.ppy.sh/"+ str(ok_userjson['user_id']) +"?img.jpeg" #下载地址合成
-
             down_res = requests.get(url=down_url,proxies=proxies)
-
             with open('./tmp/osu/'+str(ok_userjson['user_id'])+'.png',"wb") as code:
                 code.write(down_res.content)
-
             im=Image.open('./osu/img/info.png')
             im1=Image.open('./tmp/osu/'+str(ok_userjson['user_id'])+'.png')
             #im1.thumbnail((700,400))
             im.paste(im1,(279,184))
             im.save('./tmp/osu/'+str(ok_userjson['user_id'])+'ok'+'.png')
-
             bk_img = cv2.imread('./tmp/osu/'+str(ok_userjson['user_id'])+'ok'+'.png')
             #设置需要显示的字体
             fontpath = "./font/hyl.ttf"
@@ -162,8 +279,6 @@ try:
             draw.text((218, 601),  str(ok_userjson['level']), font = font, fill = (255, 255, 255)) #等级
             draw.text((196, 675),  str(ok_userjson['pp_raw']), font = font, fill = (255, 255, 255)) #PP
             bk_img = np.array(img_pil)
-
-
             cv2.imwrite('./tmp/osu/'+str(ok_userjson['user_id'])+'.png',bk_img)
             os.remove('./tmp/osu/'+str(ok_userjson['user_id'])+'ok'+'.png')
             return ok_userjson['user_id']
@@ -387,8 +502,46 @@ try:
 
     @bot.message_handler(commands=['gubaidu'])
     def send_baidu(message):
-        bot.reply_to(message,'功能已下线')
-        #bot.reply_to(message,baidurs())
+        try:
+            bot.send_chat_action(message.chat.id, 'typing')
+            headers={'User-Agent':'Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/51.0.2704.63 Safari/537.36'}
+            page = requests.get("https://www.baidu.com",headers=headers)
+            html = page.text
+            #print(source1)
+            # 从字符串解析
+            element = etree.HTML(html)
+
+            # 元素列表，获取的方式列出了如下两种
+            # ps = element.xpath('//*[@id="hotsearch-content-wrapper"]/li/a/span[2]')
+            ps = element.xpath('//*[@class="title-content-title"]')
+
+            #热搜文本内容
+            text = []
+            if len(ps) > 0:
+                for p in ps:
+                    #输出节点的文本
+                    text1 = p.text
+                    text.append(text1)
+            else:
+                print("空")
+                
+            x = element.xpath('//*[@class="s-hotsearch-content"]/li')
+
+            #热搜文本对应的排名
+            index = []
+            for x1 in x:
+                #获取节点的属性
+                index1 = x1.get("data-index")
+                index.append(index1)
+            re_text = PP(index,text)
+            #对字典性数据按key进行排序，即key=lambda re:re[0]，排序完成后再转换为字典型数据
+            last_text = dict(sorted(re_text.items(),key=lambda re:re[0]))
+            baidu_text  = '百度热搜:\n'
+            for nu in range(1,6):
+                baidu_text += str(nu)+'.'+str(last_text[str(nu)])+'\n'
+            bot.reply_to(message,baidu_text)
+        except Exception as xxxx:
+            bot.reply_to(message,xxxx)
 
     @bot.message_handler(commands=['guweibo'])
     def send_weibo(message):
@@ -458,10 +611,10 @@ try:
             try: 
                 #print(out_osuinfo(message.from_user.id,3)) #数据库检测
                 if out_osuinfo(str(message.from_user.id),3) == None:
-                    if out_osuinfo(str(osuid),2) == None:
+                    if out_osuinfo(str(osuid['user_id']),2) == None:
                         bot.send_chat_action(message.chat.id, 'typing')
                         chatjson_sql = bot.reply_to(message,"正在绑定....")
-                        inpu_osuinfo(message.from_user.id,osuid)
+                        inpu_osuinfo(message.from_user.id,osuid['user_id'],osuid['level'],osuid['pp_raw'])
                         bot.send_chat_action(message.chat.id, 'typing')
                         bot.edit_message_text('绑定 OSU 用户名成功啦!',chatjson_sql.chat.id, chatjson_sql.message_id)
                     else:
@@ -493,7 +646,7 @@ try:
             try:
                 bot.send_chat_action(message.chat.id, 'typing')
                 chatjson_img = bot.reply_to(message,"正在查询生成图片请稍后....")
-                out = osu_user_outimg(out_osuinfo(str(message.from_user.id),1))
+                out = osu_user_outinfo(str(out_osuinfo(str(message.from_user.id),1)))
                 chatjson_img = bot.edit_message_text("正在上传图片请稍后....",chatjson_img.chat.id, chatjson_img.message_id)
                 bot.send_chat_action(message.chat.id, 'upload_photo')
                 phpget = open('./tmp/osu/'+str(out)+'.png','rb')
@@ -533,7 +686,7 @@ try:
             zhihu_json_list = zhihu_json_out['list']
             zhihu_text = '知乎热搜:\n'
             for i in range(0, 10):
-                zhihu_text += '『'+str(i+1)+'.'+str(zhihu_json_list[i]['name'])+'』 - '+ str(zhihu_json_list[i]['query'])+'\n'
+                zhihu_text += str(i+1)+'.『'+str(zhihu_json_list[i]['name'])+'』 - '+ str(zhihu_json_list[i]['query'])+'\n'
             bot.edit_message_text(zhihu_text,zhihu_text_go.chat.id, zhihu_text_go.message_id)
             #bot.reply_to(message,zhihu_text)
         except:
@@ -556,12 +709,30 @@ try:
             #bili_json_list = bili_json_out['rank']['list']
             bili_text = 'BiliBili热门视频排行榜Top10:\n'
             for i in range(0, 10):
-                bili_text += '『'+str(i+1)+'.'+str(bili_json_list[i]['title'])+'』 |UP:'+ str(bili_json_list[i]['author'])+'\n'
+                bili_text += str(i+1)+'.『'+str(bili_json_list[i]['title'])+'』 | UP主:'+ str(bili_json_list[i]['author'])+'\n'
             bot.edit_message_text(bili_text,bili_text_go.chat.id, bili_text_go.message_id)
             #bot.reply_to(message,bili_text)
         except Exception as eeer:
             bot.edit_message_text('呜呜呜....运行错误',bili_text_go.chat.id, bili_text_go.message_id)
 
+    @bot.message_handler(commands=['guweb'])
+    def send_getweb(message):
+        if howpingip(message.text) == False:
+                bot.send_chat_action(message.chat.id, 'typing')
+                bot.reply_to(message,"指令出错啦!\n(缺少参数/guweb [http(s)://URL])")
+        else:
+            if yesurl.url(howpingip(message.text)) == True:
+                bot.send_chat_action(message.chat.id, 'typing')
+                web_text = bot.reply_to(message,'正在获取网页请稍后...')
+                get_webpng(message.from_user.id,howpingip(message.text))
+                bot.edit_message_text("正在上传图片请稍后....",web_text.chat.id, web_text.message_id)
+                bot.send_chat_action(message.chat.id, 'upload_photo')
+                phpget = open('./tmp/'+str(message.from_user.id)+'web.png','rb')
+                bot.send_photo(message.chat.id, phpget)
+                bot.edit_message_text("获取网页截图成功!",web_text.chat.id, web_text.message_id)
+            else:
+                bot.reply_to(message,"指令出错啦!\n(缺少参数/guweb [http(s)://URL]")
+        
     if __name__ == '__main__':
         bot.polling()
 
