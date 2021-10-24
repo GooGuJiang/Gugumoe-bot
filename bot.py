@@ -1,6 +1,5 @@
 # -*- coding:utf-8 -*-
 from telebot import apihelper
-from ctypes import windll
 from PIL import ImageFont, ImageDraw, Image
 from bs4 import BeautifulSoup
 from lxml import etree
