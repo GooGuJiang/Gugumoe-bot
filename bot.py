@@ -41,11 +41,19 @@ try:
             ok_userjson = eval(json.dumps(uesr_text[0]))
             #print(ok_userjson)    
             down_url = "https://osu-stats-signature.vercel.app/card?user="+ str(ok_userjson['user_id']) +"&mode=std&w=600&h=349" #下载地址合成
-            down_res = requests.get(url=down_url,proxies=proxies)
+            if bottok['proxy'] == True:
+                proxies = {
+                    'http': 'socks5://127.0.0.1:8089',
+                    'https': 'socks5://127.0.0.1:8089'
+                }
+                down_res = requests.get(url=down_url,proxies=proxies)
+            else:
+                down_res = requests.get(url=down_url)
+            
             with open('./tmp/osu/'+str(ok_userjson['user_id'])+'.svg',"wb") as code:
                 code.write(down_res.content)
             cairosvg.svg2png(url='./tmp/osu/'+str(ok_userjson['user_id'])+'.svg', write_to='./tmp/osu/'+str(ok_userjson['user_id'])+'.png')
-            os.remove("'./tmp/osu/'+str(ok_userjson['user_id'])+'.svg'")
+            os.remove('./tmp/osu/'+str(ok_userjson['user_id'])+'.svg')
             return ok_userjson['user_id']
         except Exception as errr:
             print(errr)
@@ -287,20 +295,21 @@ try:
                 token = bottok['osuToken']
 
             url="https://osu.ppy.sh/api/get_user?k="+token+"&u="+str(id)
-            if bottok['proxy'] == True:
-                proxies = {
-                    'http': 'socks5://127.0.0.1:8089',
-                    'https': 'socks5://127.0.0.1:8089'
-                }
-                res = requests.get(url, proxies=proxies)
-            else:
-                res = requests.get(url)
+            res = requests.get(url)
             
             uesr_text = json.loads(res.text) #json解析
             ok_userjson = eval(json.dumps(uesr_text[0]))
             #print(ok_userjson)    
             down_url = "https://a.ppy.sh/"+ str(ok_userjson['user_id']) +"?img.jpeg" #下载地址合成
-            down_res = requests.get(url=down_url,proxies=proxies)
+            if bottok['proxy'] == True:
+                proxies = {
+                    'http': 'socks5://127.0.0.1:8089',
+                    'https': 'socks5://127.0.0.1:8089'
+                }
+                down_res = requests.get(url=down_url,proxies=proxies)
+            else:
+                down_res = requests.get(url=down_url)
+                
             with open('./tmp/osu/'+str(ok_userjson['user_id'])+'.png',"wb") as code:
                 code.write(down_res.content)
             im=Image.open('./osu/img/info.png')
@@ -622,7 +631,7 @@ try:
                 try:
                     bot.send_chat_action(message.chat.id, 'typing')
                     chatjson_img = bot.reply_to(message,"正在查询生成图片请稍后....")
-                    out = osu_user_outimg(howpingip(message.text))
+                    out = new_gosu(howpingip(message.text))
 
                     chatjson_img = bot.edit_message_text("正在上传图片请稍后....",chatjson_img.chat.id, chatjson_img.message_id)
 

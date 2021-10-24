@@ -8,5 +8,6 @@ ping3
 pyTelegramBotAPI
 cairosvg
 ctypes
+lxml
 
 
