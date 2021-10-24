@@ -309,7 +309,7 @@ try:
                 down_res = requests.get(url=down_url,proxies=proxies)
             else:
                 down_res = requests.get(url=down_url)
-                
+
             with open('./tmp/osu/'+str(ok_userjson['user_id'])+'.png',"wb") as code:
                 code.write(down_res.content)
             im=Image.open('./osu/img/info.png')
@@ -642,6 +642,8 @@ try:
                     bot.send_photo(message.chat.id, phpget)
                     bot.send_chat_action(message.chat.id, 'typing')
                     bot.edit_message_text('图片上传完成!', chatjson_img.chat.id, chatjson_img.message_id)
+                    time.sleep(3)
+                    bot.delete_message(chatjson_img.chat.id, chatjson_img.message_id)
                 except Exception as gubot:
                     bot.send_chat_action(message.chat.id, 'typing')
                     bot.edit_message_text('上传时出错了惹...\n错误日志: '+str(gubot),chatjson_img.chat.id, chatjson_img.message_id)
