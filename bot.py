@@ -1,17 +1,13 @@
 # -*- coding:utf-8 -*-
-from telebot import types
-from PIL import ImageGrab
 from selenium import webdriver
 from telebot import apihelper
 from ctypes import windll
 from PIL import ImageFont, ImageDraw, Image
 from bs4 import BeautifulSoup
 from lxml import etree
-from lxml import html
 from decimal import Decimal
 from ping3 import ping
 import sqlite3
-import platform
 import requests
 import numpy as np
 import pyautogui
@@ -27,27 +23,13 @@ import glob
 
 try:
 
-    apihelper.proxy = {'https':'socks5://127.0.0.1:8089'}
+    with open('bot.yaml', 'r') as f: #读取配置文件?
+            botproxy = yaml.load(f.read(),Loader=yaml.FullLoader)
+            botproxyyesno = botproxy['proxy']
 
-    def get_webpng(userid,url): #网页截图
-        try:
-            # 无界面
-            chrome_options = webdriver.ChromeOptions()
-            chrome_options.add_argument('--headless')
-            chrome_options.add_argument('--disable-gpu')
-            chrome_options.add_argument("--incognito")
-            chrome_options.add_argument('log-level=3')
-            driver = webdriver.Chrome(chrome_options=chrome_options)
+    if botproxyyesno == True:
+        apihelper.proxy = {'https':'socks5://127.0.0.1:8089'}
 
-            # 访问
-            driver.implicitly_wait(180) 
-            driver.get(url)
-            driver.set_window_size(1920,1080)
-            driver.get_screenshot_as_file(r"./tmp/"+str(userid)+"web.png")
-            driver.quit()
-            return userid
-        except:
-            return False
 
     def num_out(in1,in2): #减法
         if str(in1) == str(in2):
@@ -68,6 +50,7 @@ try:
 
     def get_osuid(name):
 
+
         proxies = {
                 'http': 'socks5://127.0.0.1:8089',
                 'https': 'socks5://127.0.0.1:8089'
@@ -78,8 +61,14 @@ try:
             token = bottok['osuToken']
         
         url="https://osu.ppy.sh/api/get_user?k="+token+"&u="+str(name)
-
-        res = requests.get(url, proxies=proxies)
+        if bottok['proxy'] == True:
+            proxies = {
+                'http': 'socks5://127.0.0.1:8089',
+                'https': 'socks5://127.0.0.1:8089'
+            }
+            res = requests.get(url, proxies=proxies)
+        else:
+            res = requests.get(url)
 
         uesr_text = json.loads(res.text)
 
@@ -89,32 +78,45 @@ try:
 
     def get_random():
 
+        with open('bot.yaml', 'r') as f: #读取配置文件?
+            bottok = yaml.load(f.read(),Loader=yaml.FullLoader)
+
+        url='https://www.random.org/integers/?num=1&min=0&max=100&col=1&base=10&format=plain&rnd=new'
+
         proxies = {
                 'http': 'socks5://127.0.0.1:8089',
                 'https': 'socks5://127.0.0.1:8089'
             }
 
-        url='https://www.random.org/integers/?num=1&min=0&max=100&col=1&base=10&format=plain&rnd=new'
+        if bottok['proxy'] == True:
+            proxies = {
+                'http': 'socks5://127.0.0.1:8089',
+                'https': 'socks5://127.0.0.1:8089'
+            }
+            res = requests.get(url, proxies=proxies)
+        else:
+            res = requests.get(url)
 
-        res = requests.get(url, proxies=proxies)
 
         return res.text
 
 
     def osu_user_outinfo(id): #TG绑定信息查询专用
         try:
-            proxies = {
-                'http': 'socks5://127.0.0.1:8089',
-                'https': 'socks5://127.0.0.1:8089'
-            }
-
 
             with open('bot.yaml', 'r') as f: #读取配置文件?
                 bottok = yaml.load(f.read(),Loader=yaml.FullLoader)
                 token = bottok['osuToken']
 
             url="https://osu.ppy.sh/api/get_user?k="+token+"&u="+str(id)
-            res = requests.get(url, proxies=proxies)
+            if bottok['proxy'] == True:
+                proxies = {
+                    'http': 'socks5://127.0.0.1:8089',
+                    'https': 'socks5://127.0.0.1:8089'
+                }
+                res = requests.get(url, proxies=proxies)
+            else:
+                res = requests.get(url)
             uesr_text = json.loads(res.text) #json解析
             ok_userjson = eval(json.dumps(uesr_text[0]))
 
@@ -151,7 +153,15 @@ try:
             #------------------------
 
             down_url = "https://a.ppy.sh/"+ str(ok_userjson['user_id']) +"?img.jpeg" #下载地址合成
-            down_res = requests.get(url=down_url,proxies=proxies)
+            if bottok['proxy'] == True:
+                proxies = {
+                    'http': 'socks5://127.0.0.1:8089',
+                    'https': 'socks5://127.0.0.1:8089'
+                }
+                down_res = requests.get(url=down_url,proxies=proxies)
+            else:
+                down_res = requests.get(url=down_url)
+            
             with open('./tmp/osu/'+str(ok_userjson['user_id'])+'.png',"wb") as code:
                 code.write(down_res.content)
             im=Image.open('./osu/img/info.png')
@@ -243,18 +253,21 @@ try:
 
     def osu_user_outimg(id): #获取osu用户json信息
         try:
-            proxies = {
-                'http': 'socks5://127.0.0.1:8089',
-                'https': 'socks5://127.0.0.1:8089'
-            }
-
 
             with open('bot.yaml', 'r') as f: #读取配置文件?
                 bottok = yaml.load(f.read(),Loader=yaml.FullLoader)
                 token = bottok['osuToken']
 
             url="https://osu.ppy.sh/api/get_user?k="+token+"&u="+str(id)
-            res = requests.get(url, proxies=proxies)
+            if bottok['proxy'] == True:
+                proxies = {
+                    'http': 'socks5://127.0.0.1:8089',
+                    'https': 'socks5://127.0.0.1:8089'
+                }
+                res = requests.get(url, proxies=proxies)
+            else:
+                res = requests.get(url)
+            
             uesr_text = json.loads(res.text) #json解析
             ok_userjson = eval(json.dumps(uesr_text[0]))
             #print(ok_userjson)    
@@ -714,27 +727,6 @@ try:
         except Exception as eeer:
             bot.edit_message_text('呜呜呜....运行错误',bili_text_go.chat.id, bili_text_go.message_id)
 
-    @bot.message_handler(commands=['guweb'])
-    def send_getweb(message):
-        if howpingip(message.text) == False:
-                bot.send_chat_action(message.chat.id, 'typing')
-                bot.reply_to(message,"指令出错啦!\n(缺少参数/guweb [http(s)://URL])")
-        else:
-            try:
-                getimg = requests.get(howpingip(message.text))
-            except:
-                getimg = requests.get("http://"+str(howpingip(message.text)))
-            if getimg.status_code == 200:
-                bot.send_chat_action(message.chat.id, 'typing')
-                web_text = bot.reply_to(message,'正在获取网页请稍后...')
-                get_webpng(message.from_user.id,getimg.url)
-                bot.edit_message_text("正在上传图片请稍后....",web_text.chat.id, web_text.message_id)
-                bot.send_chat_action(message.chat.id, 'upload_photo')
-                phpget = open('./tmp/'+str(message.from_user.id)+'web.png','rb')
-                bot.send_photo(message.chat.id, phpget)
-                bot.edit_message_text("获取网页截图成功!",web_text.chat.id, web_text.message_id)
-            else:
-                bot.reply_to(message,"抱歉网页无法访问或者地址根本不是网页(\n参数/guweb [http(s)://URL])")
         
     if __name__ == '__main__':
         bot.polling()
