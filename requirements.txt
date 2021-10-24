@@ -1,0 +1,15 @@
+cmake
+scikit-build
+yaml
+numpy
+pillow
+opencv-python==4.2.0.32
+numpy
+requests
+ping3
+pyTelegramBotAPI
+glob
+cairosvg
+random
+bs4
+

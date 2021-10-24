@@ -1,5 +1,4 @@
 # -*- coding:utf-8 -*-
-from selenium import webdriver
 from telebot import apihelper
 from ctypes import windll
 from PIL import ImageFont, ImageDraw, Image
@@ -10,7 +9,6 @@ from ping3 import ping
 import sqlite3
 import requests
 import numpy as np
-import pyautogui
 import cv2
 import telebot
 import json
@@ -20,8 +18,39 @@ import yaml
 import random
 import os.path
 import glob
+import cairosvg
+
 
 try:
+    def new_gosu(name):
+        try:
+            with open('bot.yaml', 'r') as f: #读取配置文件?
+                    bottok = yaml.load(f.read(),Loader=yaml.FullLoader)
+                    token = bottok['osuToken']
+
+            url="https://osu.ppy.sh/api/get_user?k="+token+"&u="+str(name)
+            if bottok['proxy'] == True:
+                proxies = {
+                    'http': 'socks5://127.0.0.1:8089',
+                    'https': 'socks5://127.0.0.1:8089'
+                }
+                res = requests.get(url, proxies=proxies)
+            else:
+                res = requests.get(url)
+                
+            uesr_text = json.loads(res.text) #json解析
+            ok_userjson = eval(json.dumps(uesr_text[0]))
+            #print(ok_userjson)    
+            down_url = "https://osu-stats-signature.vercel.app/card?user="+ str(ok_userjson['user_id']) +"&mode=std&w=600&h=349" #下载地址合成
+            down_res = requests.get(url=down_url,proxies=proxies)
+            with open('./tmp/osu/'+str(ok_userjson['user_id'])+'.svg',"wb") as code:
+                code.write(down_res.content)
+            cairosvg.svg2png(url='./tmp/osu/'+str(ok_userjson['user_id'])+'.svg', write_to='./tmp/osu/'+str(ok_userjson['user_id'])+'.png')
+            os.remove("'./tmp/osu/'+str(ok_userjson['user_id'])+'.svg'")
+            return ok_userjson['user_id']
+        except Exception as errr:
+            print(errr)
+            return False
 
     with open('bot.yaml', 'r') as f: #读取配置文件?
             botproxy = yaml.load(f.read(),Loader=yaml.FullLoader)
@@ -340,9 +369,6 @@ try:
         except:
             return False
         
-    def jt_img(idimg):
-        img = pyautogui.screenshot(region=[0,0,1920,1080]) # x,y,w,h
-        img.save('./tmp/'+str(idimg)+'.png')
 
     def weibo_hot():
         news = []
@@ -598,9 +624,13 @@ try:
                     bot.send_chat_action(message.chat.id, 'typing')
                     chatjson_img = bot.reply_to(message,"正在查询生成图片请稍后....")
                     out = osu_user_outimg(howpingip(message.text))
+
                     chatjson_img = bot.edit_message_text("正在上传图片请稍后....",chatjson_img.chat.id, chatjson_img.message_id)
+
                     bot.send_chat_action(message.chat.id, 'upload_photo')
+
                     phpget = open('./tmp/osu/'+str(out)+'.png','rb')
+
                     bot.send_photo(message.chat.id, phpget)
                     bot.send_chat_action(message.chat.id, 'typing')
                     bot.edit_message_text('图片上传完成!', chatjson_img.chat.id, chatjson_img.message_id)
