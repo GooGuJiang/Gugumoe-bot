@@ -21,7 +21,7 @@ import cairosvg
 
 
 try:
-    def new_gosu(name):
+    def new_gosu(name): # OSU模式
         try:
             with open('bot.yaml', 'r') as f: #读取配置文件?
                     bottok = yaml.load(f.read(),Loader=yaml.FullLoader)
@@ -40,7 +40,7 @@ try:
             uesr_text = json.loads(res.text) #json解析
             ok_userjson = eval(json.dumps(uesr_text[0]))
             #print(ok_userjson)    
-            down_url = "https://osu-stats-signature.vercel.app/card?user="+ str(ok_userjson['user_id']) +"&mode=std&w=600&h=349" #下载地址合成
+            down_url = "https://osu-stats-signature.vercel.app/card?user="+ str(ok_userjson['user_id']) +"&mode=std&blur=6&w=1920&h=1117" #下载地址合成
             if bottok['proxy'] == True:
                 proxies = {
                     'http': 'socks5://127.0.0.1:8089',
@@ -85,32 +85,34 @@ try:
 
 
     def get_osuid(name):
+        try:
 
-
-        proxies = {
-                'http': 'socks5://127.0.0.1:8089',
-                'https': 'socks5://127.0.0.1:8089'
-            }
-
-        with open('bot.yaml', 'r') as f: #读取配置文件?
-            bottok = yaml.load(f.read(),Loader=yaml.FullLoader)
-            token = bottok['osuToken']
-        
-        url="https://osu.ppy.sh/api/get_user?k="+token+"&u="+str(name)
-        if bottok['proxy'] == True:
             proxies = {
-                'http': 'socks5://127.0.0.1:8089',
-                'https': 'socks5://127.0.0.1:8089'
-            }
-            res = requests.get(url, proxies=proxies)
-        else:
-            res = requests.get(url)
+                    'http': 'socks5://127.0.0.1:8089',
+                    'https': 'socks5://127.0.0.1:8089'
+                }
 
-        uesr_text = json.loads(res.text)
+            with open('bot.yaml', 'r') as f: #读取配置文件?
+                bottok = yaml.load(f.read(),Loader=yaml.FullLoader)
+                token = bottok['osuToken']
+            
+            url="https://osu.ppy.sh/api/get_user?k="+token+"&u="+str(name)
+            if bottok['proxy'] == True:
+                proxies = {
+                    'http': 'socks5://127.0.0.1:8089',
+                    'https': 'socks5://127.0.0.1:8089'
+                }
+                res = requests.get(url, proxies=proxies)
+            else:
+                res = requests.get(url)
 
-        ok_userjson = eval(json.dumps(uesr_text[0]))
+            uesr_text = json.loads(res.text)
 
-        return ok_userjson
+            ok_userjson = eval(json.dumps(uesr_text[0]))
+
+            return ok_userjson
+        except:
+            return False
 
     def get_random():
 
@@ -137,7 +139,7 @@ try:
         return res.text
 
 
-    def osu_user_outinfo(id): #TG绑定信息查询专用
+    def osu_user_outinfo(id,mode): #TG绑定信息查询专用
         try:
 
             with open('bot.yaml', 'r') as f: #读取配置文件?
@@ -188,7 +190,7 @@ try:
             inpu_osuinfo(tg_sql_id,id,osu_now_level,osu_now_pp)
             #------------------------
 
-            down_url = "https://a.ppy.sh/"+ str(ok_userjson['user_id']) +"?img.jpeg" #下载地址合成
+            down_url = "https://osu-stats-signature.vercel.app/card?user="+ str(ok_userjson['user_id']) +"&mode="+str(mode)+"&blur=6&w=1920&h=1117" #下载地址合成
             if bottok['proxy'] == True:
                 proxies = {
                     'http': 'socks5://127.0.0.1:8089',
@@ -198,29 +200,11 @@ try:
             else:
                 down_res = requests.get(url=down_url)
             
-            with open('./tmp/osu/'+str(ok_userjson['user_id'])+'.png',"wb") as code:
+            with open('./tmp/osu/'+str(ok_userjson['user_id'])+'.svg',"wb") as code:
                 code.write(down_res.content)
-            im=Image.open('./osu/img/info.png')
-            im1=Image.open('./tmp/osu/'+str(ok_userjson['user_id'])+'.png')
-            #im1.thumbnail((700,400))
-            im.paste(im1,(279,184))
-            im.save('./tmp/osu/'+str(ok_userjson['user_id'])+'ok'+'.png')
-            bk_img = cv2.imread('./tmp/osu/'+str(ok_userjson['user_id'])+'ok'+'.png')
-            #设置需要显示的字体
-            fontpath = "./font/hyl.ttf"
-            font = ImageFont.truetype(fontpath, 40)
-            font_how = ImageFont.truetype(fontpath, 20)
-            img_pil = Image.fromarray(bk_img)
-            draw = ImageDraw.Draw(img_pil)
-            #绘制文字信息
-            draw.text((262, 510),  str(ok_userjson['username']), font = font, fill = (255, 255, 255)) #名字
-            draw.text((218, 601),  str(ok_userjson['level']), font = font, fill = (255, 255, 255)) #等级
-            draw.text((196, 675),  str(ok_userjson['pp_raw']), font = font, fill = (255, 255, 255)) #PP
-            draw.text((218, 585),  osu_level_out, font = font_how, fill = (255, 255, 255)) #等级差
-            draw.text((196, 660),  osu_pp_out, font = font_how, fill = (255, 255, 255)) #PP差
-            bk_img = np.array(img_pil)
-            cv2.imwrite('./tmp/osu/'+str(ok_userjson['user_id'])+'.png',bk_img)
-            os.remove('./tmp/osu/'+str(ok_userjson['user_id'])+'ok'+'.png')
+            cairosvg.svg2png(url='./tmp/osu/'+str(ok_userjson['user_id'])+'.svg', write_to='./tmp/osu/'+str(ok_userjson['user_id'])+'.png')
+            os.remove('./tmp/osu/'+str(ok_userjson['user_id'])+'.svg')
+
             return ok_userjson['user_id']
         except Exception as errr:
             print(errr)
@@ -625,8 +609,27 @@ try:
         try:
             
             if howpingip(message.text) == False:
-                bot.send_chat_action(message.chat.id, 'typing')
-                bot.reply_to(message,"你指令不保熟啊!\n(缺少参数/guosu [OSU用户名/OSU ID])")
+                if out_osuinfo(str(message.from_user.id),3) == None:
+                    bot.send_chat_action(message.chat.id, 'typing')
+                    bot.reply_to(message,"你指令不保熟啊!\n(缺少参数/guosu [OSU用户名/OSU ID] 或者 /guosubind [OSU用户名/OSU ID] 来绑定)")
+                else:
+                    try:
+                        bot.send_chat_action(message.chat.id, 'typing')
+                        chatjson_img = bot.reply_to(message,"正在查询生成图片请稍后....")
+                        out = osu_user_outinfo(str(out_osuinfo(str(message.from_user.id),1)),"std")
+                        chatjson_img = bot.edit_message_text("正在上传图片请稍后....",chatjson_img.chat.id, chatjson_img.message_id)
+                        bot.send_chat_action(message.chat.id, 'upload_photo')
+                        phpget = open('./tmp/osu/'+str(out)+'.png','rb')
+                        bot.send_photo(message.chat.id, phpget)
+                        bot.send_chat_action(message.chat.id, 'typing')
+                        bot.edit_message_text('图片上传完成!', chatjson_img.chat.id, chatjson_img.message_id)
+                        time.sleep(3)
+                        bot.delete_message(chatjson_img.chat.id, chatjson_img.message_id)
+                    except Exception as gubot:
+                        bot.send_chat_action(message.chat.id, 'typing')
+                        bot.edit_message_text('上传时出错了惹...\n错误日志: '+str(gubot),chatjson_img.chat.id, chatjson_img.message_id)
+                        time.sleep(3)
+                        bot.delete_message(chatjson_img.chat.id, chatjson_img.message_id)
             else:
                 try:
                     bot.send_chat_action(message.chat.id, 'typing')
@@ -650,6 +653,8 @@ try:
         except Exception as boterr:
             bot.send_chat_action(message.chat.id, 'typing')
             bot.edit_message_text('呜呜呜...咕小酱遇到了严重问题......\n错误日志: '+str(boterr),chatjson_img.chat.id, chatjson_img.message_id)
+            time.sleep(3)
+            bot.delete_message(chatjson_img.chat.id, chatjson_img.message_id)
 
     @bot.message_handler(commands=['guosubind'])
     def send_osuinfo(message):
@@ -659,23 +664,30 @@ try:
             bot.send_chat_action(message.chat.id, 'typing')
             bot.reply_to(message,"呜呜呜....你光发指令干嘛 OSU 用户名呢???\n(缺少参数/guosubind [OSU用户名/OSU ID])")
         else:
-            osuid = get_osuid(outtext)
             try: 
-                #print(out_osuinfo(message.from_user.id,3)) #数据库检测
-                if out_osuinfo(str(message.from_user.id),3) == None:
-                    if out_osuinfo(str(osuid['user_id']),2) == None:
-                        bot.send_chat_action(message.chat.id, 'typing')
-                        chatjson_sql = bot.reply_to(message,"正在绑定....")
-                        inpu_osuinfo(message.from_user.id,osuid['user_id'],osuid['level'],osuid['pp_raw'])
-                        bot.send_chat_action(message.chat.id, 'typing')
-                        bot.edit_message_text('绑定 OSU 用户名成功啦!',chatjson_sql.chat.id, chatjson_sql.message_id)
-                    else:
-                        bot.send_chat_action(message.chat.id, 'typing')
-                        bot.reply_to(message,"此 OSU 用户名已经被其他 Telegram ID 绑定了惹...")
+                osuid = get_osuid(outtext)
+                if osuid != False:
+
+                        #print(out_osuinfo(message.from_user.id,3)) #数据库检测
+                        if out_osuinfo(str(message.from_user.id),3) == None:
+                            if out_osuinfo(str(osuid['user_id']),2) == None:
+                                bot.send_chat_action(message.chat.id, 'typing')
+                                chatjson_sql = bot.reply_to(message,"正在绑定....")
+                                if inpu_osuinfo(message.from_user.id,osuid['user_id'],osuid['level'],osuid['pp_raw']) == True:
+                                    bot.send_chat_action(message.chat.id, 'typing')
+                                    bot.edit_message_text('绑定 OSU 用户名成功啦!',chatjson_sql.chat.id, chatjson_sql.message_id)
+                                else:
+                                    bot.send_chat_action(message.chat.id, 'typing')
+                                    bot.reply_to(message,"此 OSU 用户名不存在或者数据库处理出错的说...")
+                            else:
+                                bot.send_chat_action(message.chat.id, 'typing')
+                                bot.reply_to(message,"此 OSU 用户名已经被其他 Telegram ID 绑定了惹...")
+                        else:
+                            bot.send_chat_action(message.chat.id, 'typing')
+                            bot.reply_to(message,"你的Telegram ID 绑定了 OSU 用户名了的说...")
                 else:
                     bot.send_chat_action(message.chat.id, 'typing')
-                    bot.reply_to(message,"你的Telegram ID 绑定了 OSU 用户名了的说...")
-                
+                    bot.reply_to(message,"此 OSU 用户名不存在或者数据库处理出错的说...")
 
             except Exception as ooo:
                 #inpu_osuinfo(message.from_user.id,osuid)
@@ -688,26 +700,6 @@ try:
     # #2 OSU ID 取 OSU ID 
     # #3 Telegram ID取 TG
 
-
-    @bot.message_handler(commands=['guosuinfo'])
-    def send_infopho(message):
-        if out_osuinfo(str(message.from_user.id),3) == None:
-            bot.send_chat_action(message.chat.id, 'typing')
-            bot.reply_to(message,"你的 Telegram ID 未绑定 OSU 用户名\n请使用: \n/guosubind [OSU用户名/OSU ID] \n来绑定吧!")
-        else:
-            try:
-                bot.send_chat_action(message.chat.id, 'typing')
-                chatjson_img = bot.reply_to(message,"正在查询生成图片请稍后....")
-                out = osu_user_outinfo(str(out_osuinfo(str(message.from_user.id),1)))
-                chatjson_img = bot.edit_message_text("正在上传图片请稍后....",chatjson_img.chat.id, chatjson_img.message_id)
-                bot.send_chat_action(message.chat.id, 'upload_photo')
-                phpget = open('./tmp/osu/'+str(out)+'.png','rb')
-                bot.send_photo(message.chat.id, phpget)
-                bot.send_chat_action(message.chat.id, 'typing')
-                bot.edit_message_text('图片上传完成!', chatjson_img.chat.id, chatjson_img.message_id)
-            except Exception as gubot:
-                bot.send_chat_action(message.chat.id, 'typing')
-                bot.edit_message_text('上传时出错了惹...\n错误日志: '+str(gubot),chatjson_img.chat.id, chatjson_img.message_id)
     
     @bot.message_handler(commands=['guosudel'])
     def send_infopho(message):
@@ -767,7 +759,162 @@ try:
         except Exception as eeer:
             bot.edit_message_text('呜呜呜....运行错误',bili_text_go.chat.id, bili_text_go.message_id)
 
-        
+    @bot.message_handler(commands=['guosutaiko'])
+    def guosutk(message):
+        try:
+                
+            if howpingip(message.text) == False:
+                if out_osuinfo(str(message.from_user.id),3) == None:
+                    bot.send_chat_action(message.chat.id, 'typing')
+                    bot.reply_to(message,"你指令不保熟啊!\n(缺少参数/guosutaiko [OSU用户名/OSU ID] 或者 /guosubind [OSU用户名/OSU ID] 来绑定)")
+                else:
+                    try:
+                        bot.send_chat_action(message.chat.id, 'typing')
+                        chatjson_img = bot.reply_to(message,"正在查询生成图片请稍后....")
+                        out = osu_user_outinfo(str(out_osuinfo(str(message.from_user.id),1)),"taiko")
+                        chatjson_img = bot.edit_message_text("正在上传图片请稍后....",chatjson_img.chat.id, chatjson_img.message_id)
+                        bot.send_chat_action(message.chat.id, 'upload_photo')
+                        phpget = open('./tmp/osu/'+str(out)+'.png','rb')
+                        bot.send_photo(message.chat.id, phpget)
+                        bot.send_chat_action(message.chat.id, 'typing')
+                        bot.edit_message_text('图片上传完成!', chatjson_img.chat.id, chatjson_img.message_id)
+                        time.sleep(3)
+                        bot.delete_message(chatjson_img.chat.id, chatjson_img.message_id)
+                    except Exception as gubot:
+                        bot.send_chat_action(message.chat.id, 'typing')
+                        bot.edit_message_text('上传时出错了惹...\n错误日志: '+str(gubot),chatjson_img.chat.id, chatjson_img.message_id)
+                        time.sleep(3)
+                        bot.delete_message(chatjson_img.chat.id, chatjson_img.message_id)
+            else:
+                try:
+                    bot.send_chat_action(message.chat.id, 'typing')
+                    chatjson_img = bot.reply_to(message,"正在查询生成图片请稍后....")
+                    out = new_gosu(howpingip(message.text))
+
+                    chatjson_img = bot.edit_message_text("正在上传图片请稍后....",chatjson_img.chat.id, chatjson_img.message_id)
+
+                    bot.send_chat_action(message.chat.id, 'upload_photo')
+
+                    phpget = open('./tmp/osu/'+str(out)+'.png','rb')
+
+                    bot.send_photo(message.chat.id, phpget)
+                    bot.send_chat_action(message.chat.id, 'typing')
+                    bot.edit_message_text('图片上传完成!', chatjson_img.chat.id, chatjson_img.message_id)
+                    time.sleep(3)
+                    bot.delete_message(chatjson_img.chat.id, chatjson_img.message_id)
+                except Exception as gubot:
+                    bot.send_chat_action(message.chat.id, 'typing')
+                    bot.edit_message_text('上传时出错了惹...\n错误日志: '+str(gubot),chatjson_img.chat.id, chatjson_img.message_id)
+        except Exception as boterr:
+            bot.send_chat_action(message.chat.id, 'typing')
+            bot.edit_message_text('呜呜呜...咕小酱遇到了严重问题......\n错误日志: '+str(boterr),chatjson_img.chat.id, chatjson_img.message_id)
+            time.sleep(3)
+            bot.delete_message(chatjson_img.chat.id, chatjson_img.message_id)
+
+    @bot.message_handler(commands=['guosucatch'])
+    def guosuca(message):
+        try:
+                
+            if howpingip(message.text) == False:
+                if out_osuinfo(str(message.from_user.id),3) == None:
+                    bot.send_chat_action(message.chat.id, 'typing')
+                    bot.reply_to(message,"你指令不保熟啊!\n(缺少参数/guosucatch [OSU用户名/OSU ID] 或者 /guosubind [OSU用户名/OSU ID] 来绑定)")
+                else:
+                    try:
+                        bot.send_chat_action(message.chat.id, 'typing')
+                        chatjson_img = bot.reply_to(message,"正在查询生成图片请稍后....")
+                        out = osu_user_outinfo(str(out_osuinfo(str(message.from_user.id),1)),"catch")
+                        chatjson_img = bot.edit_message_text("正在上传图片请稍后....",chatjson_img.chat.id, chatjson_img.message_id)
+                        bot.send_chat_action(message.chat.id, 'upload_photo')
+                        phpget = open('./tmp/osu/'+str(out)+'.png','rb')
+                        bot.send_photo(message.chat.id, phpget)
+                        bot.send_chat_action(message.chat.id, 'typing')
+                        bot.edit_message_text('图片上传完成!', chatjson_img.chat.id, chatjson_img.message_id)
+                        time.sleep(3)
+                        bot.delete_message(chatjson_img.chat.id, chatjson_img.message_id)
+                    except Exception as gubot:
+                        bot.send_chat_action(message.chat.id, 'typing')
+                        bot.edit_message_text('上传时出错了惹...\n错误日志: '+str(gubot),chatjson_img.chat.id, chatjson_img.message_id)
+                        time.sleep(3)
+                        bot.delete_message(chatjson_img.chat.id, chatjson_img.message_id)
+            else:
+                try:
+                    bot.send_chat_action(message.chat.id, 'typing')
+                    chatjson_img = bot.reply_to(message,"正在查询生成图片请稍后....")
+                    out = new_gosu(howpingip(message.text))
+
+                    chatjson_img = bot.edit_message_text("正在上传图片请稍后....",chatjson_img.chat.id, chatjson_img.message_id)
+
+                    bot.send_chat_action(message.chat.id, 'upload_photo')
+
+                    phpget = open('./tmp/osu/'+str(out)+'.png','rb')
+
+                    bot.send_photo(message.chat.id, phpget)
+                    bot.send_chat_action(message.chat.id, 'typing')
+                    bot.edit_message_text('图片上传完成!', chatjson_img.chat.id, chatjson_img.message_id)
+                    time.sleep(3)
+                    bot.delete_message(chatjson_img.chat.id, chatjson_img.message_id)
+                except Exception as gubot:
+                    bot.send_chat_action(message.chat.id, 'typing')
+                    bot.edit_message_text('上传时出错了惹...\n错误日志: '+str(gubot),chatjson_img.chat.id, chatjson_img.message_id)
+        except Exception as boterr:
+            bot.send_chat_action(message.chat.id, 'typing')
+            bot.edit_message_text('呜呜呜...咕小酱遇到了严重问题......\n错误日志: '+str(boterr),chatjson_img.chat.id, chatjson_img.message_id)
+            time.sleep(3)
+            bot.delete_message(chatjson_img.chat.id, chatjson_img.message_id)
+
+    @bot.message_handler(commands=['guosumania'])
+    def guosuman(message):
+        try:
+                
+            if howpingip(message.text) == False:
+                if out_osuinfo(str(message.from_user.id),3) == None:
+                    bot.send_chat_action(message.chat.id, 'typing')
+                    bot.reply_to(message,"你指令不保熟啊!\n(缺少参数/guosumania [OSU用户名/OSU ID] 或者 /guosubind [OSU用户名/OSU ID] 来绑定)")
+                else:
+                    try:
+                        bot.send_chat_action(message.chat.id, 'typing')
+                        chatjson_img = bot.reply_to(message,"正在查询生成图片请稍后....")
+                        out = osu_user_outinfo(str(out_osuinfo(str(message.from_user.id),1)),"mania")
+                        chatjson_img = bot.edit_message_text("正在上传图片请稍后....",chatjson_img.chat.id, chatjson_img.message_id)
+                        bot.send_chat_action(message.chat.id, 'upload_photo')
+                        phpget = open('./tmp/osu/'+str(out)+'.png','rb')
+                        bot.send_photo(message.chat.id, phpget)
+                        bot.send_chat_action(message.chat.id, 'typing')
+                        bot.edit_message_text('图片上传完成!', chatjson_img.chat.id, chatjson_img.message_id)
+                        time.sleep(3)
+                        bot.delete_message(chatjson_img.chat.id, chatjson_img.message_id)
+                    except Exception as gubot:
+                        bot.send_chat_action(message.chat.id, 'typing')
+                        bot.edit_message_text('上传时出错了惹...\n错误日志: '+str(gubot),chatjson_img.chat.id, chatjson_img.message_id)
+                        time.sleep(3)
+                        bot.delete_message(chatjson_img.chat.id, chatjson_img.message_id)
+            else:
+                try:
+                    bot.send_chat_action(message.chat.id, 'typing')
+                    chatjson_img = bot.reply_to(message,"正在查询生成图片请稍后....")
+                    out = new_gosu(howpingip(message.text))
+
+                    chatjson_img = bot.edit_message_text("正在上传图片请稍后....",chatjson_img.chat.id, chatjson_img.message_id)
+
+                    bot.send_chat_action(message.chat.id, 'upload_photo')
+
+                    phpget = open('./tmp/osu/'+str(out)+'.png','rb')
+
+                    bot.send_photo(message.chat.id, phpget)
+                    bot.send_chat_action(message.chat.id, 'typing')
+                    bot.edit_message_text('图片上传完成!', chatjson_img.chat.id, chatjson_img.message_id)
+                    time.sleep(3)
+                    bot.delete_message(chatjson_img.chat.id, chatjson_img.message_id)
+                except Exception as gubot:
+                    bot.send_chat_action(message.chat.id, 'typing')
+                    bot.edit_message_text('上传时出错了惹...\n错误日志: '+str(gubot),chatjson_img.chat.id, chatjson_img.message_id)
+        except Exception as boterr:
+            bot.send_chat_action(message.chat.id, 'typing')
+            bot.edit_message_text('呜呜呜...咕小酱遇到了严重问题......\n错误日志: '+str(boterr),chatjson_img.chat.id, chatjson_img.message_id)
+            time.sleep(3)
+            bot.delete_message(chatjson_img.chat.id, chatjson_img.message_id)
+
     if __name__ == '__main__':
         bot.polling()
 
