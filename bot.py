@@ -661,8 +661,12 @@ try:
         outtext = howpingip(message.text)
         #print(outtext) #指令输出
         if outtext == False:
-            bot.send_chat_action(message.chat.id, 'typing')
-            bot.reply_to(message,"呜呜呜....你光发指令干嘛 OSU 用户名呢???\n(缺少参数/guosubind [OSU用户名/OSU ID])")
+            if out_osuinfo(str(message.from_user.id),3) == None:
+                    bot.send_chat_action(message.chat.id, 'typing')
+                    bot.reply_to(message,"你指令不保熟啊!\n(缺少参数/guosu [OSU用户名/OSU ID] 或者 /guosubind [OSU用户名/OSU ID] 来绑定)")
+            else:
+                bot.send_chat_action(message.chat.id, 'typing')
+                bot.reply_to(message,"你已经绑定过 OSU 用户名了,如需更改请发送 /guosudel 重新绑定哦~")
         else:
             try: 
                 osuid = get_osuid(outtext)
