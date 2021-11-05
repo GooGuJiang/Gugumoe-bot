@@ -1086,6 +1086,8 @@ try:
                     bot.delete_message(chatjson_img.chat.id, chatjson_img.message_id)
                     audio.close()
                     os.remove("./dl-tmp/"+dl_muss+".mp3")
+                else:
+                    bot.reply_to(message,"抱歉此链接不是SoundCloud链接")
             except Exception as boterr:
                 #print(boterr)
                 bot.send_chat_action(message.chat.id, 'typing')
