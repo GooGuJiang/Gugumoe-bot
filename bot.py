@@ -20,7 +20,7 @@ import glob
 import re
 import hashlib
 import eyed3
-#import cairosvg
+import cairosvg
 
 
 try:
