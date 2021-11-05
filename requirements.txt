@@ -9,5 +9,5 @@ pyTelegramBotAPI
 cairosvg
 ctypes
 lxml
-
+eyed3
 

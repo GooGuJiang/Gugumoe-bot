@@ -17,10 +17,146 @@ import yaml
 import random
 import os.path
 import glob
-import cairosvg
+import re
+import hashlib
+import eyed3
+#import cairosvg
 
 
 try:
+    def dl_sdmusic_info(url_dl):
+        try:
+            with open('bot.yaml', 'r') as f: #读取配置文件?
+                    bottok = yaml.load(f.read(),Loader=yaml.FullLoader)
+                    token = bottok['osuToken']
+
+            # post参数合成区
+            url = 'https://soundcloudmp3.cc/ajax.php'
+
+            proxies = {
+                                'http': 'socks5://127.0.0.1:8089',
+                                'https': 'socks5://127.0.0.1:8089'
+                            }
+
+            headers = {
+                'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_4) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.163 Safari/537.36',
+            }
+
+
+            data =  {"action": "video_preview","vidURL": url_dl,"tType":"trim" }
+
+
+            # post访问
+            if bottok['proxy'] == True:
+                response = requests.post(url=url, headers=headers, data=data,proxies=proxies)
+            else:
+                response = requests.post(url=url, headers=headers, data=data)
+
+            page_text = json.loads(str(response.text))
+
+
+            return page_text["vidTitle"]
+        except Exception as ooo:
+            print(ooo)
+            return False
+
+    def getStrAsMD5(parmStr):
+        if isinstance(parmStr,str):
+            parmStr = parmStr.encode("utf-8")
+        m = hashlib.md5()
+        m.update(parmStr)
+        return m.hexdigest()
+
+    def dl_sdmusic(url_dl):
+        try:
+            with open('bot.yaml', 'r') as f: #读取配置文件?
+                    bottok = yaml.load(f.read(),Loader=yaml.FullLoader)
+            # post参数合成区
+            url = 'https://soundcloudmp3.cc/ajax.php'
+
+            proxies = {
+                                'http': 'socks5://127.0.0.1:8089',
+                                'https': 'socks5://127.0.0.1:8089'
+                            }
+
+            headers = {
+                'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_4) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.163 Safari/537.36',
+            }
+
+
+            data =  {"action": "video_preview","vidURL": url_dl,"tType":"trim" }
+
+
+            # post访问
+            if bottok['proxy'] == True:
+                response = requests.post(url=url, headers=headers, data=data,proxies=proxies)
+            else:
+                response = requests.post(url=url, headers=headers, data=data)
+
+            page_text = json.loads(str(response.text))
+
+
+            down_url = "https://soundcloudmp3.cc/"+page_text["vidSrc"][1:]
+
+            if bottok['proxy'] == True:
+                res = requests.get(down_url,proxies=proxies)
+            else:
+                res = requests.get(down_url)
+            
+            try:
+                with open("./dl-tmp/"+page_text["vidTitle"]+'.mp3', 'wb') as f:
+                    f.write(res.content)
+            except:
+                with open("./dl-tmp/"+getStrAsMD5(page_text["vidTitle"])+'.mp3', 'wb') as f:
+                    f.write(res.content)
+            #下载专辑图片
+            dl_img = repr(page_text["vidImage"])
+            dl_img = dl_img[1:len(dl_img)-1]
+            if bottok['proxy'] == True:
+                res = requests.get(dl_img,proxies=proxies)
+            else:
+                res = requests.get(dl_img)
+            
+
+            try:
+                with open("./dl-tmp/"+page_text["vidTitle"]+'.jpg', 'wb') as f:
+                    f.write(res.content)
+            except:
+                with open("./dl-tmp/"+getStrAsMD5(page_text["vidTitle"])+'.jpg', 'wb') as f:
+                    f.write(res.content)
+
+            #写入信息
+            try:
+                audiofile = eyed3.load("./dl-tmp/"+page_text["vidTitle"]+'.mp3')  # 读取mp3文件
+                audiofile.initTag()  # 初始化所有标签信息，将之前所有的标签清除
+                audiofile.tag.images.set(3, open("./dl-tmp/"+page_text["vidTitle"]+'.jpg','rb').read(), 'image/jpeg') #添加封面
+                audiofile.tag.album = u"SoundCloud"  # 唱片集
+                audiofile.tag.title = page_text["vidTitle"]  # 标题
+                audiofile.tag.save() # 保存文件
+                os.remove("./dl-tmp/"+page_text["vidTitle"]+'.jpg')
+                fill = page_text["vidTitle"]
+            except:
+                audiofile = eyed3.load("./dl-tmp/"+getStrAsMD5(page_text["vidTitle"])+'.mp3')
+                audiofile.initTag()  # 初始化所有标签信息，将之前所有的标签清除
+                audiofile.tag.images.set(3, open("./dl-tmp/"+getStrAsMD5(page_text["vidTitle"])+'.jpg','rb').read(), 'image/jpeg') #添加封面
+                audiofile.tag.album = u"SoundCloud"  # 唱片集
+                audiofile.tag.title = page_text["vidTitle"]  # 标题
+                audiofile.tag.save() # 保存文件
+                os.remove("./dl-tmp/"+getStrAsMD5(page_text["vidTitle"])+'.jpg')
+                fill = "./dl-tmp/"+getStrAsMD5(page_text["vidTitle"])
+            
+            return fill
+        except Exception as ooo:
+            print(ooo)
+            return False
+
+
+    def is_sd_url(url):
+        if re.match(r'^https*://(www.)*soundcloud\.com/', url) == None:
+            return False
+        else:
+            return True
+
     def new_gosu(name): # OSU模式
         try:
             with open('bot.yaml', 'r') as f: #读取配置文件?
@@ -623,6 +759,7 @@ try:
                         bot.send_photo(message.chat.id, phpget)
                         bot.send_chat_action(message.chat.id, 'typing')
                         bot.edit_message_text('图片上传完成!', chatjson_img.chat.id, chatjson_img.message_id)
+                        phpget.close()
                         time.sleep(3)
                         bot.delete_message(chatjson_img.chat.id, chatjson_img.message_id)
                     except Exception as gubot:
@@ -782,6 +919,7 @@ try:
                         bot.send_photo(message.chat.id, phpget)
                         bot.send_chat_action(message.chat.id, 'typing')
                         bot.edit_message_text('图片上传完成!', chatjson_img.chat.id, chatjson_img.message_id)
+                        phpget.close()
                         time.sleep(3)
                         bot.delete_message(chatjson_img.chat.id, chatjson_img.message_id)
                     except Exception as gubot:
@@ -804,6 +942,7 @@ try:
                     bot.send_photo(message.chat.id, phpget)
                     bot.send_chat_action(message.chat.id, 'typing')
                     bot.edit_message_text('图片上传完成!', chatjson_img.chat.id, chatjson_img.message_id)
+                    phpget.close()
                     time.sleep(3)
                     bot.delete_message(chatjson_img.chat.id, chatjson_img.message_id)
                 except Exception as gubot:
@@ -834,6 +973,7 @@ try:
                         bot.send_photo(message.chat.id, phpget)
                         bot.send_chat_action(message.chat.id, 'typing')
                         bot.edit_message_text('图片上传完成!', chatjson_img.chat.id, chatjson_img.message_id)
+                        phpget.close()
                         time.sleep(3)
                         bot.delete_message(chatjson_img.chat.id, chatjson_img.message_id)
                     except Exception as gubot:
@@ -856,6 +996,7 @@ try:
                     bot.send_photo(message.chat.id, phpget)
                     bot.send_chat_action(message.chat.id, 'typing')
                     bot.edit_message_text('图片上传完成!', chatjson_img.chat.id, chatjson_img.message_id)
+                    phpget.close()
                     time.sleep(3)
                     bot.delete_message(chatjson_img.chat.id, chatjson_img.message_id)
                 except Exception as gubot:
@@ -886,6 +1027,7 @@ try:
                         bot.send_photo(message.chat.id, phpget)
                         bot.send_chat_action(message.chat.id, 'typing')
                         bot.edit_message_text('图片上传完成!', chatjson_img.chat.id, chatjson_img.message_id)
+                        phpget.close()
                         time.sleep(3)
                         bot.delete_message(chatjson_img.chat.id, chatjson_img.message_id)
                     except Exception as gubot:
@@ -908,6 +1050,7 @@ try:
                     bot.send_photo(message.chat.id, phpget)
                     bot.send_chat_action(message.chat.id, 'typing')
                     bot.edit_message_text('图片上传完成!', chatjson_img.chat.id, chatjson_img.message_id)
+                    phpget.close()
                     time.sleep(3)
                     bot.delete_message(chatjson_img.chat.id, chatjson_img.message_id)
                 except Exception as gubot:
@@ -918,6 +1061,38 @@ try:
             bot.edit_message_text('呜呜呜...咕小酱遇到了严重问题......\n错误日志: '+str(boterr),chatjson_img.chat.id, chatjson_img.message_id)
             time.sleep(3)
             bot.delete_message(chatjson_img.chat.id, chatjson_img.message_id)
+
+    @bot.message_handler(commands=['gudlsds'])
+    def gudlsoundcloud(message):
+        if howpingip(message.text) == False:
+            bot.send_chat_action(message.chat.id, 'typing')
+            bot.reply_to(message,"呜呜呜...指令有问题\n(指令格式 /gudlsds [SoundCloud音乐链接] 暂不支持列表下载)")
+        else:
+            try:
+                text_rl = howpingip(message.text)
+                if is_sd_url(text_rl) == True:
+                    bot.send_chat_action(message.chat.id, 'typing')
+                    chatjson_img = bot.reply_to(message,"正在从SoundCloud获取音乐信息请稍后....")
+                    info_music = dl_sdmusic_info(text_rl)
+                    chatjson_img = bot.edit_message_text("正在下载『"+info_music+"』请稍后....",chatjson_img.chat.id, chatjson_img.message_id)
+                    dl_muss = dl_sdmusic(text_rl)
+                    chatjson_img = bot.edit_message_text("正在上传『"+info_music+"』请稍后....",chatjson_img.chat.id, chatjson_img.message_id)
+                    bot.send_chat_action(message.chat.id, 'upload_audio')
+                    audio = open("./dl-tmp/"+dl_muss+".mp3", 'rb')
+                    bot.send_audio(message.chat.id, audio)
+                    bot.send_chat_action(message.chat.id, 'typing')
+                    bot.edit_message_text("『"+info_music+'』上传完成!', chatjson_img.chat.id, chatjson_img.message_id)
+                    time.sleep(3)
+                    bot.delete_message(chatjson_img.chat.id, chatjson_img.message_id)
+                    audio.close()
+                    os.remove("./dl-tmp/"+dl_muss+".mp3")
+            except Exception as boterr:
+                #print(boterr)
+                bot.send_chat_action(message.chat.id, 'typing')
+                bot.edit_message_text('呜呜呜...咕小酱遇到了严重问题......\n错误日志: '+str(boterr),chatjson_img.chat.id, chatjson_img.message_id)
+                time.sleep(3)
+                bot.delete_message(chatjson_img.chat.id, chatjson_img.message_id)
+
 
     if __name__ == '__main__':
         bot.polling()
