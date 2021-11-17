@@ -1,14 +1,13 @@
 # -*- coding:utf-8 -*-
 from telebot import apihelper
-from PIL import ImageFont, ImageDraw, Image
 from bs4 import BeautifulSoup
 from lxml import etree
 from decimal import Decimal
 from ping3 import ping
 import sqlite3
 import requests
-import numpy as np
-import cv2
+import sys
+import zipfile
 import telebot
 import json
 import os
@@ -20,14 +19,45 @@ import glob
 import re
 import hashlib
 import eyed3
-import cairosvg
+#import cairosvg
 
 #初始化
 def oneload():
-    f = open('./config.yml','a')
-    f.write("botToken: \nosuToken: \nproxybool: False\nproxy: {'http': 'socks5://127.0.0.1:8089','https': 'socks5://127.0.0.1:8089'}")
-    f.close()
+    if os.path.exists("./config.yml") == False:
+        print("未检测到配置文件\n开始初始化")
+        with open("./config.yml", 'wb') as f:
+            f.write(bytes("botToken: \nosuToken: \nproxybool: False\nproxy: {'http': 'socks5://127.0.0.1:8089','https': 'socks5://127.0.0.1:8089'}",'utf-8'))
+            f.close()
+        print("开始创建文件夹")
+        os.mkdir("./dl-tmp")
+        os.mkdir("./img")
+        os.mkdir("./osu")
+        os.mkdir("./tmp")
+        os.mkdir("./tmp/osu")
+        os.mkdir("./user")
+        os.mkdir("./user/jrrp")
+        os.mkdir("./user/ycxt")
+        print("文件夹创建完毕")
+        print("开始下载表情包")
+        r =  requests.get("https://cdn.jsdelivr.net/gh/GooguJiang/gu_img/img.zip")
+        with open("./dl-tmp/img.zip",'wb') as code: # 将压缩包内容写入到 
+            code.write(r.content)
+        print('表情包下载完成')
+        print("开始解压文件")
+        zip_file = zipfile.ZipFile("./dl-tmp/img.zip")
+        zip_list = zip_file.namelist() # 压缩文件清单，可以直接看到压缩包内的各个文件的明细
+        for f in zip_list: # 遍历这些文件，逐个解压出来，
+            zip_file.extract(f,"./")
+        zip_file.close() # 不能少！
+        print("文件解压完毕")
+        print("删除缓存")
+        os.remove("./dl-tmp/img.zip")
+        print("初始化完毕请填写配置文件然后重新运行本程序!")
+        sys.exit()
+    else:
+        print("加载配置文件")
 
+oneload()
 
 try:
     def nbnhhsh(text):
@@ -396,50 +426,6 @@ try:
         else:
             return False
 
-    def osu_user_outimg(id): #获取osu用户json信息
-        try:
-
-            with open('config.yml', 'r') as f: #读取配置文件?
-                bottok = yaml.load(f.read(),Loader=yaml.FullLoader)
-                token = bottok['osuToken']
-
-            url="https://osu.ppy.sh/api/get_user?k="+token+"&u="+str(id)
-            res = requests.get(url)
-            
-            uesr_text = json.loads(res.text) #json解析
-            ok_userjson = eval(json.dumps(uesr_text[0]))
-            #print(ok_userjson)    
-            down_url = "https://a.ppy.sh/"+ str(ok_userjson['user_id']) +"?img.jpeg" #下载地址合成
-            if bottok['proxybool'] == True:
-                proxies = bottok['proxy']
-                down_res = requests.get(url=down_url,proxies=proxies)
-            else:
-                down_res = requests.get(url=down_url)
-
-            with open('./tmp/osu/'+str(ok_userjson['user_id'])+'.png',"wb") as code:
-                code.write(down_res.content)
-            im=Image.open('./osu/img/info.png')
-            im1=Image.open('./tmp/osu/'+str(ok_userjson['user_id'])+'.png')
-            #im1.thumbnail((700,400))
-            im.paste(im1,(279,184))
-            im.save('./tmp/osu/'+str(ok_userjson['user_id'])+'ok'+'.png')
-            bk_img = cv2.imread('./tmp/osu/'+str(ok_userjson['user_id'])+'ok'+'.png')
-            #设置需要显示的字体
-            fontpath = "./font/hyl.ttf"
-            font = ImageFont.truetype(fontpath, 40)
-            img_pil = Image.fromarray(bk_img)
-            draw = ImageDraw.Draw(img_pil)
-            #绘制文字信息
-            draw.text((262, 510),  str(ok_userjson['username']), font = font, fill = (255, 255, 255)) #名字
-            draw.text((218, 601),  str(ok_userjson['level']), font = font, fill = (255, 255, 255)) #等级
-            draw.text((196, 675),  str(ok_userjson['pp_raw']), font = font, fill = (255, 255, 255)) #PP
-            bk_img = np.array(img_pil)
-            cv2.imwrite('./tmp/osu/'+str(ok_userjson['user_id'])+'.png',bk_img)
-            os.remove('./tmp/osu/'+str(ok_userjson['user_id'])+'ok'+'.png')
-            return ok_userjson['user_id']
-        except Exception as errr:
-            print(errr)
-            return False
 
     def yesnocoom(incom): #检测ping指令是否正确
         str_1=incom
