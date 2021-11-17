@@ -1,3 +1,4 @@
+## 没时间写文档啊
 # Gugumoe-bot
 ![https://github.com/GooGuJiang/Gugumoe-bot]( https://i0.hdslb.com/bfs/album/18f28e3a7b5c74dbe628166ddeadc02516d3c5ce.jpg )
  
