@@ -22,6 +22,11 @@ import hashlib
 import eyed3
 import cairosvg
 
+#初始化
+def oneload():
+    f = open('./config.yml','a')
+    f.write("botToken: \nosuToken: \nproxybool: False\nproxy: {'http': 'socks5://127.0.0.1:8089','https': 'socks5://127.0.0.1:8089'}")
+    f.close()
 
 
 try:
@@ -52,7 +57,7 @@ try:
 
     def dl_sdmusic_info(url_dl):
         try:
-            with open('bot.yaml', 'r') as f: #读取配置文件?
+            with open('config.yml', 'r') as f: #读取配置文件?
                     bottok = yaml.load(f.read(),Loader=yaml.FullLoader)
 
             # post参数合成区
@@ -86,7 +91,7 @@ try:
 
     def dl_sdmusic(url_dl):
         try:
-            with open('bot.yaml', 'r') as f: #读取配置文件?
+            with open('config.yml', 'r') as f: #读取配置文件?
                     bottok = yaml.load(f.read(),Loader=yaml.FullLoader)
             # post参数合成区
             url = 'https://soundcloudmp3.cc/ajax.php'
@@ -168,7 +173,7 @@ try:
 
     def new_gosu(name): # OSU模式
         try:
-            with open('bot.yaml', 'r') as f: #读取配置文件?
+            with open('config.yml', 'r') as f: #读取配置文件?
                     bottok = yaml.load(f.read(),Loader=yaml.FullLoader)
                     token = bottok['osuToken']
 
@@ -198,7 +203,7 @@ try:
             print(errr)
             return False
 
-    with open('bot.yaml', 'r') as f: #读取配置文件?
+    with open('config.yml', 'r') as f: #读取配置文件?
             botproxy = yaml.load(f.read(),Loader=yaml.FullLoader)
             botproxyyesno = botproxy['proxybool']
 
@@ -227,7 +232,7 @@ try:
         try:
 
 
-            with open('bot.yaml', 'r') as f: #读取配置文件?
+            with open('config.yml', 'r') as f: #读取配置文件?
                 bottok = yaml.load(f.read(),Loader=yaml.FullLoader)
                 token = bottok['osuToken']
             proxies = bottok['proxy']
@@ -249,7 +254,7 @@ try:
 
     def get_random():
 
-        with open('bot.yaml', 'r') as f: #读取配置文件?
+        with open('config.yml', 'r') as f: #读取配置文件?
             bottok = yaml.load(f.read(),Loader=yaml.FullLoader)
 
         url='https://www.random.org/integers/?num=1&min=0&max=100&col=1&base=10&format=plain&rnd=new'
@@ -268,7 +273,7 @@ try:
     def osu_user_outinfo(id,mode): #TG绑定信息查询专用
         try:
 
-            with open('bot.yaml', 'r') as f: #读取配置文件?
+            with open('config.yml', 'r') as f: #读取配置文件?
                 bottok = yaml.load(f.read(),Loader=yaml.FullLoader)
                 token = bottok['osuToken']
 
@@ -394,7 +399,7 @@ try:
     def osu_user_outimg(id): #获取osu用户json信息
         try:
 
-            with open('bot.yaml', 'r') as f: #读取配置文件?
+            with open('config.yml', 'r') as f: #读取配置文件?
                 bottok = yaml.load(f.read(),Loader=yaml.FullLoader)
                 token = bottok['osuToken']
 
@@ -549,7 +554,7 @@ try:
             return False
 
 
-    with open('bot.yaml', 'r') as f: #读取配置文件?
+    with open('config.yml', 'r') as f: #读取配置文件?
         bottok = yaml.load(f.read(),Loader=yaml.FullLoader)
         token = bottok['botToken']
 
