@@ -19,7 +19,7 @@ import glob
 import re
 import hashlib
 import eyed3
-#import cairosvg
+import cairosvg
 
 #初始化
 def oneload():
@@ -1083,5 +1083,7 @@ try:
         bot.polling()
 
 except Exception as boterr:
-    print(boterr)
-    bot.polling()
+    while True:
+        print("程序出错正在重启"+str(boterr))
+        bot.polling()
+        time.sleep(10)
