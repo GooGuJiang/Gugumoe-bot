@@ -7,7 +7,6 @@ requests
 ping3
 pyTelegramBotAPI
 cairosvg
-ctypes
 lxml
 eyed3
-
+bs4
