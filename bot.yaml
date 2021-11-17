@@ -1,3 +1,4 @@
-botToken: 
-osuToken:
-proxy: False
+botToken: xxx:xxx
+osuToken: rehgihergjkhewhbqfwsohpf
+proxybool: False
+proxy: {'http': 'socks5://127.0.0.1:8089','https': 'socks5://127.0.0.1:8089'}

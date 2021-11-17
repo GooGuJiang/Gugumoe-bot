@@ -54,15 +54,11 @@ try:
         try:
             with open('bot.yaml', 'r') as f: #读取配置文件?
                     bottok = yaml.load(f.read(),Loader=yaml.FullLoader)
-                    token = bottok['osuToken']
 
             # post参数合成区
             url = 'https://soundcloudmp3.cc/ajax.php'
 
-            proxies = {
-                                'http': 'socks5://127.0.0.1:8089',
-                                'https': 'socks5://127.0.0.1:8089'
-                            }
+            proxies = bottok['proxy']
 
             headers = {
                 'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_4) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.163 Safari/537.36',
@@ -71,7 +67,7 @@ try:
 
             data =  {"action": "video_preview","vidURL": url_dl,"tType":"trim" }
             # post访问
-            if bottok['proxy'] == True:
+            if bottok['proxybool'] == True:
                 response = requests.post(url=url, headers=headers, data=data,proxies=proxies)
             else:
                 response = requests.post(url=url, headers=headers, data=data)
@@ -95,10 +91,7 @@ try:
             # post参数合成区
             url = 'https://soundcloudmp3.cc/ajax.php'
 
-            proxies = {
-                                'http': 'socks5://127.0.0.1:8089',
-                                'https': 'socks5://127.0.0.1:8089'
-                            }
+            proxies = bottok['proxy']
 
             headers = {
                 'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_4) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.163 Safari/537.36',
@@ -109,13 +102,13 @@ try:
 
 
             # post访问
-            if bottok['proxy'] == True:
+            if bottok['proxybool'] == True:
                 response = requests.post(url=url, headers=headers, data=data,proxies=proxies)
             else:
                 response = requests.post(url=url, headers=headers, data=data)
             page_text = json.loads(str(response.text))
             down_url = "https://soundcloudmp3.cc/"+page_text["vidSrc"][1:]
-            if bottok['proxy'] == True:
+            if bottok['proxybool'] == True:
                 res = requests.get(down_url,proxies=proxies)
             else:
                 res = requests.get(down_url)
@@ -129,7 +122,7 @@ try:
             #下载专辑图片
             dl_img = repr(page_text["vidImage"])
             dl_img = dl_img[1:len(dl_img)-1]
-            if bottok['proxy'] == True:
+            if bottok['proxybool'] == True:
                 res = requests.get(dl_img,proxies=proxies)
             else:
                 res = requests.get(dl_img)
@@ -180,11 +173,8 @@ try:
                     token = bottok['osuToken']
 
             url="https://osu.ppy.sh/api/get_user?k="+token+"&u="+str(name)
-            if bottok['proxy'] == True:
-                proxies = {
-                    'http': 'socks5://127.0.0.1:8089',
-                    'https': 'socks5://127.0.0.1:8089'
-                }
+            if bottok['proxybool'] == True:
+                proxies = bottok['proxy']
                 res = requests.get(url, proxies=proxies)
             else:
                 res = requests.get(url)
@@ -193,11 +183,8 @@ try:
             ok_userjson = eval(json.dumps(uesr_text[0]))
             #print(ok_userjson)    
             down_url = "https://osu-stats-signature.vercel.app/card?user="+ str(ok_userjson['user_id']) +"&mode=std&blur=6&w=1920&h=1117" #下载地址合成
-            if bottok['proxy'] == True:
-                proxies = {
-                    'http': 'socks5://127.0.0.1:8089',
-                    'https': 'socks5://127.0.0.1:8089'
-                }
+            if bottok['proxybool'] == True:
+                proxies = bottok['proxy']
                 down_res = requests.get(url=down_url,proxies=proxies)
             else:
                 down_res = requests.get(url=down_url)
@@ -213,10 +200,10 @@ try:
 
     with open('bot.yaml', 'r') as f: #读取配置文件?
             botproxy = yaml.load(f.read(),Loader=yaml.FullLoader)
-            botproxyyesno = botproxy['proxy']
+            botproxyyesno = botproxy['proxybool']
 
     if botproxyyesno == True:
-        apihelper.proxy = {'https':'socks5://127.0.0.1:8089'}
+        apihelper.proxy = botproxy['proxy']
 
 
     def num_out(in1,in2): #减法
@@ -239,21 +226,15 @@ try:
     def get_osuid(name):
         try:
 
-            proxies = {
-                    'http': 'socks5://127.0.0.1:8089',
-                    'https': 'socks5://127.0.0.1:8089'
-                }
 
             with open('bot.yaml', 'r') as f: #读取配置文件?
                 bottok = yaml.load(f.read(),Loader=yaml.FullLoader)
                 token = bottok['osuToken']
+            proxies = bottok['proxy']
             
             url="https://osu.ppy.sh/api/get_user?k="+token+"&u="+str(name)
-            if bottok['proxy'] == True:
-                proxies = {
-                    'http': 'socks5://127.0.0.1:8089',
-                    'https': 'socks5://127.0.0.1:8089'
-                }
+            if bottok['proxybool'] == True:
+                proxies = bottok['proxy'] 
                 res = requests.get(url, proxies=proxies)
             else:
                 res = requests.get(url)
@@ -273,16 +254,9 @@ try:
 
         url='https://www.random.org/integers/?num=1&min=0&max=100&col=1&base=10&format=plain&rnd=new'
 
-        proxies = {
-                'http': 'socks5://127.0.0.1:8089',
-                'https': 'socks5://127.0.0.1:8089'
-            }
+        proxies = bottok['proxy']
 
-        if bottok['proxy'] == True:
-            proxies = {
-                'http': 'socks5://127.0.0.1:8089',
-                'https': 'socks5://127.0.0.1:8089'
-            }
+        if bottok['proxybool'] == True:
             res = requests.get(url, proxies=proxies)
         else:
             res = requests.get(url)
@@ -299,11 +273,8 @@ try:
                 token = bottok['osuToken']
 
             url="https://osu.ppy.sh/api/get_user?k="+token+"&u="+str(id)
-            if bottok['proxy'] == True:
-                proxies = {
-                    'http': 'socks5://127.0.0.1:8089',
-                    'https': 'socks5://127.0.0.1:8089'
-                }
+            if bottok['proxybool'] == True:
+                proxies = bottok['proxy']
                 res = requests.get(url, proxies=proxies)
             else:
                 res = requests.get(url)
@@ -343,11 +314,8 @@ try:
             #------------------------
 
             down_url = "https://osu-stats-signature.vercel.app/card?user="+ str(ok_userjson['user_id']) +"&mode="+str(mode)+"&blur=6&w=1920&h=1117" #下载地址合成
-            if bottok['proxy'] == True:
-                proxies = {
-                    'http': 'socks5://127.0.0.1:8089',
-                    'https': 'socks5://127.0.0.1:8089'
-                }
+            if bottok['proxybool'] == True:
+                proxies = bottok['proxy']
                 down_res = requests.get(url=down_url,proxies=proxies)
             else:
                 down_res = requests.get(url=down_url)
@@ -437,11 +405,8 @@ try:
             ok_userjson = eval(json.dumps(uesr_text[0]))
             #print(ok_userjson)    
             down_url = "https://a.ppy.sh/"+ str(ok_userjson['user_id']) +"?img.jpeg" #下载地址合成
-            if bottok['proxy'] == True:
-                proxies = {
-                    'http': 'socks5://127.0.0.1:8089',
-                    'https': 'socks5://127.0.0.1:8089'
-                }
+            if bottok['proxybool'] == True:
+                proxies = bottok['proxy']
                 down_res = requests.get(url=down_url,proxies=proxies)
             else:
                 down_res = requests.get(url=down_url)
