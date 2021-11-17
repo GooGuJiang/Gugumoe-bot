@@ -20,10 +20,35 @@ import glob
 import re
 import hashlib
 import eyed3
-import cairosvg
+#import cairosvg
 
 
 try:
+    def nbnhhsh(text):
+        url = 'https://lab.magiconch.com/api/nbnhhsh/guess'
+        headers = {
+            'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_4) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.163 Safari/537.36',
+            }
+
+        data = {
+            "text": text
+        }
+
+        response = requests.post(url=url, headers=headers, data=data)
+        json_text = response.text
+        ok_json = eval(json.dumps(json.loads(json_text)))
+        try:
+            sc = ok_json[0]["trans"]
+            gu_text = '缩写释义文本:'+ok_json[0]["name"]+'\n\n你查询的可能是:\n'
+            for i in range(0, len(sc)):
+                if len(sc) != i:
+                    gu_text += str(i+1)+'.『'+ok_json[0]["trans"][i]+'』\n'
+                else:
+                    gu_text += str(i+1)+'.『'+ok_json[0]["trans"][i]+'』'
+            return gu_text
+        except:
+            return "无查询结果"
+
     def dl_sdmusic_info(url_dl):
         try:
             with open('bot.yaml', 'r') as f: #读取配置文件?
@@ -1040,13 +1065,9 @@ try:
                     bot.send_chat_action(message.chat.id, 'typing')
                     chatjson_img = bot.reply_to(message,"正在查询生成图片请稍后....")
                     out = new_gosu(howpingip(message.text))
-
                     chatjson_img = bot.edit_message_text("正在上传图片请稍后....",chatjson_img.chat.id, chatjson_img.message_id)
-
                     bot.send_chat_action(message.chat.id, 'upload_photo')
-
                     phpget = open('./tmp/osu/'+str(out)+'.png','rb')
-
                     bot.send_photo(message.chat.id, phpget)
                     bot.send_chat_action(message.chat.id, 'typing')
                     bot.edit_message_text('图片上传完成!', chatjson_img.chat.id, chatjson_img.message_id)
@@ -1086,8 +1107,6 @@ try:
                     bot.delete_message(chatjson_img.chat.id, chatjson_img.message_id)
                     audio.close()
                     os.remove("./dl-tmp/"+dl_muss+".mp3")
-                else:
-                    bot.reply_to(message,"抱歉此链接不是SoundCloud链接")
             except Exception as boterr:
                 #print(boterr)
                 bot.send_chat_action(message.chat.id, 'typing')
@@ -1095,6 +1114,23 @@ try:
                 time.sleep(3)
                 bot.delete_message(chatjson_img.chat.id, chatjson_img.message_id)
 
+    @bot.message_handler(commands=['guhhsh'])
+    def send_nbnhhsh(message):
+        try:
+            text_rl = howpingip(message.text)
+            if text_rl != False:
+                bot.send_chat_action(message.chat.id, 'typing')
+                hhsh_text_go = bot.reply_to(message,'正在查询请稍后...')
+                text = nbnhhsh(text_rl)
+                bot.edit_message_text(text,hhsh_text_go.chat.id, hhsh_text_go.message_id)
+                #bot.reply_to(message,zhihu_text)
+            else:
+                bot.send_chat_action(message.chat.id, 'typing')
+                bot.reply_to(message,"你的指令出错了惹!\n(缺少参数/guhhsh [查询拼音首字母缩写释义的文本])")
+                
+
+        except:
+            bot.edit_message_text('呜呜呜....运行错误',hhsh_text_go.chat.id, hhsh_text_go.message_id)
 
     if __name__ == '__main__':
         bot.polling()
