@@ -40,15 +40,15 @@ def oneload():
         print("文件夹创建完毕")
         print("开始下载表情包")
         r =  requests.get("https://cdn.jsdelivr.net/gh/GooguJiang/gu_img/img.zip")
-        with open("./dl-tmp/img.zip",'wb') as code: # 将压缩包内容写入到 
+        with open("./dl-tmp/img.zip",'wb') as code:
             code.write(r.content)
         print('表情包下载完成')
         print("开始解压文件")
         zip_file = zipfile.ZipFile("./dl-tmp/img.zip")
-        zip_list = zip_file.namelist() # 压缩文件清单，可以直接看到压缩包内的各个文件的明细
-        for f in zip_list: # 遍历这些文件，逐个解压出来，
+        zip_list = zip_file.namelist() 
+        for f in zip_list: 
             zip_file.extract(f,"./")
-        zip_file.close() # 不能少！
+        zip_file.close() 
         print("文件解压完毕")
         print("删除缓存")
         os.remove("./dl-tmp/img.zip")
