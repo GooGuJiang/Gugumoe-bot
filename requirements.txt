@@ -1,7 +1,7 @@
 pyyaml
 numpy
 opencv-python==4.2.0.32
-numpy
+pillow==7.0.0
 requests
 ping3
 pyTelegramBotAPI
