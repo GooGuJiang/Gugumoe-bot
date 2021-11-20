@@ -10,3 +10,4 @@ lxml
 eyed3
 bs4
 httpx
+loguru
