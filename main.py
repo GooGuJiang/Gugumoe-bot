@@ -29,14 +29,13 @@ def oneload():
             f.write(bytes("botToken: \nosuToken: \nproxybool: False\nproxy: {'http': 'socks5://127.0.0.1:8089','https': 'socks5://127.0.0.1:8089'}",'utf-8'))
             f.close()
         print("开始创建文件夹")
-        os.mkdir("./dl-tmp")
-        os.mkdir("./img")
-        os.mkdir("./osu")
-        os.mkdir("./tmp")
-        os.mkdir("./tmp/osu")
-        os.mkdir("./user")
-        os.mkdir("./user/jrrp")
-        os.mkdir("./user/ycxt")
+        dir_list = ["./dl-tmp","./img","./osu","./tmp","./tmp/osu","./user","./user/jrrp","./user/ycxt"]
+        for i in range(0,len(dir_list)):
+            if os.path.exists(dir_list[i]) == False:
+                print("正在创建"+str(dir_list[i]))
+                os.mkdir(dir_list[i])
+            else:
+                print("已存在"+str(dir[i]))
         print("文件夹创建完毕")
         print("开始下载表情包")
         r =  requests.get("https://cdn.jsdelivr.net/gh/GooguJiang/gu_img/img.zip")
@@ -470,29 +469,6 @@ try:
             return False
         
 
-    def weibo_hot():
-        news = []
-        # 新建数组存放热搜榜
-        hot_url = 'https://s.weibo.com/top/summary/'
-        # 热搜榜链接
-        r = requests.get(hot_url)
-        # 向链接发送get请求获得页面
-        soup = BeautifulSoup(r.text, 'lxml')
-        # 解析页面
-
-        urls_titles = soup.select('#pl_top_realtimehot > table > tbody > tr > td.td-02 > a')
-        hotness = soup.select('#pl_top_realtimehot > table > tbody > tr > td.td-02 > span')
-
-        for i in range(10):
-            hot_news = ''
-            # 将信息保存到字典中
-            hot_news = str(i+1) + '.' + urls_titles[i+1].get_text() + '|热度：'+hotness[i].get_text()
-
-            news.append(hot_news) 
-            # 字典追加到数组中 
-        return news[0]+'\n'+news[1]+'\n'+news[2]+'\n'+news[3]+'\n'+news[4]+'\n'+news[5]+'\n'+news[6]+'\n'+news[7]+'\n'+news[8]+'\n'+news[9]
-
-
     def get_phi():
         return random.randint(0,4)
 
@@ -681,11 +657,6 @@ try:
         except Exception as xxxx:
             bot.reply_to(message,xxxx)
 
-    @bot.message_handler(commands=['guweibo'])
-    def send_weibo(message):
-        bot.send_chat_action(message.chat.id, 'typing')
-        bot.reply_to(message,'微博热搜:\n'+weibo_hot())
-
 
     @bot.message_handler(commands=['guping'])
     def send_jtimg(message):
@@ -729,28 +700,6 @@ try:
         except:
             bot.edit_message_text('呜呜呜....运行错误',zhihu_text_go.chat.id, zhihu_text_go.message_id)
 
-    @bot.message_handler(commands=['gubili'])
-    def send_bilibili(message):
-        try:
-            bot.send_chat_action(message.chat.id, 'typing')
-            bili_json_input = requests.get("https://hibiapi.aliserver.net/api/bilibili/v3/video_ranking")
-            if bili_json_input.status_code == 200:
-                try:
-                    bili_text_go = bot.reply_to(message,'正在获取请稍后...')
-                    bili_json_list = json.loads(bili_json_input.content)['rank']['list']
-                    #print(bili_json_list)
-                except:
-                    pass
-            #bili_json_out = eval(json.dumps(json.loads(bili_json_input.text)))
-            #print(bili_json_out)
-            #bili_json_list = bili_json_out['rank']['list']
-            bili_text = 'BiliBili热门视频排行榜Top10:\n'
-            for i in range(0, 10):
-                bili_text += str(i+1)+'.『'+str(bili_json_list[i]['title'])+'』 | UP主:'+ str(bili_json_list[i]['author'])+'\n'
-            bot.edit_message_text(bili_text,bili_text_go.chat.id, bili_text_go.message_id)
-            #bot.reply_to(message,bili_text)
-        except Exception as eeer:
-            bot.edit_message_text('呜呜呜....运行错误',bili_text_go.chat.id, bili_text_go.message_id)
 
     
     @bot.message_handler(commands=['gudlsds'])
@@ -801,6 +750,14 @@ try:
 
         except:
             bot.edit_message_text('呜呜呜....运行错误',hhsh_text_go.chat.id, hhsh_text_go.message_id)
+
+    @bot.message_handler(commands=['guosu','guosutaiko','guosucatch','guosumania','guosubind','guosudel'])
+    def send_err(message):
+        bot.reply_to(message,'因为 cairosvg 库出问题本功能暂时或永久下线')
+
+    @bot.message_handler(commands=['gubili','guweibo'])
+    def send_err(message):
+        bot.reply_to(message,'因为 API 问题本功能暂时或永久下线')
 
     if __name__ == '__main__':
         bot.polling()
