@@ -1,4 +1,6 @@
 # -*- coding:utf-8 -*-
+from gacha import gacha_info , FILE_PATH , Gacha , POOL ,DEFAULT_POOL
+from gachacz import gacha_info_cz , Gacha_cz
 from telebot import apihelper
 from bs4 import BeautifulSoup
 from lxml import etree
@@ -41,7 +43,7 @@ def oneload():
         r =  requests.get("https://cdn.jsdelivr.net/gh/GooguJiang/gu_img/img.zip")
         with open("./dl-tmp/img.zip",'wb') as code:
             code.write(r.content)
-        print('表情包下载完成')
+        print('表情包/原神图包下载完成下载完成')
         print("开始解压文件")
         zip_file = zipfile.ZipFile("./dl-tmp/img.zip")
         zip_list = zip_file.namelist() 
@@ -759,6 +761,43 @@ try:
     def send_err(message):
         bot.reply_to(message,'因为 API 问题本功能暂时或永久下线')
 
+    @bot.message_handler(commands=['gugetup10'])
+    def send_ck(message):
+        G = Gacha()
+        json_out_ten = G.gacha_10(tggid=message.from_user.id)
+        outtt = json.loads(json.dumps(json_out_ten))
+        bot.send_chat_action(message.chat.id, 'typing')
+        text = bot.reply_to(message,outtt["msg"])
+        sti = open(outtt["fil"], 'rb')
+        bot.send_chat_action(message.chat.id, 'upload_photo')
+        bot.send_photo(message.chat.id,sti.read(),reply_to_message_id=text.message_id)
+        sti.close()
+        os.remove(outtt["fil"])
+        
+    @bot.message_handler(commands=['gugetcz10'])
+    def send_ck(message):
+        G = Gacha_cz()
+        json_out_ten = G.gacha_10(tggid=message.from_user.id)
+        outtt = json.loads(json.dumps(json_out_ten))
+        bot.send_chat_action(message.chat.id, 'typing')
+        text = bot.reply_to(message,outtt["msg"])
+        sti = open(outtt["fil"], 'rb')
+        bot.send_chat_action(message.chat.id, 'upload_photo')
+        bot.send_photo(message.chat.id,sti.read(),reply_to_message_id=text.message_id)
+        sti.close()
+        os.remove(outtt["fil"])
+
+    @bot.message_handler(commands=['gugetup'])
+    def send_ck(message):
+        G = Gacha()
+        text = bot.reply_to(message,gacha_info())
+
+    @bot.message_handler(commands=['gugetcz'])
+    def send_ck(message):
+        G = Gacha()
+        text = bot.reply_to(message,gacha_info_cz())
+
+
     if __name__ == '__main__':
         bot.polling()
 
@@ -766,4 +805,3 @@ except Exception as boterr:
     while True:
         print("程序出错正在重启"+str(boterr))
         bot.polling()
-        time.sleep(10)
