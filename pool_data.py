@@ -34,26 +34,28 @@ FONT_PATH = os.path.join(os.path.dirname(FILE_PATH),'artifact_collect',"zh-cn.tt
 
 if os.path.exists("./font/hyl.ttf") == False:
     os.mkdir("./font")
-    print("正在下载字体")
-    foonn =  requests.get("https://cdn.jsdelivr.net/gh/GooguJiang/gu_img/hyl.ttf")
+    logger.info(f"正在下载字体")
+    foonn =  requests.get("https://gmoe.cc/bot/hyl.ttf")
     with open("./font/hyl.ttf",'wb') as code:
             code.write(foonn.content)
     code.close()
-    print("正在下载原神图标库")
-    iccc =  requests.get("https://cdn.jsdelivr.net/gh/GooguJiang/gu_img/icon.zip")
+    logger.info(f"正在下载原神图标")
+    iccc =  requests.get("https://gmoe.cc/bot/icon.zip")
     os.mkdir('./icon')
     with open("./icon.zip",'wb') as code:
             code.write(iccc.content)
     code.close()
-    print("开始解压文件")
+    logger.info(f"开始解压文件")
     zip_file = zipfile.ZipFile("./icon.zip")
     zip_list = zip_file.namelist() 
     for f in zip_list: 
+        logger.info(f"解压 {f}")
         zip_file.extract(f,"./")
     zip_file.close() 
-    print("文件解压完毕")
-    print("删除缓存")
+    logger.info(f"文件解压完毕")
+    logger.info(f"清除缓存")
     os.remove("./icon.zip")
+    
 FONT=ImageFont.truetype("./font/hyl.ttf", size=20)
 
 
