@@ -53,7 +53,7 @@ if os.path.exists("./config.yml") == False: # 初始化Bot
     logger.info(f"清除缓存")
     os.remove("./tmp/img.zip")
     logger.info(f"初始化原神系统")
-    import pool_data
+    import gacha.pool_data
     logger.info(f"初始化完毕请填写配置文件然后重新运行本程序!")
     sys.exit()
 else:
@@ -73,7 +73,49 @@ else:
             apihelper.proxy = bot_config['proxy']
         logger.info(f"配置文件加载完毕!")
         from gacha import gacha_info , FILE_PATH , Gacha , POOL ,DEFAULT_POOL
-        from gachacz import gacha_info_cz , Gacha_cz
+        from almanac import get_almanac_base64_str
+        #from query_resource_points.query_resource_points import get_resource_map_mes
+
+def nbnhhsh(text):
+    url = 'https://lab.magiconch.com/api/nbnhhsh/guess'
+    headers = {
+        'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_4) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.163 Safari/537.36',
+        }
+
+    data = {
+        "text": text
+    }
+
+    response = requests.post(url=url, headers=headers, data=data)
+    json_text = response.text
+    ok_json = eval(json.dumps(json.loads(json_text)))
+    try:
+        sc = ok_json[0]["trans"]
+        gu_text = '缩写释义文本:'+ok_json[0]["name"]+'\n\n你查询的可能是:\n'
+        for i in range(0, len(sc)):
+            if len(sc) != i:
+                gu_text += str(i+1)+'.『'+ok_json[0]["trans"][i]+'』\n'
+            else:
+                gu_text += str(i+1)+'.『'+ok_json[0]["trans"][i]+'』'
+        return gu_text
+    except:
+        return "无查询结果"
+
+def howpingip(textlt): #指令提取
+    try:
+        textcomm = textlt
+        if ' ' in textlt:
+            char_1=' '
+            commkgkg=textcomm.find(char_1)
+            outip = textcomm[commkgkg+1:len(textcomm)]
+            if outip == None:
+                return False
+            else:
+                return outip
+        else:
+            return False
+    except:
+        return False
 
 def get_random():
     url='https://www.random.org/integers/?num=1&min=0&max=100&col=1&base=10&format=plain&rnd=new'
@@ -104,6 +146,18 @@ def fill_json(id): #让我康康你的数据文件在不在?
             return True
         else:
             return False
+
+@bot.message_handler(commands=['gu'])
+def send_gu(message):
+    try:
+        path_file_name=glob.glob(pathname='./img/*.webp') #获取当前文件夹下个数
+        sti = open(path_file_name[random.randint(0,len(path_file_name)-1)], 'rb')
+        bot.send_chat_action(message.chat.id, 'upload_photo')
+        bot.send_sticker(message.chat.id, sti,reply_to_message_id=message.message_id)
+        sti.close()
+    except Exception as errr:
+        bot.send_chat_action(message.chat.id, 'typing')
+        bot.reply_to(message, '呜呜呜....图片没上传及时.......')
 
 @bot.message_handler(commands=['jrrp'])
 def send_jrrp(message):
@@ -157,29 +211,49 @@ def send_ck(message):
     sti.close()
     os.remove(outtt["fil"])
     
-@bot.message_handler(commands=['gugetcz10'])
-def send_ck(message):
-    G = Gacha_cz()
-    json_out_ten = G.gacha_10(tggid=message.from_user.id)
-    outtt = json.loads(json.dumps(json_out_ten))
-    bot.send_chat_action(message.chat.id, 'typing')
-    text = bot.reply_to(message,outtt["msg"])
-    sti = open(outtt["fil"], 'rb')
-    bot.send_chat_action(message.chat.id, 'upload_photo')
-    bot.send_photo(message.chat.id,sti.read(),reply_to_message_id=text.message_id)
-    sti.close()
-    os.remove(outtt["fil"])
-
 @bot.message_handler(commands=['gugetup'])
 def send_ck(message):
     G = Gacha()
     text = bot.reply_to(message,gacha_info())
 
-@bot.message_handler(commands=['gugetcz'])
-def send_ck(message):
-    G = Gacha()
-    text = bot.reply_to(message,gacha_info_cz())
+@bot.message_handler(commands=['gunow'])
+def send_lhl(message):
+    bot.send_chat_action(message.chat.id, 'typing')
+    text = bot.reply_to(message,"正在生成原神黄历....")
+    fil = open(get_almanac_base64_str(message.from_user.id),'rb')
+    bot.edit_message_text('生成成功', text.chat.id, text.message_id)
+    bot.send_sticker(message.chat.id, fil,reply_to_message_id=text.message_id)
+    fil.close()
+    os.remove("./tmp/hl"+str(message.from_user.id)+".png")
+    #text = bot.reply_to(message,)
 
+@bot.message_handler(commands=['guhhsh'])
+def send_nbnhhsh(message):
+    try:
+        text_rl = howpingip(message.text)
+        if text_rl != False:
+            bot.send_chat_action(message.chat.id, 'typing')
+            hhsh_text_go = bot.reply_to(message,'正在查询请稍后...')
+            text = nbnhhsh(text_rl)
+            bot.edit_message_text(text,hhsh_text_go.chat.id, hhsh_text_go.message_id)
+            #bot.reply_to(message,zhihu_text)
+        else:
+            bot.send_chat_action(message.chat.id, 'typing')
+            bot.reply_to(message,"你的指令出错了惹!\n(缺少参数/guhhsh [查询拼音首字母缩写释义的文本])")
+    except:
+        pass
+
+#@bot.message_handler(commands=['guyshow'])
+#def send_whathow(message):
+#    text_rl = howpingip(message.text)
+#    if text_rl != False:
+#        bot.send_chat_action(message.chat.id, 'typing')
+#        hhsh_text_go = bot.reply_to(message,'正在查询请稍后...')
+#        text = get_resource_map_mes(text_rl)
+#        bot.edit_message_text(text,hhsh_text_go.chat.id, hhsh_text_go.message_id)
+#    else:
+#        bot.send_chat_action(message.chat.id, 'typing')
+#        bot.reply_to(message,"你的指令出错了惹!\n(缺少参数/guyshow [资源位置])")
 
 if __name__ == '__main__':
     while True:
