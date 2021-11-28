@@ -52,8 +52,6 @@ if os.path.exists("./config.yml") == False: # 初始化Bot
     logger.info(f"文件解压完毕")
     logger.info(f"清除缓存")
     os.remove("./tmp/img.zip")
-    logger.info(f"初始化原神系统")
-    import gacha.pool_data
     logger.info(f"初始化完毕请填写配置文件然后重新运行本程序!")
     sys.exit()
 else:
@@ -72,9 +70,6 @@ else:
             from telebot import apihelper
             apihelper.proxy = bot_config['proxy']
         logger.info(f"配置文件加载完毕!")
-        from gacha import gacha_info , FILE_PATH , Gacha , POOL ,DEFAULT_POOL
-        from almanac import get_almanac_base64_str
-        #from query_resource_points.query_resource_points import get_resource_map_mes
 
 def nbnhhsh(text):
     url = 'https://lab.magiconch.com/api/nbnhhsh/guess'
@@ -198,34 +193,6 @@ def send_jrrp(message):
         bot.reply_to(message, '呜呜呜....今日人品出错了,请重新发送 /jrrp \n错误日志: '+str(errr))
 
 
-@bot.message_handler(commands=['gugetup10'])
-def send_ck(message):
-    G = Gacha()
-    json_out_ten = G.gacha_10(tggid=message.from_user.id)
-    outtt = json.loads(json.dumps(json_out_ten))
-    bot.send_chat_action(message.chat.id, 'typing')
-    text = bot.reply_to(message,outtt["msg"])
-    sti = open(outtt["fil"], 'rb')
-    bot.send_chat_action(message.chat.id, 'upload_photo')
-    bot.send_photo(message.chat.id,sti.read(),reply_to_message_id=text.message_id)
-    sti.close()
-    os.remove(outtt["fil"])
-    
-@bot.message_handler(commands=['gugetup'])
-def send_ck(message):
-    G = Gacha()
-    text = bot.reply_to(message,gacha_info())
-
-@bot.message_handler(commands=['gunow'])
-def send_lhl(message):
-    bot.send_chat_action(message.chat.id, 'typing')
-    text = bot.reply_to(message,"正在生成原神黄历....")
-    fil = open(get_almanac_base64_str(message.from_user.id),'rb')
-    bot.edit_message_text('生成成功', text.chat.id, text.message_id)
-    bot.send_sticker(message.chat.id, fil,reply_to_message_id=text.message_id)
-    fil.close()
-    os.remove("./tmp/hl"+str(message.from_user.id)+".png")
-    #text = bot.reply_to(message,)
 
 @bot.message_handler(commands=['guhhsh'])
 def send_nbnhhsh(message):
