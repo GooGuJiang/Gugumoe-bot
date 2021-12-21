@@ -28,7 +28,7 @@ if os.path.exists("./config.yml") == False: # 初始化Bot
         f.write(bytes("botToken: \nosuToken: \nproxybool: False\nproxy: {'http': 'socks5://127.0.0.1:8089','https': 'socks5://127.0.0.1:8089'}",'utf-8'))
         f.close()
     logger.info(f"创建文件夹")
-    dir_list = ["./img","./tmp","./user","./user/jrrp"]
+    dir_list = ["./img","./tmp","./user","./user/jrrp","./user/shoutmp"]
     for i in range(0,len(dir_list)):
         if os.path.exists(dir_list[i]) == False:
             logger.info(f"正在创建 "+str(dir_list[i]))
@@ -122,25 +122,135 @@ def get_random():
     return res.text
 
 def jrrp_text(nub_in):
-        nub = int(nub_in)
-        if nub >= 90:
-            return "人品好评！"
-        elif nub >= 70:
-            return "www,人品还挺好的("
-        elif nub >= 60:
-            return "人品还过得去..."
-        elif nub >= 40:
-            return "还好还好只有" + str(nub)
-        elif nub >= 20:
-            return "这数字太....要命了"
-        elif nub >= 1:
-            return "啊这人品"
+    nub = int(nub_in)
+    if nub >= 90:
+        return "人品好评！"
+    elif nub >= 70:
+        return "www,人品还挺好的("
+    elif nub >= 60:
+        return "人品还过得去..."
+    elif nub >= 40:
+        return "还好还好只有" + str(nub)
+    elif nub >= 20:
+        return "这数字太....要命了"
+    elif nub >= 1:
+        return "啊这人品"
 
 def fill_json(id): #让我康康你的数据文件在不在?
-        if os.path.isfile('./user/jrrp/'+str(id)+'.json') == True:
-            return True
+    if os.path.isfile('./user/jrrp/'+str(id)+'.json') == True:
+        return True
+    else:
+        return False
+
+def getStrAsMD5(parmStr):
+    if isinstance(parmStr,str):
+        parmStr = parmStr.encode("utf-8")
+    m = hashlib.md5()
+    m.update(parmStr)
+    return m.hexdigest()
+
+def dl_sdmusic_info(url_dl):
+    try:
+        # post参数合成区
+        url = 'https://soundcloudmp3.cc/ajax.php'
+
+        headers = {
+            'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_4) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.163 Safari/537.36',
+        }
+
+
+        data =  {"action": "video_preview","vidURL": url_dl,"tType":"trim" }
+        # post访问
+        if bot_config['proxybool'] == True:
+            response = requests.post(url=url, headers=headers, data=data,proxies=bot_config['proxy'])
         else:
-            return False
+            response = requests.post(url=url, headers=headers, data=data)
+        page_text = json.loads(str(response.text))
+        return page_text["vidTitle"]
+    except Exception as ooo:
+        print(ooo)
+        return False
+
+
+def dl_sdmusic(url_dl):
+    try:
+        # post参数合成区
+        url = 'https://soundcloudmp3.cc/ajax.php'
+
+        headers = {
+            'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_4) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.163 Safari/537.36',
+        }
+
+
+        data =  {"action": "video_preview","vidURL": url_dl,"tType":"trim" }
+
+
+        # post访问
+        if bot_config['proxybool'] == True:
+            response = requests.post(url=url, headers=headers, data=data,proxies=bot_config['proxy'])
+        else:
+            response = requests.post(url=url, headers=headers, data=data)
+        page_text = json.loads(str(response.text))
+        down_url = "https://soundcloudmp3.cc/"+page_text["vidSrc"][1:]
+        if bot_config['proxybool'] == True:
+            res = requests.get(down_url,proxies=bot_config['proxy'])
+        else:
+            res = requests.get(down_url)
+        
+        try:
+            with open("./tmp/"+page_text["vidTitle"]+'.mp3', 'wb') as f:
+                f.write(res.content)
+        except:
+            with open("./tmp/"+getStrAsMD5(page_text["vidTitle"])+'.mp3', 'wb') as f:
+                f.write(res.content)
+        #下载专辑图片
+        dl_img = repr(page_text["vidImage"])
+        dl_img = dl_img[1:len(dl_img)-1]
+        if bot_config['proxybool'] == True:
+            res = requests.get(dl_img,proxies=bot_config['proxy'])
+        else:
+            res = requests.get(dl_img)
+        
+        try:
+            with open("./tmp/"+page_text["vidTitle"]+'.jpg', 'wb') as f:
+                f.write(res.content)
+        except:
+            with open("./tmp/"+getStrAsMD5(page_text["vidTitle"])+'.jpg', 'wb') as f:
+                f.write(res.content)
+
+        #写入信息
+        try:
+            audiofile = eyed3.load("./tmp/"+page_text["vidTitle"]+'.mp3')  # 读取mp3文件
+            audiofile.initTag()  # 初始化所有标签信息，将之前所有的标签清除
+            audiofile.tag.images.set(3, open("./tmp/"+page_text["vidTitle"]+'.jpg','rb').read(), 'image/jpeg') #添加封面
+            audiofile.tag.album = u"SoundCloud"  # 唱片集
+            audiofile.tag.title = page_text["vidTitle"]  # 标题
+            audiofile.tag.save() # 保存文件
+            os.remove("./dl-tmp/"+page_text["vidTitle"]+'.jpg')
+            fill = page_text["vidTitle"]
+        except:
+            audiofile = eyed3.load("./tmp/"+getStrAsMD5(page_text["vidTitle"])+'.mp3')
+            audiofile.initTag()  # 初始化所有标签信息，将之前所有的标签清除
+            audiofile.tag.images.set(3, open("./tmp/"+getStrAsMD5(page_text["vidTitle"])+'.jpg','rb').read(), 'image/jpeg') #添加封面
+            audiofile.tag.album = u"SoundCloud"  # 唱片集
+            audiofile.tag.title = page_text["vidTitle"]  # 标题
+            audiofile.tag.save() # 保存文件
+            os.remove("./dl-tmp/"+getStrAsMD5(page_text["vidTitle"])+'.jpg')
+            fill = "./dl-tmp/"+getStrAsMD5(page_text["vidTitle"])
+        
+        return fill
+    except Exception as ooo:
+        print(ooo)
+        return False
+
+def is_sd_url(url):
+    if re.match(r'^https*://(www.)*soundcloud\.com/', url) == None:
+        return False
+    else:
+        return True
+
+#--------------------------------------------------------------
+
 
 @bot.message_handler(commands=['gu'])
 def send_gu(message):
@@ -210,17 +320,52 @@ def send_nbnhhsh(message):
     except:
         pass
 
-#@bot.message_handler(commands=['guyshow'])
-#def send_whathow(message):
-#    text_rl = howpingip(message.text)
-#    if text_rl != False:
-#        bot.send_chat_action(message.chat.id, 'typing')
-#        hhsh_text_go = bot.reply_to(message,'正在查询请稍后...')
-#        text = get_resource_map_mes(text_rl)
-#        bot.edit_message_text(text,hhsh_text_go.chat.id, hhsh_text_go.message_id)
-#    else:
-#        bot.send_chat_action(message.chat.id, 'typing')
-#        bot.reply_to(message,"你的指令出错了惹!\n(缺少参数/guyshow [资源位置])")
+@bot.message_handler(commands=['gudlsds'])
+def gudlsoundcloud(message):
+    if howpingip(message.text) == False:
+        bot.send_chat_action(message.chat.id, 'typing')
+        bot.reply_to(message,"呜呜呜...指令有问题\n(指令格式 /gudlsds [SoundCloud音乐链接] 暂不支持列表下载)")
+    else:
+        try:
+            text_rl = howpingip(message.text)
+            if is_sd_url(text_rl) == True:
+                bot.send_chat_action(message.chat.id, 'typing')
+                chatjson_img = bot.reply_to(message,"正在从SoundCloud获取音乐信息请稍后....")
+                info_music = dl_sdmusic_info(text_rl)
+                chatjson_img = bot.edit_message_text("正在下载『"+info_music+"』请稍后....",chatjson_img.chat.id, chatjson_img.message_id)
+                dl_muss = dl_sdmusic(text_rl)
+                chatjson_img = bot.edit_message_text("正在上传『"+info_music+"』请稍后....",chatjson_img.chat.id, chatjson_img.message_id)
+                bot.send_chat_action(message.chat.id, 'upload_audio')
+                audio = open("./tmp/"+dl_muss+".mp3", 'rb')
+                bot.send_audio(message.chat.id, audio)
+                bot.send_chat_action(message.chat.id, 'typing')
+                bot.edit_message_text("『"+info_music+'』上传完成!', chatjson_img.chat.id, chatjson_img.message_id)
+                time.sleep(3)
+                bot.delete_message(chatjson_img.chat.id, chatjson_img.message_id)
+                audio.close()
+                os.remove("./tmp/"+dl_muss+".mp3")
+        except Exception as boterr:
+            #print(boterr)
+            bot.send_chat_action(message.chat.id, 'typing')
+            bot.edit_message_text('呜呜呜...咕小酱遇到了严重问题......\n错误日志: '+str(boterr),chatjson_img.chat.id, chatjson_img.message_id)
+            time.sleep(3)
+            bot.delete_message(chatjson_img.chat.id, chatjson_img.message_id)
+
+@bot.message_handler(commands=['httpcat'])
+def gudlsoundcloud(message):
+    if howpingip(message.text) == False:
+        bot.send_chat_action(message.chat.id, 'typing')
+        bot.reply_to(message,"呜呜呜...指令有问题\n(指令格式 /httpcat [Http代码])")
+    else:
+        try:
+            text_rl = howpingip(message.text)
+            bot.send_photo(message.chat.id, "https://http.cat/"+str(text_rl),reply_to_message_id=message.message_id)
+        except Exception as boterr:
+            #print(boterr)
+            bot.send_chat_action(message.chat.id, 'typing')
+            bot.edit_message_text('呜呜呜...咕小酱遇到了严重问题......\n错误日志: '+str(boterr),chatjson_img.chat.id, chatjson_img.message_id)
+            time.sleep(3)
+            bot.delete_message(chatjson_img.chat.id, chatjson_img.message_id)
 
 if __name__ == '__main__':
     while True:
