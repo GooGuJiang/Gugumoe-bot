@@ -416,8 +416,17 @@ def gudlsoundcloud(message):
         photo = open("./tmp/big"+str(message.from_user.id)+".png", 'rb')
         bot.send_chat_action(message.chat.id, 'upload_photo')
         bot.send_photo(message.chat.id, photo,reply_to_message_id=message.message_id)
-        bot.edit_message_text("上传成功!", botjson.chat.id, botjson.message_id)
         photo.close()
+        file_obj=open("./tmp/big"+str(message.from_user.id)+".png",'rb')
+        file={'smfile':file_obj}	#参数名称必须为smfile
+        data_result=requests.post('https://sm.ms/api/v2/upload',data=None,files=file)
+        file_obj.close()
+        uplaod = data_result.json()
+        if uplaod['success'] == True:
+            bot.edit_message_text("上传成功!\n图片地址:"+uplaod['data']['url'], botjson.chat.id, botjson.message_id)
+        else:
+            bot.edit_message_text("上传成功!\n图片地址: 上传失败", botjson.chat.id, botjson.message_id)
+        
         os.remove("./tmp/big"+str(message.from_user.id)+".png")
         os.remove("./tmp/"+str(message.from_user.id)+".png")
     except Exception as oooo:
