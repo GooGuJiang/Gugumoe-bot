@@ -25,7 +25,7 @@ if os.path.exists("./config.yml") == False: # 初始化Bot
     logger.info(f"开始第一次初始化")
     logger.info(f"创建 config.yml 配置文件")
     with open("./config.yml", 'wb') as f:
-        f.write(bytes("botToken: \nosuToken: \nproxybool: False\nproxy: {'http': 'socks5://127.0.0.1:8089','https': 'socks5://127.0.0.1:8089'}",'utf-8'))
+        f.write(bytes("botToken: \nosuToken: \nproxybool: False\nproxy: {'http': 'socks5://127.0.0.1:8089','https': 'socks5://127.0.0.1:8089'}\napikey: ",'utf-8'))
         f.close()
     logger.info(f"创建文件夹")
     dir_list = ["./img","./tmp","./user","./user/jrrp","./user/shoutmp"]
@@ -63,6 +63,9 @@ else:
         sys.exit()
     elif bot_config["osuToken"] == None:
         logger.error(f"配置文件 osuToken 未填写")
+        sys.exit()
+    elif bot_config["apikey"] == None:
+        logger.error(f"配置文件 apikey 未填写")
         sys.exit()
     else:
         bot = telebot.TeleBot(bot_config["botToken"])
@@ -359,13 +362,70 @@ def gudlsoundcloud(message):
     else:
         try:
             text_rl = howpingip(message.text)
-            bot.send_photo(message.chat.id, "https://http.cat/"+str(text_rl),reply_to_message_id=message.message_id)
+            bot.send_chat_action(message.chat.id, 'upload_photo')
+            try:
+                chatjson_img = bot.send_photo(message.chat.id, "https://http.cat/"+str(text_rl),reply_to_message_id=message.message_id)
+            except:
+                chatjson_img = bot.send_photo(message.chat.id, "https://http.cat/404",reply_to_message_id=message.message_id)
         except Exception as boterr:
             #print(boterr)
             bot.send_chat_action(message.chat.id, 'typing')
-            bot.edit_message_text('呜呜呜...咕小酱遇到了严重问题......\n错误日志: '+str(boterr),chatjson_img.chat.id, chatjson_img.message_id)
+            #bot.edit_message_text('呜呜呜...咕小酱遇到了严重问题......\n错误日志: '+str(boterr),chatjson_img.chat.id, chatjson_img.message_id)
+            chatjson_img = bot.reply_to(message,'呜呜呜...咕小酱遇到了严重问题......\n错误日志: '+str(boterr))
             time.sleep(3)
             bot.delete_message(chatjson_img.chat.id, chatjson_img.message_id)
+
+@bot.message_handler(commands=['gubig'])
+def gudlsoundcloud(message):
+    try:
+        bot.send_chat_action(message.chat.id, 'typing')
+        jsonjx = json.loads(json.dumps(message.json))
+        #print(jsonjx['reply_to_message']['photo'][2]['file_id'])
+        try:
+            file_info = bot.get_file(jsonjx['reply_to_message']['photo'][2]['file_id'])
+        except:
+            bot.reply_to(message,"请回复一张图片,不然放大什么?")
+            return None
+        botjson = bot.reply_to(message,"正在获取图片请稍后....")
+        if bot_config['proxybool'] == True:
+            file = requests.get('https://api.telegram.org/file/bot{0}/{1}'.format(bot_config["botToken"], file_info.file_path),proxies=bot_config['proxy'])
+            botph =bot_config['proxy']
+        else:
+            file = requests.get('https://api.telegram.org/file/bot{0}/{1}'.format(bot_config["botToken"], file_info.file_path))
+            botph =None
+        poh = open("./tmp/"+str(message.from_user.id)+".png",'wb')
+        poh.write(file.content)
+        poh.close()
+        bot.edit_message_text("图片获取完成,上传服务器放大中...", botjson.chat.id, botjson.message_id)
+        
+        r = requests.post(
+            "https://api.deepai.org/api/waifu2x",
+            files={
+                'image': open("./tmp/"+str(message.from_user.id)+".png", 'rb'),
+            },
+            headers={'api-key': bot_config['apikey']},proxies=botph
+        )
+        outjson = r.json()
+        file = requests.get(outjson["output_url"],proxies=botph)
+        poh = open("./tmp/big"+str(message.from_user.id)+".png",'wb')
+        poh.write(file.content)
+        poh.close()
+        bot.edit_message_text("图片放大完成，正在上传...", botjson.chat.id, botjson.message_id)
+        #bot.send_photo(message,outjson["output_url"])
+        #bot.reply_to(message,outjson["output_url"])
+        photo = open("./tmp/big"+str(message.from_user.id)+".png", 'rb')
+        bot.send_chat_action(message.chat.id, 'upload_photo')
+        bot.send_photo(message.chat.id, photo,reply_to_message_id=message.message_id)
+        bot.edit_message_text("上传成功!", botjson.chat.id, botjson.message_id)
+        photo.close()
+        os.remove("./tmp/big"+str(message.from_user.id)+".png")
+        os.remove("./tmp/"+str(message.from_user.id)+".png")
+    except Exception as oooo:
+        bot.send_chat_action(message.chat.id, 'typing')
+        #bot.edit_message_text('呜呜呜...咕小酱遇到了严重问题......\n错误日志: '+str(boterr),chatjson_img.chat.id, chatjson_img.message_id)
+        chatjson_img = bot.reply_to(message,'呜呜呜...咕小酱遇到了严重问题......\n错误日志: '+str(oooo))
+        time.sleep(3)
+        bot.delete_message(chatjson_img.chat.id, chatjson_img.message_id)
 
 if __name__ == '__main__':
     while True:
