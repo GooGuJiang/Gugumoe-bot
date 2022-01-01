@@ -27,7 +27,7 @@
 | ------- | ------- |
 |今日人品|/jrrp|
 |咕|/gu|
-|Ping|/guhhsh [需要查询的缩写]|
+|能不能好好说话|/guhhsh [需要查询的缩写]|
 |下载SoundCloud音乐|/gudlsds [音乐地址]|
 |获取Http.Cat图片|/httpcat [http代码]|
 |图片放大[貌似没用]|/gubig [回复要放大的图片]|
