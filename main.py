@@ -19,13 +19,13 @@ import glob
 import re
 import hashlib
 import eyed3
-
+import urllib.parse
 
 if os.path.exists("./config.yml") == False: # 初始化Bot
     logger.info(f"开始第一次初始化")
     logger.info(f"创建 config.yml 配置文件")
     with open("./config.yml", 'wb') as f:
-        f.write(bytes("botToken: \nosuToken: \nproxybool: False\nproxy: {'http': 'socks5://127.0.0.1:8089','https': 'socks5://127.0.0.1:8089'}\napikey: ",'utf-8'))
+        f.write(bytes("botToken: \nosuToken: \nproxybool: False\nproxy: {'http': 'socks5://127.0.0.1:8089','https': 'socks5://127.0.0.1:8089'}\napikey: \nmusicapi: \nmusicphone: \nmusicpwd: ",'utf-8'))
         f.close()
     logger.info(f"创建文件夹")
     dir_list = ["./img","./tmp","./user","./user/jrrp","./user/shoutmp"]
@@ -67,12 +67,98 @@ else:
     elif bot_config["apikey"] == None:
         logger.error(f"配置文件 apikey 未填写")
         sys.exit()
+    elif bot_config["musicapi"] == None:
+        logger.error(f"配置文件 musicapi 未填写")
+        sys.exit()
+    elif bot_config["musicphone"] == None:
+        logger.error(f"配置文件 musicphone 未填写")
+        sys.exit()
+    elif bot_config["musicpwd"] == None:
+        logger.error(f"配置文件 musicpwd 未填写")
+        sys.exit()
     else:
         bot = telebot.TeleBot(bot_config["botToken"])
         if bot_config["proxybool"] == True:
             from telebot import apihelper
             apihelper.proxy = bot_config['proxy']
         logger.info(f"配置文件加载完毕!")
+
+def dl_netmusic_info(mid): #网易云音乐信息获取
+    try:
+        son_info_get = requests.get(str(bot_config["musicapi"])+"/song/detail?ids="+str(mid))
+        son_info_json= json.loads(json.dumps(json.loads(str(son_info_get.text))))
+        son_name = son_info_json["songs"][0]["name"]
+        #作者信息拼接
+        son_art_json =  son_info_json["songs"][0]["ar"]
+        son_art_text = ''
+        for i in range(0,len(son_art_json)):
+            if len(son_art_json) == 0:
+                son_art_text += son_info_json["songs"][0]["ar"][i]["name"]
+            else:
+                if i == len(son_art_json)-1:
+                    son_art_text += son_info_json["songs"][0]["ar"][i]["name"]
+                else:
+                    son_art_text += son_info_json["songs"][0]["ar"][i]["name"]+","
+        jsonout = {
+            "success":"ok",
+            "muname":son_name,
+            "art":str(son_art_text)
+            }
+        return jsonout
+    except Exception as ooow:
+        return {"success":"err","err":str(ooow)}
+
+def dl_netmusic(mid): #网易云音乐下载!
+    try:
+        denlu = requests.get(str(bot_config["musicapi"])+"/login/cellphone?phone=15587920053&password=Googujiang233Uu.")#获取登录信息
+        inp_cookjson = json.loads(json.dumps(json.loads(str(denlu.text))))
+        url=str(bot_config["musicapi"])+'/song/url?id='+str(mid)+'&cookie='+inp_cookjson["cookie"]
+        res= requests.get(url)
+        dljson = json.dumps(json.loads(str(res.text)))
+        outjson = json.loads(dljson)
+        if outjson["data"][0]["url"] == None: #检测音乐地址
+            return False
+        res = requests.get(outjson["data"][0]["url"])
+        with open("./tmp/"+str(outjson["data"][0]["id"])+'.'+str(outjson["data"][0]["type"]), 'wb') as f:
+            f.write(res.content)
+        time.sleep(0.5)
+        son_info_get = requests.get(str(bot_config["musicapi"])+"/song/detail?ids="+str(mid))
+        son_info_json= json.loads(json.dumps(json.loads(str(son_info_get.text))))
+        son_name = son_info_json["songs"][0]["name"]
+        #作者信息拼接
+        son_art_json =  son_info_json["songs"][0]["ar"]
+        son_art_text = ''
+        for i in range(0,len(son_art_json)):
+            if len(son_art_json) == 0:
+                son_art_text += son_info_json["songs"][0]["ar"][i]["name"]
+            else:
+                if i == len(son_art_json)-1:
+                    son_art_text += son_info_json["songs"][0]["ar"][i]["name"]
+                else:
+                    son_art_text += son_info_json["songs"][0]["ar"][i]["name"]+","
+        if str(outjson["data"][0]["type"]) == "mp3":
+            #下载专辑封面
+            dl_img = requests.get(son_info_json["songs"][0]["al"]["picUrl"])
+            with open("./tmp/"+str(mid)+'.jpg', 'wb') as f:
+                f.write(dl_img.content)
+            #音乐信息写入
+            audiofile = eyed3.load("./tmp/"+str(outjson["data"][0]["id"])+'.'+str(outjson["data"][0]["type"]))
+            #audiofile.initTag()
+            audiofile.tag.images.set(3, open("./tmp/"+str(mid)+'.jpg','rb').read(), 'image/jpeg') #添加封面
+            audiofile.tag.artist = str(son_art_text)
+            audiofile.tag.album = son_info_json["songs"][0]["al"]["name"]  # 唱片集
+            audiofile.tag.title = son_name  # 标题
+            audiofile.tag.save() # 保存文件
+            os.remove("./tmp/"+str(mid)+'.jpg')
+        jsonout = {
+            "success":"ok",
+            "muname":son_name,
+            "art":str(son_art_text),
+            "fil":"./tmp/"+str(outjson["data"][0]["id"])+'.'+str(outjson["data"][0]["type"])
+            }
+        return jsonout
+    except Exception as ooow:
+        return {"success":"err","err":str(ooow)}
 
 def nbnhhsh(text):
     url = 'https://lab.magiconch.com/api/nbnhhsh/guess'
@@ -252,6 +338,17 @@ def is_sd_url(url):
     else:
         return True
 
+def is_163pc_url(url):
+    if re.match(r'^https*://(music.)*163\.com/', url) == None:
+        return False
+    else:
+        return True
+
+def is_163ph_url(url):
+    if re.match(r'^https*://(y.music.)*163\.com/', url) == None:
+        return False
+    else:
+        return True
 #--------------------------------------------------------------
 
 
@@ -435,6 +532,63 @@ def gudlsoundcloud(message):
         chatjson_img = bot.reply_to(message,'呜呜呜...咕小酱遇到了严重问题......\n错误日志: '+str(oooo))
         time.sleep(3)
         bot.delete_message(chatjson_img.chat.id, chatjson_img.message_id)
+
+@bot.message_handler(commands=['gunetmu'])
+def gudlwyy(message):
+    if howpingip(message.text) == False:
+        bot.send_chat_action(message.chat.id, 'typing')
+        bot.reply_to(message,"呜呜呜...指令有问题\n(指令格式 /gunetease [网易云音乐ID/网易云分享链接])")
+    else:
+        try:
+            text_rl = howpingip(message.text)
+            bot.send_chat_action(message.chat.id, 'typing')
+            if is_163pc_url(text_rl) == True:
+                chatjson_img = bot.reply_to(message,"识别到网易云网页端的链接...开始解析")
+                outnb = urllib.parse.urlparse(text_rl)
+                out_quer =outnb.query
+                zzout = re.match(r'(id=)[0-9]*',out_quer).group()
+                text_ok_id = zzout[3:]
+                time.sleep(1)
+            elif is_163ph_url(text_rl) == True:
+                chatjson_img = bot.reply_to(message,"识别到网易云手机端的链接...开始解析")
+                outnb = urllib.parse.urlparse(text_rl)
+                out_quer =outnb.query
+                zzout = re.match(r'(id=)[0-9]*',out_quer).group()
+                text_ok_id = zzout[3:]
+                time.sleep(1)
+            else:
+                try:
+                    int(text_rl)
+                    chatjson_img = bot.reply_to(message,"识别到网易云音乐ID...开始解析")
+                    text_ok_id = text_rl
+                    time.sleep(1)
+                except:
+                    bot.reply_to(message,"抱歉,无法识别"+str(text_rl))
+                    return None
+
+            chatjson_img = bot.edit_message_text("解析成功...开始从API获取音乐",chatjson_img.chat.id, chatjson_img.message_id)
+            info_musi_info = dl_netmusic_info(text_ok_id)
+            chatjson_img = bot.edit_message_text("正在下载『"+info_musi_info['muname']+' - '+info_musi_info['art']+"』请稍后....",chatjson_img.chat.id, chatjson_img.message_id)
+            info_music = dl_netmusic(text_ok_id)
+            if info_music['success'] == "err":
+                 chatjson_img = bot.edit_message_text("抱歉,咕小酱下载音乐时候遇到了未知错误,请重新尝试....",chatjson_img.chat.id, chatjson_img.message_id)
+                 return None
+            chatjson_img = bot.edit_message_text("正在上传『"+info_musi_info['muname']+' - '+info_musi_info['art']+"』请稍后....",chatjson_img.chat.id, chatjson_img.message_id)
+            bot.send_chat_action(message.chat.id, 'upload_audio')
+            audio = open(info_music['fil'], 'rb')
+            bot.send_audio(message.chat.id, audio,performer=info_music['art'],title=info_music['muname'],reply_to_message_id=message.message_id)
+            bot.send_chat_action(message.chat.id, 'typing')
+            bot.edit_message_text("『"+info_music['muname']+' - '+info_music['art']+'』上传完成!', chatjson_img.chat.id, chatjson_img.message_id)
+            time.sleep(3)
+            bot.delete_message(chatjson_img.chat.id, chatjson_img.message_id)
+            audio.close()
+            os.remove(info_music['fil'])
+        except Exception as boterr:
+            #print(boterr)
+            bot.send_chat_action(message.chat.id, 'typing')
+            bot.edit_message_text('呜呜呜...咕小酱遇到了严重问题......\n错误日志: '+str(boterr),chatjson_img.chat.id, chatjson_img.message_id)
+            time.sleep(3)
+            bot.delete_message(chatjson_img.chat.id, chatjson_img.message_id)
 
 if __name__ == '__main__':
     while True:
