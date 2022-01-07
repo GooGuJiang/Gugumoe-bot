@@ -9,6 +9,7 @@ import requests
 import sys
 import zipfile
 import telebot
+from telebot import types
 import json
 import os
 import time
@@ -108,9 +109,9 @@ def dl_netmusic_info(mid): #网易云音乐信息获取
     except Exception as ooow:
         return {"success":"err","err":str(ooow)}
 
-def dl_netmusic(mid): #网易云音乐下载!
+def dl_netmusic(mid,pwt): #网易云音乐下载!
     try:
-        denlu = requests.get(str(bot_config["musicapi"])+"/login/cellphone?phone=15587920053&password=Googujiang233Uu.")#获取登录信息
+        denlu = requests.get(str(bot_config["musicapi"])+"/login/cellphone?phone="+str(bot_config["musicphone"])+"&password="+str(bot_config["musicpwd"]))#获取登录信息
         inp_cookjson = json.loads(json.dumps(json.loads(str(denlu.text))))
         url=str(bot_config["musicapi"])+'/song/url?id='+str(mid)+'&cookie='+inp_cookjson["cookie"]
         res= requests.get(url)
@@ -200,6 +201,8 @@ def howpingip(textlt): #指令提取
             return False
     except:
         return False
+
+
 
 def get_random():
     url='https://www.random.org/integers/?num=1&min=0&max=100&col=1&base=10&format=plain&rnd=new'
@@ -590,6 +593,28 @@ def gudlwyy(message):
             time.sleep(3)
             bot.delete_message(chatjson_img.chat.id, chatjson_img.message_id)
 
+@bot.message_handler(commands=['gutest'])
+def gugugutest(message):
+    markup = types.InlineKeyboardMarkup()
+    for i in range(0,1):
+        btn1 = types.InlineKeyboardButton('咕咕咕'+str(i), callback_data=str(i))
+        markup.add(btn1)
+    bot.reply_to(message,"这是一个测试",reply_markup=markup)
+    print(message)
+
+@bot.callback_query_handler(func=lambda call: True)
+def callback_handle(call):
+    bot.answer_callback_query(call.id, "你点击了第 "+str(call.data)+" 按钮")
+    #if call.data == "test":
+        #bot.answer_callback_query(call.id, '点我干嘛?')
+
+@bot.message_handler(commands=['gunetsc'])
+def guscwyy(message):
+    if howpingip(message.text) == False:
+        bot.send_chat_action(message.chat.id, 'typing')
+        bot.reply_to(message,"呜呜呜...指令有问题\n(指令格式 /gunetease [网易云音乐ID/网易云分享链接])")
+    else:
+        
 if __name__ == '__main__':
     while True:
         try:
