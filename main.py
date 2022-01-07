@@ -5,6 +5,7 @@ from decimal import Decimal
 from ping3 import ping
 from loguru import logger
 import sqlite3
+import gzip
 import requests
 import sys
 import zipfile
@@ -83,6 +84,41 @@ else:
             from telebot import apihelper
             apihelper.proxy = bot_config['proxy']
         logger.info(f"配置文件加载完毕!")
+#----------------------------------------------------------------------------------------------
+def sc_netmusic(name):#网易云音乐搜索
+    try:
+        son_info_get = requests.get(str(bot_config["musicapi"])+"/search?keywords="+str(name))
+        son_info_json= json.loads(json.dumps(json.loads(str(son_info_get.text))))
+        son_name = son_info_json["result"]["songs"]
+        son_art_text = ''
+        out_list=[]
+        for i in range(0,len(son_name)):
+            son_name_out = son_name[i]["name"]
+            son_name_art_inp = son_name[i]["artists"]
+            son_id_out=son_name[i]["id"]
+            for b in range(0,len(son_name_art_inp)):
+                if len(son_name_art_inp) == 0:
+                    son_art_text += son_name_art_inp[b]["name"]
+                else:
+                    if b == len(son_name_art_inp)-1:
+                        son_art_text += son_name_art_inp[b]["name"]
+                    else:
+                        son_art_text += son_name_art_inp[b]["name"]+","
+        
+            out_text = son_name_out+" - "+son_art_text
+            json_out ={
+                "name":out_text,
+                "sonid":son_id_out
+            }
+            out_list.append(json_out)
+            son_art_text=""
+            son_name_out=""
+            out_text =""
+            son_id_out=""
+        return out_list
+    except Exception as ooow:
+        return ooow
+
 
 def dl_netmusic_info(mid): #网易云音乐信息获取
     try:
@@ -109,7 +145,7 @@ def dl_netmusic_info(mid): #网易云音乐信息获取
     except Exception as ooow:
         return {"success":"err","err":str(ooow)}
 
-def dl_netmusic(mid,pwt): #网易云音乐下载!
+def dl_netmusic(mid): #网易云音乐下载!
     try:
         denlu = requests.get(str(bot_config["musicapi"])+"/login/cellphone?phone="+str(bot_config["musicphone"])+"&password="+str(bot_config["musicpwd"]))#获取登录信息
         inp_cookjson = json.loads(json.dumps(json.loads(str(denlu.text))))
@@ -596,25 +632,60 @@ def gudlwyy(message):
 @bot.message_handler(commands=['gutest'])
 def gugugutest(message):
     markup = types.InlineKeyboardMarkup()
+    mkjson = '{"id":1481390124,"cd":1431873495,"bd":3490,"do":"sc\"}'
     for i in range(0,1):
-        btn1 = types.InlineKeyboardButton('咕咕咕'+str(i), callback_data=str(i))
+        btn1 = types.InlineKeyboardButton('咕咕咕'+str(i), callback_data=str(mkjson))
         markup.add(btn1)
     bot.reply_to(message,"这是一个测试",reply_markup=markup)
     print(message)
 
 @bot.callback_query_handler(func=lambda call: True)
 def callback_handle(call):
-    bot.answer_callback_query(call.id, "你点击了第 "+str(call.data)+" 按钮")
-    #if call.data == "test":
-        #bot.answer_callback_query(call.id, '点我干嘛?')
+    out_json = json.loads(str(call.data))
+    #bot.answer_callback_query(call.id, "你点击了第 "+str(call.data)+" 按钮")
+    if out_json["do"] == "sc":#网易云音乐搜索
+        bot.answer_callback_query(call.id, "正在通知咕小酱...")
+        #bot.edit_message_text("你点击了"+str(out_json["id"]),out_json["cd"], out_json["bd"],reply_markup=None)
+        bot.delete_message(call.message.chat.id, call.message.id)
+        #print(call)
+        text_ok_id=out_json["id"]
+        musiout = bot.send_message(out_json["cd"],"正在从网易云 API 获取音乐信息",reply_to_message_id=out_json["ud"])
+        info_musi_info = dl_netmusic_info(text_ok_id)
+        chatjson_img = bot.edit_message_text("正在下载『"+info_musi_info['muname']+' - '+info_musi_info['art']+"』请稍后....",musiout.chat.id, musiout.message_id)
+        info_music = dl_netmusic(text_ok_id)
+        if info_music['success'] == "err":
+                chatjson_img = bot.edit_message_text("抱歉,咕小酱下载音乐时候遇到了未知错误,请重新尝试....",chatjson_img.chat.id, chatjson_img.message_id)
+                return None
+        chatjson_img = bot.edit_message_text("正在上传『"+info_musi_info['muname']+' - '+info_musi_info['art']+"』请稍后....",chatjson_img.chat.id, chatjson_img.message_id)
+        bot.send_chat_action(call.message.chat.id, 'upload_audio')
+        audio = open(info_music['fil'], 'rb')
+        bot.send_audio(call.message.chat.id, audio,performer=info_music['art'],title=info_music['muname'],reply_to_message_id=out_json["ud"])
+        bot.send_chat_action(call.message.chat.id, 'typing')
+        bot.edit_message_text("『"+info_music['muname']+' - '+info_music['art']+'』上传完成!', chatjson_img.chat.id, chatjson_img.message_id)
+        time.sleep(3)
+        bot.delete_message(chatjson_img.chat.id, chatjson_img.message_id)
+        audio.close()
+        os.remove(info_music['fil'])
 
 @bot.message_handler(commands=['gunetsc'])
 def guscwyy(message):
     if howpingip(message.text) == False:
         bot.send_chat_action(message.chat.id, 'typing')
-        bot.reply_to(message,"呜呜呜...指令有问题\n(指令格式 /gunetease [网易云音乐ID/网易云分享链接])")
+        bot.reply_to(message,"呜呜呜...指令有问题\n(指令格式 /gunetsc [搜索音乐的名字])")
     else:
+        out_sc_txt = howpingip(message.text)
+        out_sc_list = sc_netmusic(str(out_sc_txt))
+        markup = types.InlineKeyboardMarkup()
+        sc_text_go=bot.reply_to(message,"正在从网易云音乐搜索音乐")
+        for i in range(0,5):
+            #data_in = str(out_sc_list[i])
+            mkjson = '{"id":'+str(out_sc_list[i]["sonid"])+',"cd":'+str(message.chat.id)+',"ud":'+str(message.message_id)+',"do":"sc\"}'
+            btn1 = types.InlineKeyboardButton(out_sc_list[i]["name"], callback_data=str(mkjson))
+            markup.add(btn1)
+
         
+        bot.edit_message_text("前5条搜索结果如下👇",sc_text_go.chat.id, sc_text_go.message_id,reply_markup=markup)
+
 if __name__ == '__main__':
     while True:
         try:
