@@ -9,6 +9,8 @@
  ~~同时会有一堆运行Bug~~
  
  **[咕小酱在这呢!](http://t.me/gugumoe_bot)**
+ 
+ <a href="https://count.getloli.com"><img align="center" src="https://count.getloli.com/get/@Gugumoe-bot"></a><br>
 
 ## 👉功能
 | 功能 | 是否实现 |
