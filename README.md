@@ -4,7 +4,7 @@
 **⚠️本仓库文档未完善**
 
  这是咕谷酱的Telegram机器人 (咕小酱)
- 是基于 [pyTelegramBotAPI](/eternnoir/pyTelegramBotAPI) 的一个 Python 机器人。
+ 是基于 [pyTelegramBotAPI](https://github.com/eternnoir/pyTelegramBotAPI) 的一个 Python 机器人。
  
  ~~同时会有一堆运行Bug~~
  
