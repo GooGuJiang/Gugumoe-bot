@@ -718,8 +718,6 @@ def guscwyy(message):
         bot.edit_message_text("前5条搜索结果如下👇",sc_text_go.chat.id, sc_text_go.message_id,reply_markup=markup)
 
 
-
-
 @bot.message_handler(commands=['gsgame'])
 def gus(message):
     if str(message.chat.id) in dit_list:
@@ -733,7 +731,7 @@ def echo_message(message):
     global dit_list
     if str(message.chat.id) in dit_list.keys():
         if message.text in dit_list[str(message.chat.id)]["game_name"]:
-            bot.send_message(message.chat.id,"游戏结束 回答正确!!!\n答案是: "+dit_list[str(message.chat.id)]["answer"])
+            bot.reply_to(message,"游戏结束 回答正确!!!\n答案是: "+dit_list[str(message.chat.id)]["answer"])
             dit_list.pop(str(message.chat.id))
 
 if __name__ == '__main__':
