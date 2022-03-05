@@ -387,6 +387,47 @@ def is_163ph_url(url):
         return False
     else:
         return True
+
+def random_ys_sound():
+    load_json = open("./genshin/data/name.json","rb")
+    load_json = load_json.read()
+    load_json = json.loads(load_json)
+    name_list = []
+    for list_json in load_json:
+        name_list.append(list_json)
+    
+    return load_json[name_list[random.randint(0,len(name_list)-1)]]
+
+def send_gs_msg(msg_id):
+    global dit_list
+    json_load_ram = random_ys_sound()
+
+    name_random_list = json_load_ram["name"] 
+    name_random_answer = json_load_ram["answer"]
+    name_random_file = json_load_ram["sound_data"]
+    file_name_list = os.listdir("./genshin/sound/"+name_random_file)
+    file_name = "./genshin/sound/"+name_random_file+"/"+file_name_list[random.randint(0,len(file_name_list)-1)]
+
+    dit_list.update({str(msg_id.chat.id):{"game_name":name_random_list,"answer":name_random_answer}})
+    bot.reply_to(msg_id,'即将发送一段原神语音，将在 30秒 后公布答案。(测试ing)')
+
+    audio = open(file_name, 'rb')
+    bot.send_audio(msg_id.chat.id, audio,title="猜测我是谁?")
+
+    #bot.send_message(msg_id.chat.id,"发送音频")
+    for c in range(30): #游戏时间设置
+        if str(msg_id.chat.id) in dit_list.keys():
+            pass
+        else:
+            #bot.reply_to(msg_id,"游戏结束")
+            return None
+        time.sleep(1)
+
+    try:
+        bot.send_message(msg_id.chat.id,"游戏结束!!!\n答案是: "+dit_list[str(msg_id.chat.id)]["answer"])
+        dit_list.pop(str(msg_id.chat.id))
+    except:
+        pass
 #--------------------------------------------------------------
 
 
@@ -677,22 +718,9 @@ def guscwyy(message):
         bot.edit_message_text("前5条搜索结果如下👇",sc_text_go.chat.id, sc_text_go.message_id,reply_markup=markup)
 
 
-def send_gs_msg(msg_id):
-    global dit_list
-    name_ramond_list = ["甘雨","王小美"] 
-    name_ramond_answer = "甘雨"
-    dit_list.update({str(msg_id.chat.id):{"game_name":name_ramond_list,"answer":name_ramond_answer}})
-    bot.reply_to(msg_id,'即将发送一段原神语音，将在 30秒 后公布答案。(测试ing)')
-    bot.send_message(msg_id.chat.id,"发送音频")
-    for c in range(30): #游戏时间设置
-        if str(msg_id.chat.id) in dit_list.keys():
-            print(dit_list)
-        else:
-            bot.reply_to(msg_id,"游戏结束")
-            return None
-        time.sleep(1)
 
-@bot.message_handler(commands=['gutest'])
+
+@bot.message_handler(commands=['gsgame'])
 def gus(message):
     if str(message.chat.id) in dit_list:
         bot.reply_to(message,'抱歉本群组正在进行游戏')
@@ -705,7 +733,7 @@ def echo_message(message):
     global dit_list
     if str(message.chat.id) in dit_list.keys():
         if message.text in dit_list[str(message.chat.id)]["game_name"]:
-            bot.reply_to(message,"回答正确!\n答案是: "+dit_list[str(message.chat.id)]["answer"])
+            bot.send_message(message.chat.id,"游戏结束 回答正确!!!\n答案是: "+dit_list[str(message.chat.id)]["answer"])
             dit_list.pop(str(message.chat.id))
 
 if __name__ == '__main__':
