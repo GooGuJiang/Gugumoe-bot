@@ -18,6 +18,13 @@ import eyed3
 import urllib.parse
 from threading import Thread
 import logging
+import base64
+import time
+import datetime
+from urllib import parse
+from bs4 import BeautifulSoup
+
+session = requests.session()
 
 
 if os.path.exists("./config.yml") == False: # 初始化Bot
@@ -428,8 +435,6 @@ def send_gs_msg(msg_id):
         dit_list.pop(str(msg_id.chat.id))
     except:
         pass
-#--------------------------------------------------------------
-
 
 @bot.message_handler(commands=['gu'])
 def send_gu(message):
@@ -551,66 +556,6 @@ def gudlsoundcloud(message):
             time.sleep(3)
             bot.delete_message(chatjson_img.chat.id, chatjson_img.message_id)
 
-@bot.message_handler(commands=['gubig'])
-def gudlsoundcloud(message):
-    try:
-        bot.send_chat_action(message.chat.id, 'typing')
-        jsonjx = json.loads(json.dumps(message.json))
-        #print(jsonjx['reply_to_message']['photo'][2]['file_id'])
-        try:
-            file_info = bot.get_file(jsonjx['reply_to_message']['photo'][2]['file_id'])
-        except:
-            bot.reply_to(message,"请回复一张图片,不然放大什么?")
-            return None
-        botjson = bot.reply_to(message,"正在获取图片请稍后....")
-        if bot_config['proxybool'] == True:
-            file = requests.get('https://api.telegram.org/file/bot{0}/{1}'.format(bot_config["botToken"], file_info.file_path),proxies=bot_config['proxy'])
-            botph =bot_config['proxy']
-        else:
-            file = requests.get('https://api.telegram.org/file/bot{0}/{1}'.format(bot_config["botToken"], file_info.file_path))
-            botph =None
-        poh = open("./tmp/"+str(message.from_user.id)+".png",'wb')
-        poh.write(file.content)
-        poh.close()
-        bot.edit_message_text("图片获取完成,上传服务器放大中...", botjson.chat.id, botjson.message_id)
-        
-        r = requests.post(
-            "https://api.deepai.org/api/waifu2x",
-            files={
-                'image': open("./tmp/"+str(message.from_user.id)+".png", 'rb'),
-            },
-            headers={'api-key': bot_config['apikey']},proxies=botph
-        )
-        outjson = r.json()
-        file = requests.get(outjson["output_url"],proxies=botph)
-        poh = open("./tmp/big"+str(message.from_user.id)+".png",'wb')
-        poh.write(file.content)
-        poh.close()
-        bot.edit_message_text("图片放大完成，正在上传...", botjson.chat.id, botjson.message_id)
-        #bot.send_photo(message,outjson["output_url"])
-        #bot.reply_to(message,outjson["output_url"])
-        photo = open("./tmp/big"+str(message.from_user.id)+".png", 'rb')
-        bot.send_chat_action(message.chat.id, 'upload_photo')
-        bot.send_photo(message.chat.id, photo,reply_to_message_id=message.message_id)
-        photo.close()
-        file_obj=open("./tmp/big"+str(message.from_user.id)+".png",'rb')
-        file={'smfile':file_obj}	#参数名称必须为smfile
-        data_result=requests.post('https://sm.ms/api/v2/upload',data=None,files=file)
-        file_obj.close()
-        uplaod = data_result.json()
-        if uplaod['success'] == True:
-            bot.edit_message_text("上传成功!\n图片地址:"+uplaod['data']['url'], botjson.chat.id, botjson.message_id)
-        else:
-            bot.edit_message_text("上传成功!\n图片地址: 上传失败", botjson.chat.id, botjson.message_id)
-        
-        os.remove("./tmp/big"+str(message.from_user.id)+".png")
-        os.remove("./tmp/"+str(message.from_user.id)+".png")
-    except Exception as oooo:
-        bot.send_chat_action(message.chat.id, 'typing')
-        #bot.edit_message_text('呜呜呜...咕小酱遇到了严重问题......\n错误日志: '+str(boterr),chatjson_img.chat.id, chatjson_img.message_id)
-        chatjson_img = bot.reply_to(message,'呜呜呜...咕小酱遇到了严重问题......\n错误日志: '+str(oooo))
-        time.sleep(3)
-        bot.delete_message(chatjson_img.chat.id, chatjson_img.message_id)
 
 @bot.message_handler(commands=['gunetmu'])
 def gudlwyy(message):
@@ -726,6 +671,60 @@ def gus(message):
     t1 = Thread(target=send_gs_msg, args=(message,))  # 定义线程t1，线程任务为调用task1函数，task1函数的参数是6
     t1.start()
 
+@bot.message_handler(commands=['moetrace'])
+def gudlsoundcloud(message):
+    try:
+        bot.send_chat_action(message.chat.id, 'typing')
+        jsonjx = json.loads(json.dumps(message.json))
+        try:
+            file_info = bot.get_file(jsonjx['reply_to_message']['photo'][2]['file_id'])
+        except:
+            bot.reply_to(message, "呜呜呜...请回复一张图片呐~")
+            return None
+        botjson = bot.reply_to(message, "咕小酱正在获取图片请稍后....")
+
+        #file = requests.get(
+        #    'https://api.telegram.org/file/bot{0}/{1}'.format(API_TOKEN, file_info.file_path))
+
+        if bot_config['proxybool'] == True:
+        #    file = requests.get('https://api.telegram.org/file/bot{0}/{1}'.format(bot_config["botToken"], file_info.file_path),proxies=bot_config['proxy'])
+            botph = bot_config['proxy']
+        else:
+        #    file = requests.get('https://api.telegram.org/file/bot{0}/{1}'.format(bot_config["botToken"], file_info.file_path))
+            botph = None
+
+        get_info_about = requests.get("https://api.trace.moe/me",proxies=botph).json()
+
+        bot.edit_message_text("咕小酱正在努力搜索中...", botjson.chat.id, botjson.message_id)
+
+        url = bot.get_file_url(file_info.file_id)
+
+        get_info = requests.get("https://api.trace.moe/search?anilistInfo&url={}".format(urllib.parse.quote_plus(url)),proxies=botph).json()
+
+        get_title_jp = get_info["result"][0]["anilist"]["title"]["native"] 
+        get_title_en = get_info["result"][0]["anilist"]["title"]["english"]
+
+        get_title = "「"+str(get_title_jp)+"」("+str(get_title_en)+")"
+
+        get_similarity = round(get_info["result"][0]["similarity"]*100,2)
+
+        get_video = get_info["result"][0]["video"]
+        
+        quota = get_info_about["quota"]
+        quotaUsed = get_info_about["quotaUsed"]
+        quota_text = str(quota)+"/"+str(quotaUsed)
+
+        bot.edit_message_text("搜索信息如下↓ \n图片来自番剧: \n"+str(get_title)+"\n相似度: "+str(get_similarity)+" %\n查询配额: "+str(quota_text), botjson.chat.id, botjson.message_id)
+
+        bot.send_video_note(botjson.chat.id, get_video,reply_to_message_id=botjson.message_id)
+
+    except Exception as oooo:
+        bot.send_chat_action(message.chat.id, 'typing')
+        # bot.edit_message_text('呜呜呜...咕小酱遇到了严重问题......\n错误日志: '+str(boterr),chatjson_img.chat.id, chatjson_img.message_id)
+        chatjson_img = bot.reply_to(message, '呜呜呜...咕小酱遇到了严重问题......\n错误日志: ' + str(oooo))
+        time.sleep(3)
+        bot.delete_message(chatjson_img.chat.id, chatjson_img.message_id)
+
 @bot.message_handler(func=lambda message: True)
 def echo_message(message):
     global dit_list
@@ -733,6 +732,7 @@ def echo_message(message):
         if message.text in dit_list[str(message.chat.id)]["game_name"]:
             bot.reply_to(message,"游戏结束 回答正确!!!\n答案是: "+dit_list[str(message.chat.id)]["answer"])
             dit_list.pop(str(message.chat.id))
+
 
 if __name__ == '__main__':
     while True:
