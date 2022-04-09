@@ -712,7 +712,7 @@ def gudlsoundcloud(message):
         
         quota = get_info_about["quota"]
         quotaUsed = get_info_about["quotaUsed"]
-        quota_text = str(quota)+"/"+str(quotaUsed)
+        quota_text = str(quota)+"/"+str(quotaUsed+1)
 
         bot.edit_message_text("搜索信息如下↓ \n图片来自番剧: \n"+str(get_title)+"\n相似度: "+str(get_similarity)+" %\n查询配额: "+str(quota_text), botjson.chat.id, botjson.message_id)
 
