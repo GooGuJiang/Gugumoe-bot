@@ -677,7 +677,7 @@ def gudlsoundcloud(message):
         bot.send_chat_action(message.chat.id, 'typing')
         jsonjx = json.loads(json.dumps(message.json))
         try:
-            file_info = bot.get_file(jsonjx['reply_to_message']['photo'][2]['file_id'])
+            file_info = bot.get_file(jsonjx['reply_to_message']['photo'][-1]['file_id'])
         except:
             bot.reply_to(message, "呜呜呜...请使用 /moetrace 回复一张图片 ")
             return None
