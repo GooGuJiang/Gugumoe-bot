@@ -699,7 +699,7 @@ def gudlsoundcloud(message):
 
         url = bot.get_file_url(file_info.file_id)
 
-        get_info = requests.get("https://api.trace.moe/search?anilistInfo&url={}".format(urllib.parse.quote_plus(url)),proxies=botph).json()
+        get_info = requests.get("https://api.trace.moe/search?cutBorders&anilistInfo&url={}".format(urllib.parse.quote_plus(url)),proxies=botph).json()
 
         get_title_jp = get_info["result"][0]["anilist"]["title"]["native"] 
         get_title_en = get_info["result"][0]["anilist"]["title"]["english"]
