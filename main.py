@@ -679,7 +679,7 @@ def gudlsoundcloud(message):
         try:
             file_info = bot.get_file(jsonjx['reply_to_message']['photo'][2]['file_id'])
         except:
-            bot.reply_to(message, "呜呜呜...请回复一张图片呐~")
+            bot.reply_to(message, "呜呜呜...请使用 /moetrace 回复一张图片 ")
             return None
         botjson = bot.reply_to(message, "咕小酱正在获取图片请稍后....")
 
@@ -712,9 +712,9 @@ def gudlsoundcloud(message):
         
         quota = get_info_about["quota"]
         quotaUsed = get_info_about["quotaUsed"]
-        quota_text = str(quota)+"/"+str(quotaUsed+1)
+        quota_text = str(quota-(quotaUsed+1))
 
-        bot.edit_message_text("搜索信息如下↓ \n图片来自番剧: \n"+str(get_title)+"\n相似度: "+str(get_similarity)+" %\n查询额度: "+str(quota_text), botjson.chat.id, botjson.message_id)
+        bot.edit_message_text("搜索信息如下↓ \n图片来自番剧: \n"+str(get_title)+"\n相似度: "+str(get_similarity)+" %\n查询额度还有: "+str(quota_text)+" 次", botjson.chat.id, botjson.message_id)
 
         bot.send_video_note(botjson.chat.id, get_video,reply_to_message_id=botjson.message_id)
 
