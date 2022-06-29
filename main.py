@@ -147,10 +147,8 @@ def gudlsoundcloud(message):
         #    'https://api.telegram.org/file/bot{0}/{1}'.format(API_TOKEN, file_info.file_path))
 
         if bot_config['proxybool'] == True:
-        #    file = requests.get('https://api.telegram.org/file/bot{0}/{1}'.format(bot_config["botToken"], file_info.file_path),proxies=bot_config['proxy'])
             botph = bot_config['proxy']
         else:
-        #    file = requests.get('https://api.telegram.org/file/bot{0}/{1}'.format(bot_config["botToken"], file_info.file_path))
             botph = None
 
         get_info_about = requests.get("https://api.trace.moe/me",proxies=botph).json()
@@ -192,6 +190,32 @@ def gudlsoundcloud(message):
         chatjson_img = bot.reply_to(message, '呜呜呜...咕小酱遇到了严重问题......\n错误日志: ' + str(oooo))
         time.sleep(3)
         bot.delete_message(chatjson_img.chat.id, chatjson_img.message_id)
+
+@bot.message_handler(commands=['httpcat'])
+def gudlsoundcloud(message):
+    if get_zl_text(message.text) == False:
+        bot.send_chat_action(message.chat.id, 'typing')
+        bot.reply_to(message,"呜呜呜...指令有问题\n(指令格式 /httpcat [Http代码])")
+    else:
+        try:
+            if bot_config['proxybool'] == True:
+                botph = bot_config['proxy']
+            else:
+                botph = None
+            text_rl = get_zl_text(message.text)
+            bot.send_chat_action(message.chat.id, 'upload_photo')
+            try:
+                chatjson_img = bot.send_photo(message.chat.id, "https://http.cat/"+str(text_rl),reply_to_message_id=message.message_id,proxies=botph)
+            except:
+                chatjson_img = bot.send_photo(message.chat.id, "https://http.cat/404",reply_to_message_id=message.message_id,proxies=botph)
+        except Exception as boterr:
+            #print(boterr)
+            bot.send_chat_action(message.chat.id, 'typing')
+            #bot.edit_message_text('呜呜呜...咕小酱遇到了严重问题......\n错误日志: '+str(boterr),chatjson_img.chat.id, chatjson_img.message_id)
+            chatjson_img = bot.reply_to(message,'呜呜呜...咕小酱遇到了严重问题......\n错误日志: '+str(boterr))
+            time.sleep(3)
+            bot.delete_message(chatjson_img.chat.id, chatjson_img.message_id)
+
 
 #Main
 if __name__ == '__main__':
