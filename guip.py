@@ -14,7 +14,7 @@ def gu_traceroute(ip): # ip路由
         last_distance = 0
         for hop in hops:
             if last_distance + 1 != hop.distance:
-                gu_tmp += f'{hop.distance}  {hop.address}   {czip.lookup(hop.address)[0]}({czip.lookup(hop.address)[1]})  {hop.avg_rtt} ms\n'
+                gu_tmp += f'{hop.distance} | {hop.address} {czip.lookup(hop.address)[0]}({czip.lookup(hop.address)[1]})  {hop.avg_rtt} ms\n'
                 last_distance = hop.distance
         return gu_tmp.strip('\n')
     except:
@@ -25,7 +25,7 @@ def gu_ping(ip):# ping 测试
         gu_tmp = ""
         hops = ping(str(ip), count=4, interval=0.2)
         for nub in range(len(hops.rtts)):
-            gu_tmp += f"{nub+1}  {hops.address}  {round(hops.rtts[nub],2)} ms\n"
+            gu_tmp += f"{nub+1} | {hops.address}  {round(hops.rtts[nub],2)} ms\n"
         gu_tmp += f"平均延迟 {hops.avg_rtt} ms"
         if len(hops.rtts) == 0:
             return False
