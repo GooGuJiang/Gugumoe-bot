@@ -13,7 +13,7 @@ import random
 #额外
 import jrrp
 import hhsh
-
+import guip
 
 if os.path.exists("./config.yml") is False: # 初始化Bot
     logger.info(f"开始第一次初始化")
@@ -116,7 +116,6 @@ def send_gu(message):
         bot.send_chat_action(message.chat.id, 'typing')
         bot.reply_to(message, '呜呜呜....图片没上传及时.......')
         print(errr)
-
 
 @bot.message_handler(commands=['guhhsh'])
 def send_nbnhhsh(message):
@@ -654,6 +653,54 @@ def osu_help(message):
 */guosu_unbind 解除绑定 OSU ID*
 */guosu_help 查看本帮助*
 """)
+
+@bot.message_handler(commands=['guip_traceroute'])
+def guip_traceroute(message):
+    input_ip = get_zl_text(message.text)
+    if input_ip is False:
+        bot.send_chat_action(message.chat.id, 'typing')
+        bot.reply_to(message,"呜呜呜...指令有问题\n(指令格式 /guip_traceroute *[ip]*)")
+        return None
+
+    get_lo = guip.is_localhost_ip(input_ip)
+
+    if get_lo is True:
+        bot.reply_to(message,"呜呜呜...咕小酱发现此 *地址* 为 *本地主机* 地址,无法检测")
+        return None
+
+    bot.send_chat_action(message.chat.id, 'typing')
+    chatjson_ip = bot.reply_to(message,"正在进行路由跟踪...")
+    get_gu = guip.gu_traceroute(input_ip)
+    if get_gu is False:
+        bot.edit_message_text("呜呜呜...咕小酱无法访问此 *地址* 或者 这个地址就根本 *不存在* !",chatjson_ip.chat.id, chatjson_ip.message_id)
+        return None
+    
+    bot.edit_message_text(f"跟踪信息如下:\n```\n{get_gu}\n```",chatjson_ip.chat.id, chatjson_ip.message_id)
+
+@bot.message_handler(commands=['guip_ping'])
+def guip_ping(message):
+    input_ip = get_zl_text(message.text)
+    if input_ip is False:
+        bot.send_chat_action(message.chat.id, 'typing')
+        bot.reply_to(message,"呜呜呜...指令有问题\n(指令格式 /guip_ping *[ip]*)")
+        return None
+
+    get_lo = guip.is_localhost_ip(input_ip)
+
+    if get_lo is True:
+        bot.reply_to(message,"呜呜呜...咕小酱发现此 *地址* 为 *本地主机* 地址,无法检测")
+        return None
+
+    bot.send_chat_action(message.chat.id, 'typing')
+    chatjson_ip = bot.reply_to(message,"正在进行 Ping ...")
+    get_gu = guip.gu_ping(input_ip)
+    if get_gu is False:
+        bot.edit_message_text("呜呜呜...咕小酱无法Ping通此 *地址* 或者 这个地址就根本 *不存在* !",chatjson_ip.chat.id, chatjson_ip.message_id)
+        return None
+    
+    bot.edit_message_text(f"Ping 信息如下:\n```\n{get_gu}\n```",chatjson_ip.chat.id, chatjson_ip.message_id)
+        
+
 #Main   
 if __name__ == '__main__':
     while True:
