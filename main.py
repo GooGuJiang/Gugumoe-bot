@@ -1,4 +1,5 @@
 import telebot
+from telebot import types
 import zipfile
 import yaml
 from loguru import logger
@@ -700,6 +701,18 @@ def guip_ping(message):
     
     bot.edit_message_text(f"Ping 信息如下:\n```\n{get_gu}\n```",chatjson_ip.chat.id, chatjson_ip.message_id)
         
+
+@bot.inline_handler(lambda query: query.query == 'jrrp')
+def query_jrrpt(inline_query):
+    try:
+        markup = types.InlineKeyboardMarkup()
+        get_jrrp = jrrp.jrrp_get(inline_query.from_user.id)
+        btn1 = types.InlineKeyboardButton("我也试试", switch_inline_query="jrrp")
+        markup.add(btn1)
+        r = types.InlineQueryResultArticle('1', '今日人品', types.InputTextMessageContent("你今天的人品是: {0}\n{1}".format(get_jrrp,jrrp.jrrp_text_init(get_jrrp))),thumb_url="https://s3.bmp.ovh/imgs/2022/07/02/e15481817c097493.jpg",description="测测你今天的人品!",reply_markup=markup)
+        bot.answer_inline_query(inline_query.id, [r])
+    except Exception as e:
+        print(e)
 
 #Main   
 if __name__ == '__main__':

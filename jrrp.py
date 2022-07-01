@@ -2,6 +2,9 @@ import datetime
 import random
 import sqlite3
 import time
+import os
+
+
 
 def get_random(userid):
     out_hash = hash(str(datetime.datetime.now())+str(userid))
@@ -22,7 +25,24 @@ def get_random(userid):
     else:
         return out_str
 
-    
+def jrrp_text_init(nub_in):
+    nub = int(nub_in)
+    if nub == 100:
+        return "100 人品好评!!!"
+    elif nub >= 90:
+        return "今天的人品非常不错呢"
+    elif nub >= 70:
+        return "哇,人品还挺好的!"
+    elif nub >= 60:
+        return "今天是 非常¿ 不错的一天呢!"
+    elif nub >= 50:
+        return "五五开！"
+    elif nub >= 40:
+        return "还好还好只有" + str(nub)
+    elif nub >= 20:
+        return str(nub)+"这数字太....要命了"
+    elif nub >= 1:
+        return "抽大奖¿"
 
 def jrrp_text(nub_in):
     nub = int(nub_in)
@@ -86,3 +106,7 @@ def jrrp_get(tgid):
         jrrp_sql_con.close()
         return random_get
     #print(get_sql)
+
+
+if os.path.exists("./user/jrrp/data.db") is False: #初始化
+    jrrp_oneload()
