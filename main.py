@@ -1,3 +1,4 @@
+from tkinter.messagebox import NO
 import telebot
 from telebot import types
 import zipfile
@@ -705,13 +706,14 @@ def guip_ping(message):
 @bot.inline_handler(lambda query: query.query == 'jrrp')
 def query_jrrpt(inline_query):
     try:
-        #print(inline_query)
+        #print("jrrp=",inline_query)
+        localtime = time.localtime(time.time())
         markup = types.InlineKeyboardMarkup()
         get_jrrp = jrrp.jrrp_get(inline_query.from_user.id)
         btn1 = types.InlineKeyboardButton("我也试试", switch_inline_query="jrrp")
         markup.add(btn1)
-        r = types.InlineQueryResultArticle('1', '今日人品', types.InputTextMessageContent("你今天的人品是: {0}\n{1}".format(get_jrrp,jrrp.jrrp_text_init(get_jrrp))),thumb_url="https://s3.bmp.ovh/imgs/2022/07/02/e15481817c097493.jpg",description="测测你今天的人品!",reply_markup=markup)
-        bot.answer_inline_query(inline_query.id, [r])
+        r = types.InlineQueryResultArticle('1', f'今日人品 {localtime.tm_year}-{localtime.tm_mon}-{localtime.tm_mday}', types.InputTextMessageContent("你今天的人品是: {0}\n{1}".format(get_jrrp,jrrp.jrrp_text_init(get_jrrp))),thumb_url="https://s3.bmp.ovh/imgs/2022/07/02/e15481817c097493.jpg",description="测测你今天的人品!",reply_markup=markup)
+        bot.answer_inline_query(inline_query.id, [r], cache_time=1)
     except Exception as e:
         print(e)
 
@@ -719,12 +721,13 @@ def query_jrrpt(inline_query):
 def query_mr(inline_query):
     try:
         #print(inline_query)
+        localtime = time.localtime(time.time())
         markup = types.InlineKeyboardMarkup()
         get_jrrp = jrrp.jrrp_get(inline_query.from_user.id)
         btn1 = types.InlineKeyboardButton("我也试试", switch_inline_query="jrrp")
         markup.add(btn1)
-        r = types.InlineQueryResultArticle('1', '今日人品', types.InputTextMessageContent("你今天的人品是: {0}\n{1}".format(get_jrrp,jrrp.jrrp_text_init(get_jrrp))),thumb_url="https://s3.bmp.ovh/imgs/2022/07/02/e15481817c097493.jpg",description="测测你今天的人品!",reply_markup=markup)
-        bot.answer_inline_query(inline_query.id, [r])
+        r = types.InlineQueryResultArticle('5', f'今日人品 {localtime.tm_year}-{localtime.tm_mon}-{localtime.tm_mday}', types.InputTextMessageContent("你今天的人品是: {0}\n{1}".format(get_jrrp,jrrp.jrrp_text_init(get_jrrp))),thumb_url="https://s3.bmp.ovh/imgs/2022/07/02/e15481817c097493.jpg",description="测测你今天的人品!",reply_markup=markup)
+        bot.answer_inline_query(inline_query.id, [r], cache_time=1)
     except Exception as e:
         print(e)
 #Main   
