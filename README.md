@@ -71,11 +71,11 @@ $ python3 main.py
 | 名称 | 描述 | 类型 | 举例 |
 | ------- | ------- | ------- | ------- |
 | botToken | Telegram 机器人 Token | str | 114514XXX:XXXX_XXXXXXX_XXXXXX |
-| osuToken | OSU API KEY (暂时没用) | str | 56a3261XXXXX109XXXXX79 |
+| osuToken | OSU API KEY  | str | 56a3261XXXXX109XXXXX79 |
 | proxybool | 是否通过代理 | bool | True |
 | proxy | 代理配置 | json | {'http': 'socks5://127.0.0.1:8089','https': 'socks5://127.0.0.1:8089'} |
-|musicapi|网易云第三方API地址| str |  http://XXXX:3000 |
-|musicphone|网易云手机号|int|11451419198|
-|musicpwd|网易云登录密码|str|XXXXXXXX| 
+|musicapi|网易云第三方API地址(暂时没用)| str |  http://XXXX:3000 |
+|musicphone|网易云手机号(暂时没用)|int|11451419198|
+|musicpwd|网易云登录密码(暂时没用)|str|XXXXXXXX| 
 
 **第三方API基于 [NeteaseCloudMusicApi](https://github.com/Binaryify/NeteaseCloudMusicApi) 使用网上公共API请注意安全哦！**
