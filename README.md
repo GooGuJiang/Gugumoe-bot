@@ -8,7 +8,7 @@
  
  ~~同时会有一堆运行Bug~~
  
- **[咕小酱在这呢!](http://t.me/gugumoe_bot)**
+ **咕小酱在这呢👉[@gugumoe_bot](http://t.me/gugumoe_bot)**
  
  <a href="https://count.getloli.com"><img align="center" src="https://count.getloli.com/get/@Gugumoe-bot"></a><br>
 
@@ -18,22 +18,23 @@
 |今日人品|√|
 |咕|√|
 |能不能好好说话?|√|
-|下载SoundCloud音乐|X|
+|OSU查询功能|√|
 |Http.Cat|√|
-|图片放大|√|
-|网易云音乐下载|60%|
+|IP 测试|√|
+|网易云音乐下载|0%|
 
 ## 👉指令列表
 
-|功能|指令|
+|指令|功能|
 | ------- | ------- |
-|今日人品|/jrrp|
-|咕|/gu|
-|能不能好好说话|/guhhsh [需要查询的缩写]|
-|下载SoundCloud音乐|/gudlsds [音乐地址]|
-|获取Http.Cat图片|/httpcat [http代码]|
-|图片放大[貌似没用]|/gubig [回复要放大的图片]|
-|网易云音乐下载|/gunetmu [网易云音乐ID/分享链接]|
+|gu | 咕咕咕! |
+|jrrp | 今日人品？|
+|guhhsh | 能不能好好说话?|
+|httpcat | Http.Cat|
+|moetrace  | 番剧截图搜索|
+|guosu_help | OSU功能帮助菜单|
+|guip_ping | Ping|
+|guip_traceroute | 路由跟踪|
 
 # 💁‍♀️ 怎么部署?
 1. 确保 `python` 的版本为 3.x
@@ -48,6 +49,12 @@ $ git clone https://github.com/GooGuJiang/Gu-Random-Image.git
 
 ```bash
 $ pip install -r requirements.txt
+```
+
+3.5. 执行初始化
+
+```bash
+$ python3 main.py
 ```
 
 4. 配置 config.yml
@@ -67,9 +74,8 @@ $ python3 main.py
 | osuToken | OSU API KEY (暂时没用) | str | 56a3261XXXXX109XXXXX79 |
 | proxybool | 是否通过代理 | bool | True |
 | proxy | 代理配置 | json | {'http': 'socks5://127.0.0.1:8089','https': 'socks5://127.0.0.1:8089'} |
-| apikey | deepai.org API KEY | str | 3XX6bXX9-XXXX-XXXX-XXXX-XXXXfbc7285b |
 |musicapi|网易云第三方API地址| str |  http://XXXX:3000 |
 |musicphone|网易云手机号|int|11451419198|
-|musicpwd|网易云登录密码|str|XXXXXXXX|
+|musicpwd|网易云登录密码|str|XXXXXXXX| 
 
 **第三方API基于 [NeteaseCloudMusicApi](https://github.com/Binaryify/NeteaseCloudMusicApi) 使用网上公共API请注意安全哦！**
