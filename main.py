@@ -209,9 +209,9 @@ def httpcat(message):
             text_rl = get_zl_text(message.text)
             bot.send_chat_action(message.chat.id, 'upload_photo')
             try:
-                chatjson_img = bot.send_photo(message.chat.id, "https://http.cat/"+str(text_rl),reply_to_message_id=message.message_id,proxies=botph)
+                chatjson_img = bot.send_photo(message.chat.id, "https://http.cat/"+str(text_rl),reply_to_message_id=message.message_id)
             except:
-                chatjson_img = bot.send_photo(message.chat.id, "https://http.cat/404",reply_to_message_id=message.message_id,proxies=botph)
+                chatjson_img = bot.send_photo(message.chat.id, "https://http.cat/404",reply_to_message_id=message.message_id)
         except Exception as boterr:
             #print(boterr)
             bot.send_chat_action(message.chat.id, 'typing')
