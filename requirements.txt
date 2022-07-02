@@ -11,3 +11,6 @@ bs4
 httpx
 loguru
 urllib3
+pysocks
+qqwry-py3
+icmplib
