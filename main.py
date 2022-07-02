@@ -1,4 +1,3 @@
-from tkinter.messagebox import NO
 import telebot
 from telebot import types
 import zipfile
