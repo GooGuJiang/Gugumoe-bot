@@ -660,7 +660,7 @@ def guip_traceroute(message):
     input_ip = get_zl_text(message.text)
     if input_ip is False:
         bot.send_chat_action(message.chat.id, 'typing')
-        bot.reply_to(message,"呜呜呜...指令有问题\n(指令格式 /guip_traceroute *[ip]*)")
+        bot.reply_to(message,"呜呜呜...指令有问题\n(指令格式 */guip_traceroute [ip]*)")
         return None
 
     get_lo = guip.is_localhost_ip(input_ip)
@@ -683,7 +683,7 @@ def guip_ping(message):
     input_ip = get_zl_text(message.text)
     if input_ip is False:
         bot.send_chat_action(message.chat.id, 'typing')
-        bot.reply_to(message,"呜呜呜...指令有问题\n(指令格式 /guip_ping *[ip]*)")
+        bot.reply_to(message,"呜呜呜...指令有问题\n(指令格式 */guip_ping [ip]*)")
         return None
 
     get_lo = guip.is_localhost_ip(input_ip)
@@ -705,6 +705,7 @@ def guip_ping(message):
 @bot.inline_handler(lambda query: query.query == 'jrrp')
 def query_jrrpt(inline_query):
     try:
+        #print(inline_query)
         markup = types.InlineKeyboardMarkup()
         get_jrrp = jrrp.jrrp_get(inline_query.from_user.id)
         btn1 = types.InlineKeyboardButton("我也试试", switch_inline_query="jrrp")
@@ -714,6 +715,18 @@ def query_jrrpt(inline_query):
     except Exception as e:
         print(e)
 
+@bot.inline_handler(lambda query: True)
+def query_mr(inline_query):
+    try:
+        #print(inline_query)
+        markup = types.InlineKeyboardMarkup()
+        get_jrrp = jrrp.jrrp_get(inline_query.from_user.id)
+        btn1 = types.InlineKeyboardButton("我也试试", switch_inline_query="jrrp")
+        markup.add(btn1)
+        r = types.InlineQueryResultArticle('1', '今日人品', types.InputTextMessageContent("你今天的人品是: {0}\n{1}".format(get_jrrp,jrrp.jrrp_text_init(get_jrrp))),thumb_url="https://s3.bmp.ovh/imgs/2022/07/02/e15481817c097493.jpg",description="测测你今天的人品!",reply_markup=markup)
+        bot.answer_inline_query(inline_query.id, [r])
+    except Exception as e:
+        print(e)
 #Main   
 if __name__ == '__main__':
     while True:

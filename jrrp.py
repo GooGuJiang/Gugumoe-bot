@@ -83,7 +83,7 @@ def jrrp_get(tgid):
     
     if gu_out_data is None:
         random_get = get_random(tgid)
-        jrrp_sql_cur.execute("INSERT INTO jrrp values(?,?,?)", (int(tgid), random_get, time.strftime("%d", time.localtime())))
+        jrrp_sql_cur.execute("INSERT INTO jrrp values(?,?,?)", (int(tgid), random_get, time.strftime("%y-%m-%d", time.localtime())))
         jrrp_sql_con.commit()
         # 关闭游标
         jrrp_sql_cur.close()
@@ -91,7 +91,7 @@ def jrrp_get(tgid):
         jrrp_sql_con.close()
         return random_get
 
-    if gu_out_data[2] == time.strftime("%d", time.localtime()):
+    if gu_out_data[2] == time.strftime("%y-%m-%d", time.localtime()):
         jrrp_sql_cur.close()
         # 断开数据库连接
         jrrp_sql_con.close()
