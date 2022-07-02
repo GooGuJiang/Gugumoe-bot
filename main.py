@@ -57,9 +57,9 @@ else:
     if bot_config["botToken"] == None:
         logger.error(f"配置文件 botToken 未填写")
         sys.exit()
-    #elif bot_config["osuToken"] == None:
-        #logger.error(f"配置文件 osuToken 未填写")
-        #sys.exit()
+    elif bot_config["osuToken"] == None:
+        logger.error(f"配置文件 osuToken 未填写")
+        sys.exit()
     elif bot_config["apikey"] == None:
         logger.error(f"配置文件 apikey 未填写")
         sys.exit()
@@ -198,7 +198,7 @@ def gudlsoundcloud(message):
 def httpcat(message):
     if get_zl_text(message.text) == False:
         bot.send_chat_action(message.chat.id, 'typing')
-        bot.reply_to(message,"呜呜呜...指令有问题\n(指令格式 /httpcat *[Http代码]*)")
+        bot.reply_to(message,"呜呜呜...指令有问题\n(指令格式 */httpcat [Http代码]*)")
     else:
         try:
             if bot_config['proxybool'] == True:
