@@ -30,7 +30,7 @@ def get_osu_img(name,mode,is_mini,tg_id): # 获取osu图片
             res = requests.get(url)
             
         uesr_text = json.loads(res.text) #json解析
-        ok_userjson = eval(json.dumps(uesr_text[0]))
+        ok_userjson = uesr_text[0]
         #print(ok_userjson)
         if is_mini: 
             down_url = "https://osu-sig.vercel.app/card?user={0}&mode={1}&blur=6&mini=true&w=1920&h=1117".format(str(ok_userjson['user_id']),mode) #下载地址合成
@@ -48,6 +48,7 @@ def get_osu_img(name,mode,is_mini,tg_id): # 获取osu图片
         #os.remove('./tmp/osu_'+str(ok_userjson['user_id'])+'.svg')
         return "osu_"+str(tg_id)+"_"+str(ok_userjson['user_id'])+'_'+str(mode)+".png"
     except Exception as errr:
+        print(errr)
         return False
 
 def get_osuid(name):
