@@ -52,17 +52,17 @@ def get_osu_img(name,mode,is_mini,tg_id): # 获取osu图片
 
 def get_osuid(name):
     try:
+        
         with open('config.yml', 'r') as f: #读取配置文件?
             bottok = yaml.load(f.read(),Loader=yaml.FullLoader)
-            token = bottok['osuToken'] 
+        token = bottok['osuToken'] 
         url="https://osu.ppy.sh/api/get_user?k="+token+"&u="+str(name)
         if bottok['proxybool'] == True:
             proxies = bottok['proxy'] 
         else:
             proxies = None
         get_res = requests.get(url, proxies=proxies)
-        #print(get_res.text)
-        return eval(json.dumps(json.loads(get_res.text)[0]))
+        return json.loads(get_res.text)[0]
     except Exception as err:
         return False
 
