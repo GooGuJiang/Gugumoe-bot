@@ -3,27 +3,32 @@ import random
 import sqlite3
 import time
 import os
-
+import requests
 
 
 def get_random(userid):
-    out_hash = hash(str(datetime.datetime.now())+str(userid))
-    if out_hash < 0:
-        out_hash=out_hash*-1
-    out_str = int(str(out_hash)[0:2])
+    try:
+        url='https://www.random.org/integers/?num=1&min=0&max=100&col=1&base=10&format=plain&rnd=new'
+        res = requests.get(url)
+        return res.text.strip("\n")
+    except:
+        out_hash = hash(str(datetime.datetime.now())+str(userid))
+        if out_hash < 0:
+            out_hash=out_hash*-1
+        out_str = int(str(out_hash)[0:2])
 
-    if out_str >= 98:        
-        if random.randint(0,1) == 1:
-            return 100
+        if out_str >= 98:        
+            if random.randint(0,1) == 1:
+                return 100
+            else:
+                return out_str
+        elif out_str <= 11:
+            if random.randint(0,1) == 1:
+                return random.randint(0,10)
+            else:
+                return out_str
         else:
             return out_str
-    elif out_str <= 11:
-        if random.randint(0,1) == 1:
-            return random.randint(0,10)
-        else:
-            return out_str
-    else:
-        return out_str
 
 def jrrp_text_init(nub_in):
     nub = int(nub_in)
@@ -112,3 +117,7 @@ def jrrp_get(tgid):
 
 if os.path.exists("./user/jrrp/data.db") is False: #初始化
     jrrp_oneload()
+
+
+while True:
+    print(get_random("114514"))
