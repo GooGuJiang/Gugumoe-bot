@@ -100,6 +100,8 @@ def jrrp_get(tgid):
         random_get = get_random(tgid)
         jrrp_sql_cur.execute("UPDATE jrrp SET nub=? WHERE tg_id=?", (random_get, tgid))
         jrrp_sql_con.commit()
+        jrrp_sql_cur.execute("UPDATE jrrp SET time=? WHERE tg_id=?", (time.strftime("%y-%m-%d", time.localtime()), tgid))
+        jrrp_sql_con.commit()
         # 关闭游标
         jrrp_sql_cur.close()
         # 断开数据库连接
