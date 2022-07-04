@@ -117,7 +117,3 @@ def jrrp_get(tgid):
 
 if os.path.exists("./user/jrrp/data.db") is False: #初始化
     jrrp_oneload()
-
-
-while True:
-    print(get_random("114514"))
