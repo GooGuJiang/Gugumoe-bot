@@ -71,7 +71,7 @@ def jrrp_text(nub_in):
 def jrrp_oneload():
     jrrp_sql_con = sqlite3.connect("./user/jrrp/data.db")
     jrrp_sql_cur = jrrp_sql_con.cursor()
-    sql = "CREATE TABLE IF NOT EXISTS jrrp(tg_id INTEGER PRIMARY KEY,nub INTEGER,time TEXT)"
+    sql = "CREATE TABLE IF NOT EXISTS jrrp(tg_id TEXT PRIMARY KEY,nub INTEGER,time TEXT)"
     jrrp_sql_cur.execute(sql)
     # 关闭游标
     jrrp_sql_cur.close()

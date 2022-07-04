@@ -101,9 +101,15 @@ def get_zl_text(textlt): #指令提取
 #命令
 @bot.message_handler(commands=['jrrp'])
 def send_jrrp(message):
+    print(message)
     bot.send_chat_action(message.chat.id, 'typing')
-    get_jrrp = jrrp.jrrp_get(message.from_user.id)
-    bot.reply_to(message, "你今天的人品是: *{0}*\n{1}".format(get_jrrp,jrrp.jrrp_text(get_jrrp)))
+    if message.from_user.username != "Channel_Bot":
+        get_jrrp = jrrp.jrrp_get(message.from_user.id)
+        bot.reply_to(message, "你今天的人品是: *{0}*\n{1}".format(get_jrrp,jrrp.jrrp_text(get_jrrp)))
+    else:
+        get_jrrp = jrrp.jrrp_get(message.sender_chat.id)
+        bot.reply_to(message, "你今天的人品是: *{0}*\n{1}".format(get_jrrp,jrrp.jrrp_text(get_jrrp)))
+
 
 @bot.message_handler(commands=['gu'])
 def send_gu(message):
@@ -612,7 +618,7 @@ def osu_bind(message):
                     bot.edit_message_text("抱歉,该 OSU ID 已经绑定其他 Telegram ID,如需绑定请联系机器人管理员!",chatjson_bind.chat.id, chatjson_bind.message_id)
                     time.sleep(10)
                     bot.delete_message(chatjson_bind.chat.id, chatjson_bind.message_id)
-            except:
+            except Exception as err:
                 bot.edit_message_text("*绑定失败*,请检查 OSU ID 是否正确或者联系机器人管理员!",chatjson_bind.chat.id, chatjson_bind.message_id)
                 time.sleep(10)
                 bot.delete_message(chatjson_bind.chat.id, chatjson_bind.message_id)
