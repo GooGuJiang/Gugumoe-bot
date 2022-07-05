@@ -15,6 +15,7 @@ import random
 import jrrp
 import hhsh
 import guip
+import make_img
 
 if os.path.exists("./config.yml") is False: # 初始化Bot
     logger.info(f"开始第一次初始化")
@@ -23,7 +24,7 @@ if os.path.exists("./config.yml") is False: # 初始化Bot
         f.write(bytes("botToken: \nosuToken: \nproxybool: False\nproxy: {'http': 'socks5://127.0.0.1:8089','https': 'socks5://127.0.0.1:8089'}\napikey: \nmusicapi: \nmusicphone: \nmusicpwd: ",'utf-8'))
         f.close()
     logger.info(f"创建文件夹")
-    dir_list = ["./img","./tmp","./user","./user/jrrp","./user/shoutmp","./user/osu"]
+    dir_list = ["./img","./tmp","./user","./user/jrrp","./user/shoutmp","./user/osu","./output"]
     for i in range(0,len(dir_list)):
         if os.path.exists(dir_list[i]) == False:
             logger.info(f"正在创建 "+str(dir_list[i]))
@@ -906,8 +907,57 @@ def guip_ping(message):
         return None
     
     bot.edit_message_text(f"Ping 信息如下:\n```\n{get_gu}\n```",chatjson_ip.chat.id, chatjson_ip.message_id)
-        
 
+
+@bot.message_handler(commands=['gu_eat'])
+def gu_eat(message):
+    #print(message)
+    bot.send_chat_action(message.chat.id, 'typing')
+    jsonjx = json.loads(json.dumps(message.json))
+    del_json = bot.reply_to(message, '正在生成图片...')
+    try:
+        if jsonjx['reply_to_message']["from"]["id"] != 136817688:
+            user_id = jsonjx['reply_to_message']["from"]["id"]
+            out_img_info = bot.get_user_profile_photos(user_id)
+            out_img_info = out_img_info.photos[0][-1]
+            img_url = bot.get_file_url(out_img_info.file_id)
+        else:
+            user_id = jsonjx['reply_to_message']["sender_chat"]["id"]
+            out_img_file_id = bot.get_chat(user_id)
+            img_url = bot.get_file_url(out_img_file_id.photo.big_file_id)
+        
+    except Exception as err:
+        bot.reply_to(message, "呜呜呜...请使用 */gu_eat* 回复一个人的消息 ")
+        return None
+    
+    if bot_config['proxybool'] == True:
+            botph = bot_config['proxy']
+    else:
+        botph = None
+
+    get_info_about = requests.get("https://api.trace.moe/me",proxies=botph).json()
+
+    r = requests.get(img_url, stream=True,proxies=botph)
+    out_file_name = f"gu_eat_{user_id}.png"
+    if r.status_code == 200:
+        open(f'./tmp/{out_file_name}', 'wb').write(r.content)
+
+    out_rl = make_img.make_eat_img(f'{out_file_name}',str(user_id))
+
+    try:
+        sti = open(out_rl, 'rb')
+        bot.send_chat_action(message.chat.id, 'upload_photo')
+        bot.send_sticker(message.chat.id, sti,reply_to_message_id=message.message_id)
+        bot.delete_message(del_json.chat.id, del_json.message_id)
+        sti.close()
+        os.remove(out_rl)
+        os.remove(f'./tmp/{out_file_name}')
+    except Exception as errr:
+        bot.delete_message(del_json.chat.id, del_json.message_id)
+        bot.send_chat_action(message.chat.id, 'typing')
+        bot.reply_to(message, '呜呜呜....图片没上传及时.......')
+        print(errr)
+    
 @bot.inline_handler(lambda query: query.query == 'jrrp')
 def query_jrrpt(inline_query):
     try:
@@ -935,6 +985,9 @@ def query_mr(inline_query):
         bot.answer_inline_query(inline_query.id, [r], cache_time=1)
     except Exception as e:
         print(e)
+
+
+
 #Main   
 if __name__ == '__main__':
     while True:
