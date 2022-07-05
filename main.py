@@ -101,7 +101,7 @@ def get_zl_text(textlt): #指令提取
 #命令
 @bot.message_handler(commands=['jrrp'])
 def send_jrrp(message):
-    print(message)
+    #print(message)
     bot.send_chat_action(message.chat.id, 'typing')
     if message.from_user.username != "Channel_Bot":
         get_jrrp = jrrp.jrrp_get(message.from_user.id)
@@ -228,27 +228,48 @@ def httpcat(message):
 @bot.message_handler(commands=['guosu_std_mini'])
 def osu_std_mini(message):
     if get_zl_text(message.text) == False:
-        get_osu_id = osu.sql_tg2osu_id(message.from_user.id)
-        if get_osu_id is False:
-            bot.send_chat_action(message.chat.id, 'typing')
-            bot.reply_to(message,"呜呜呜...指令有问题\n(缺少参数 */guosu_std_mini [OSU ID/用户名]* )")
-        else:
-            bot.send_chat_action(message.chat.id, 'typing')
-            chatjson_out = bot.reply_to(message,"正在查询,请稍后...")
-            osu_img_bool =  osu.get_osu_img(get_osu_id,"std",True,message.from_user.id)
-            if osu_img_bool:
-                sti = open('./tmp/'+osu_img_bool, 'rb')
-                bot.send_sticker(message.chat.id, sti,reply_to_message_id=message.message_id)
-                sti.close()
-                os.remove('./tmp/'+osu_img_bool)
-                bot.delete_message(chatjson_out.chat.id, chatjson_out.message_id)
-            else:
-                bot.delete_message(chatjson_out.chat.id, chatjson_out.message_id)
+        if message.from_user.username != "Channel_Bot":
+            get_osu_id = osu.sql_tg2osu_id(message.from_user.id)
+            if get_osu_id is False:
                 bot.send_chat_action(message.chat.id, 'typing')
-                chatjson_out = bot.reply_to(message,"查询图片生成出错,请重试=-=")
-                time.sleep(5)
-                bot.delete_message(chatjson_out.chat.id, chatjson_out.message_id)
-
+                bot.reply_to(message,"呜呜呜...指令有问题\n(缺少参数 */guosu_std_mini [OSU ID/用户名]* )")
+            else:
+                bot.send_chat_action(message.chat.id, 'typing')
+                chatjson_out = bot.reply_to(message,"正在查询,请稍后...")
+                osu_img_bool =  osu.get_osu_img(get_osu_id,"std",True,message.from_user.id)
+                if osu_img_bool:
+                    sti = open('./tmp/'+osu_img_bool, 'rb')
+                    bot.send_sticker(message.chat.id, sti,reply_to_message_id=message.message_id)
+                    sti.close()
+                    os.remove('./tmp/'+osu_img_bool)
+                    bot.delete_message(chatjson_out.chat.id, chatjson_out.message_id)
+                else:
+                    bot.delete_message(chatjson_out.chat.id, chatjson_out.message_id)
+                    bot.send_chat_action(message.chat.id, 'typing')
+                    chatjson_out = bot.reply_to(message,"查询图片生成出错,请重试=-=")
+                    time.sleep(5)
+                    bot.delete_message(chatjson_out.chat.id, chatjson_out.message_id)
+        else:
+            get_osu_id = osu.sql_tg2osu_id(message.sender_chat.id)
+            if get_osu_id is False:
+                bot.send_chat_action(message.chat.id, 'typing')
+                bot.reply_to(message,"呜呜呜...指令有问题\n(缺少参数 */guosu_std_mini [OSU ID/用户名]* )")
+            else:
+                bot.send_chat_action(message.chat.id, 'typing')
+                chatjson_out = bot.reply_to(message,"正在查询,请稍后...")
+                osu_img_bool =  osu.get_osu_img(get_osu_id,"std",True,message.from_user.id)
+                if osu_img_bool:
+                    sti = open('./tmp/'+osu_img_bool, 'rb')
+                    bot.send_sticker(message.chat.id, sti,reply_to_message_id=message.message_id)
+                    sti.close()
+                    os.remove('./tmp/'+osu_img_bool)
+                    bot.delete_message(chatjson_out.chat.id, chatjson_out.message_id)
+                else:
+                    bot.delete_message(chatjson_out.chat.id, chatjson_out.message_id)
+                    bot.send_chat_action(message.chat.id, 'typing')
+                    chatjson_out = bot.reply_to(message,"查询图片生成出错,请重试=-=")
+                    time.sleep(5)
+                    bot.delete_message(chatjson_out.chat.id, chatjson_out.message_id)
     else:
         bot.send_chat_action(message.chat.id, 'typing')
         chatjson_out = bot.reply_to(message,"正在查询,请稍后...")
@@ -274,25 +295,46 @@ def osu_std_mini(message):
 @bot.message_handler(commands=['guosu_taiko_mini'])
 def osu_taiko_mini(message):
     if get_zl_text(message.text) == False:
-        get_osu_id = osu.sql_tg2osu_id(message.from_user.id)
-        if get_osu_id is False:
-            bot.send_chat_action(message.chat.id, 'typing')
-            bot.reply_to(message,"呜呜呜...指令有问题\n(缺少参数 */guosu_taiko_mini [OSU ID/用户名]* )")
-        else:
-            bot.send_chat_action(message.chat.id, 'typing')
-            chatjson_out = bot.reply_to(message,"正在查询,请稍后...")
-            osu_img_bool =  osu.get_osu_img(get_osu_id,"taiko",True,message.from_user.id)
-            if osu_img_bool:
-                sti = open('./tmp/'+osu_img_bool, 'rb')
-                bot.send_sticker(message.chat.id, sti,reply_to_message_id=message.message_id)
-                sti.close()
-                os.remove('./tmp/'+osu_img_bool)
-                bot.delete_message(chatjson_out.chat.id, chatjson_out.message_id)
+        if message.from_user.username != "Channel_Bot":
+            get_osu_id = osu.sql_tg2osu_id(message.from_user.id)
+            if get_osu_id is False:
+                bot.send_chat_action(message.chat.id, 'typing')
+                bot.reply_to(message,"呜呜呜...指令有问题\n(缺少参数 */guosu_taiko_mini [OSU ID/用户名]* )")
             else:
-                bot.delete_message(chatjson_out.chat.id, chatjson_out.message_id)
-                chatjson_out = bot.reply_to(message,"查询图片生成出错,请重试=-=")
-                time.sleep(5)
-                bot.delete_message(chatjson_out.chat.id, chatjson_out.message_id)
+                bot.send_chat_action(message.chat.id, 'typing')
+                chatjson_out = bot.reply_to(message,"正在查询,请稍后...")
+                osu_img_bool =  osu.get_osu_img(get_osu_id,"taiko",True,message.from_user.id)
+                if osu_img_bool:
+                    sti = open('./tmp/'+osu_img_bool, 'rb')
+                    bot.send_sticker(message.chat.id, sti,reply_to_message_id=message.message_id)
+                    sti.close()
+                    os.remove('./tmp/'+osu_img_bool)
+                    bot.delete_message(chatjson_out.chat.id, chatjson_out.message_id)
+                else:
+                    bot.delete_message(chatjson_out.chat.id, chatjson_out.message_id)
+                    chatjson_out = bot.reply_to(message,"查询图片生成出错,请重试=-=")
+                    time.sleep(5)
+                    bot.delete_message(chatjson_out.chat.id, chatjson_out.message_id)
+        else:
+            get_osu_id = osu.sql_tg2osu_id(message.sender_chat.id)
+            if get_osu_id is False:
+                bot.send_chat_action(message.chat.id, 'typing')
+                bot.reply_to(message,"呜呜呜...指令有问题\n(缺少参数 */guosu_taiko_mini [OSU ID/用户名]* )")
+            else:
+                bot.send_chat_action(message.chat.id, 'typing')
+                chatjson_out = bot.reply_to(message,"正在查询,请稍后...")
+                osu_img_bool =  osu.get_osu_img(get_osu_id,"taiko",True,message.from_user.id)
+                if osu_img_bool:
+                    sti = open('./tmp/'+osu_img_bool, 'rb')
+                    bot.send_sticker(message.chat.id, sti,reply_to_message_id=message.message_id)
+                    sti.close()
+                    os.remove('./tmp/'+osu_img_bool)
+                    bot.delete_message(chatjson_out.chat.id, chatjson_out.message_id)
+                else:
+                    bot.delete_message(chatjson_out.chat.id, chatjson_out.message_id)
+                    chatjson_out = bot.reply_to(message,"查询图片生成出错,请重试=-=")
+                    time.sleep(5)
+                    bot.delete_message(chatjson_out.chat.id, chatjson_out.message_id)
 
     else:
         bot.send_chat_action(message.chat.id, 'typing')
@@ -319,26 +361,46 @@ def osu_taiko_mini(message):
 @bot.message_handler(commands=['guosu_catch_mini'])
 def osu_catch_mini(message):
     if get_zl_text(message.text) == False:
-        get_osu_id = osu.sql_tg2osu_id(message.from_user.id)
-        if get_osu_id is False:
-            bot.send_chat_action(message.chat.id, 'typing')
-            bot.reply_to(message,"呜呜呜...指令有问题\n(缺少参数 */guosu_catch_mini [OSU ID/用户名]* )")
-        else:
-            bot.send_chat_action(message.chat.id, 'typing')
-            chatjson_out = bot.reply_to(message,"正在查询,请稍后...")
-            osu_img_bool =  osu.get_osu_img(get_osu_id,"catch",True,message.from_user.id)
-            if osu_img_bool:
-                sti = open('./tmp/'+osu_img_bool, 'rb')
-                bot.send_sticker(message.chat.id, sti,reply_to_message_id=message.message_id)
-                sti.close()
-                os.remove('./tmp/'+osu_img_bool)
-                bot.delete_message(chatjson_out.chat.id, chatjson_out.message_id)
+        if message.from_user.username != "Channel_Bot":
+            get_osu_id = osu.sql_tg2osu_id(message.from_user.id)
+            if get_osu_id is False:
+                bot.send_chat_action(message.chat.id, 'typing')
+                bot.reply_to(message,"呜呜呜...指令有问题\n(缺少参数 */guosu_catch_mini [OSU ID/用户名]* )")
             else:
-                bot.delete_message(chatjson_out.chat.id, chatjson_out.message_id)
-                chatjson_out = bot.reply_to(message,"查询图片生成出错,请重试=-=")
-                time.sleep(5)
-                bot.delete_message(chatjson_out.chat.id, chatjson_out.message_id)
-
+                bot.send_chat_action(message.chat.id, 'typing')
+                chatjson_out = bot.reply_to(message,"正在查询,请稍后...")
+                osu_img_bool =  osu.get_osu_img(get_osu_id,"catch",True,message.from_user.id)
+                if osu_img_bool:
+                    sti = open('./tmp/'+osu_img_bool, 'rb')
+                    bot.send_sticker(message.chat.id, sti,reply_to_message_id=message.message_id)
+                    sti.close()
+                    os.remove('./tmp/'+osu_img_bool)
+                    bot.delete_message(chatjson_out.chat.id, chatjson_out.message_id)
+                else:
+                    bot.delete_message(chatjson_out.chat.id, chatjson_out.message_id)
+                    chatjson_out = bot.reply_to(message,"查询图片生成出错,请重试=-=")
+                    time.sleep(5)
+                    bot.delete_message(chatjson_out.chat.id, chatjson_out.message_id)
+        else:
+            get_osu_id = osu.sql_tg2osu_id(message.sender_chat.id)
+            if get_osu_id is False:
+                bot.send_chat_action(message.chat.id, 'typing')
+                bot.reply_to(message,"呜呜呜...指令有问题\n(缺少参数 */guosu_catch_mini [OSU ID/用户名]* )")
+            else:
+                bot.send_chat_action(message.chat.id, 'typing')
+                chatjson_out = bot.reply_to(message,"正在查询,请稍后...")
+                osu_img_bool =  osu.get_osu_img(get_osu_id,"catch",True,message.from_user.id)
+                if osu_img_bool:
+                    sti = open('./tmp/'+osu_img_bool, 'rb')
+                    bot.send_sticker(message.chat.id, sti,reply_to_message_id=message.message_id)
+                    sti.close()
+                    os.remove('./tmp/'+osu_img_bool)
+                    bot.delete_message(chatjson_out.chat.id, chatjson_out.message_id)
+                else:
+                    bot.delete_message(chatjson_out.chat.id, chatjson_out.message_id)
+                    chatjson_out = bot.reply_to(message,"查询图片生成出错,请重试=-=")
+                    time.sleep(5)
+                    bot.delete_message(chatjson_out.chat.id, chatjson_out.message_id)
     else:
         bot.send_chat_action(message.chat.id, 'typing')
         chatjson_out = bot.reply_to(message,"正在查询,请稍后...")
@@ -364,25 +426,46 @@ def osu_catch_mini(message):
 @bot.message_handler(commands=['guosu_mania_mini'])
 def osu_mania_mini(message):
     if get_zl_text(message.text) == False:
-        get_osu_id = osu.sql_tg2osu_id(message.from_user.id)
-        if get_osu_id is False:
-            bot.send_chat_action(message.chat.id, 'typing')
-            bot.reply_to(message,"呜呜呜...指令有问题\n(缺少参数 */guosu_mania_mini [OSU ID/用户名]* )")
-        else:
-            bot.send_chat_action(message.chat.id, 'typing')
-            chatjson_out = bot.reply_to(message,"正在查询,请稍后...")
-            osu_img_bool =  osu.get_osu_img(get_osu_id,"mania",True,message.from_user.id)
-            if osu_img_bool:
-                sti = open('./tmp/'+osu_img_bool, 'rb')
-                bot.send_sticker(message.chat.id, sti,reply_to_message_id=message.message_id)
-                sti.close()
-                os.remove('./tmp/'+osu_img_bool)
-                bot.delete_message(chatjson_out.chat.id, chatjson_out.message_id)
+        if message.from_user.username != "Channel_Bot":
+            get_osu_id = osu.sql_tg2osu_id(message.from_user.id)
+            if get_osu_id is False:
+                bot.send_chat_action(message.chat.id, 'typing')
+                bot.reply_to(message,"呜呜呜...指令有问题\n(缺少参数 */guosu_mania_mini [OSU ID/用户名]* )")
             else:
-                bot.delete_message(chatjson_out.chat.id, chatjson_out.message_id)
-                chatjson_out = bot.reply_to(message,"查询图片生成出错,请重试=-=")
-                time.sleep(5)
-                bot.delete_message(chatjson_out.chat.id, chatjson_out.message_id)
+                bot.send_chat_action(message.chat.id, 'typing')
+                chatjson_out = bot.reply_to(message,"正在查询,请稍后...")
+                osu_img_bool =  osu.get_osu_img(get_osu_id,"mania",True,message.from_user.id)
+                if osu_img_bool:
+                    sti = open('./tmp/'+osu_img_bool, 'rb')
+                    bot.send_sticker(message.chat.id, sti,reply_to_message_id=message.message_id)
+                    sti.close()
+                    os.remove('./tmp/'+osu_img_bool)
+                    bot.delete_message(chatjson_out.chat.id, chatjson_out.message_id)
+                else:
+                    bot.delete_message(chatjson_out.chat.id, chatjson_out.message_id)
+                    chatjson_out = bot.reply_to(message,"查询图片生成出错,请重试=-=")
+                    time.sleep(5)
+                    bot.delete_message(chatjson_out.chat.id, chatjson_out.message_id)
+        else:
+            get_osu_id = osu.sql_tg2osu_id(message.sender_chat.id)
+            if get_osu_id is False:
+                bot.send_chat_action(message.chat.id, 'typing')
+                bot.reply_to(message,"呜呜呜...指令有问题\n(缺少参数 */guosu_mania_mini [OSU ID/用户名]* )")
+            else:
+                bot.send_chat_action(message.chat.id, 'typing')
+                chatjson_out = bot.reply_to(message,"正在查询,请稍后...")
+                osu_img_bool =  osu.get_osu_img(get_osu_id,"mania",True,message.from_user.id)
+                if osu_img_bool:
+                    sti = open('./tmp/'+osu_img_bool, 'rb')
+                    bot.send_sticker(message.chat.id, sti,reply_to_message_id=message.message_id)
+                    sti.close()
+                    os.remove('./tmp/'+osu_img_bool)
+                    bot.delete_message(chatjson_out.chat.id, chatjson_out.message_id)
+                else:
+                    bot.delete_message(chatjson_out.chat.id, chatjson_out.message_id)
+                    chatjson_out = bot.reply_to(message,"查询图片生成出错,请重试=-=")
+                    time.sleep(5)
+                    bot.delete_message(chatjson_out.chat.id, chatjson_out.message_id)
 
     else:
         bot.send_chat_action(message.chat.id, 'typing')
@@ -409,25 +492,46 @@ def osu_mania_mini(message):
 @bot.message_handler(commands=['guosu_std'])
 def osu_std(message):
     if get_zl_text(message.text) == False:
-        get_osu_id = osu.sql_tg2osu_id(message.from_user.id)
-        if get_osu_id is False:
-            bot.send_chat_action(message.chat.id, 'typing')
-            bot.reply_to(message,"呜呜呜...指令有问题\n(缺少参数 */guosu_std [OSU ID/用户名]* )")
-        else:
-            bot.send_chat_action(message.chat.id, 'typing')
-            chatjson_out = bot.reply_to(message,"正在查询,请稍后...")
-            osu_img_bool =  osu.get_osu_img(get_osu_id,"std",False,message.from_user.id)
-            if osu_img_bool:
-                sti = open('./tmp/'+osu_img_bool, 'rb')
-                bot.send_photo(message.chat.id, sti,reply_to_message_id=message.message_id)
-                sti.close()
-                os.remove('./tmp/'+osu_img_bool)
-                bot.delete_message(chatjson_out.chat.id, chatjson_out.message_id)
+        if message.from_user.username != "Channel_Bot":
+            get_osu_id = osu.sql_tg2osu_id(message.from_user.id)
+            if get_osu_id is False:
+                bot.send_chat_action(message.chat.id, 'typing')
+                bot.reply_to(message,"呜呜呜...指令有问题\n(缺少参数 */guosu_std [OSU ID/用户名]* )")
             else:
-                bot.delete_message(chatjson_out.chat.id, chatjson_out.message_id)
-                chatjson_out = bot.reply_to(message,"查询图片生成出错,请重试=-=")
-                time.sleep(5)
-                bot.delete_message(chatjson_out.chat.id, chatjson_out.message_id)
+                bot.send_chat_action(message.chat.id, 'typing')
+                chatjson_out = bot.reply_to(message,"正在查询,请稍后...")
+                osu_img_bool =  osu.get_osu_img(get_osu_id,"std",False,message.from_user.id)
+                if osu_img_bool:
+                    sti = open('./tmp/'+osu_img_bool, 'rb')
+                    bot.send_photo(message.chat.id, sti,reply_to_message_id=message.message_id)
+                    sti.close()
+                    os.remove('./tmp/'+osu_img_bool)
+                    bot.delete_message(chatjson_out.chat.id, chatjson_out.message_id)
+                else:
+                    bot.delete_message(chatjson_out.chat.id, chatjson_out.message_id)
+                    chatjson_out = bot.reply_to(message,"查询图片生成出错,请重试=-=")
+                    time.sleep(5)
+                    bot.delete_message(chatjson_out.chat.id, chatjson_out.message_id)
+        else:
+            get_osu_id = osu.sql_tg2osu_id(message.sender_chat.id)
+            if get_osu_id is False:
+                bot.send_chat_action(message.chat.id, 'typing')
+                bot.reply_to(message,"呜呜呜...指令有问题\n(缺少参数 */guosu_std [OSU ID/用户名]* )")
+            else:
+                bot.send_chat_action(message.chat.id, 'typing')
+                chatjson_out = bot.reply_to(message,"正在查询,请稍后...")
+                osu_img_bool =  osu.get_osu_img(get_osu_id,"std",False,message.from_user.id)
+                if osu_img_bool:
+                    sti = open('./tmp/'+osu_img_bool, 'rb')
+                    bot.send_photo(message.chat.id, sti,reply_to_message_id=message.message_id)
+                    sti.close()
+                    os.remove('./tmp/'+osu_img_bool)
+                    bot.delete_message(chatjson_out.chat.id, chatjson_out.message_id)
+                else:
+                    bot.delete_message(chatjson_out.chat.id, chatjson_out.message_id)
+                    chatjson_out = bot.reply_to(message,"查询图片生成出错,请重试=-=")
+                    time.sleep(5)
+                    bot.delete_message(chatjson_out.chat.id, chatjson_out.message_id)
 
     else:
         bot.send_chat_action(message.chat.id, 'typing')
@@ -454,25 +558,46 @@ def osu_std(message):
 @bot.message_handler(commands=['guosu_taiko'])
 def osu_taiko(message):
     if get_zl_text(message.text) == False:
-        get_osu_id = osu.sql_tg2osu_id(message.from_user.id)
-        if get_osu_id is False:
-            bot.send_chat_action(message.chat.id, 'typing')
-            bot.reply_to(message,"呜呜呜...指令有问题\n(缺少参数 */guosu_taiko [OSU ID/用户名]* )")
-        else:
-            bot.send_chat_action(message.chat.id, 'typing')
-            chatjson_out = bot.reply_to(message,"正在查询,请稍后...")
-            osu_img_bool =  osu.get_osu_img(get_osu_id,"taiko",False,message.from_user.id)
-            if osu_img_bool:
-                sti = open('./tmp/'+osu_img_bool, 'rb')
-                bot.send_photo(message.chat.id, sti,reply_to_message_id=message.message_id)
-                sti.close()
-                os.remove('./tmp/'+osu_img_bool)
-                bot.delete_message(chatjson_out.chat.id, chatjson_out.message_id)
+        if message.from_user.username != "Channel_Bot":
+            get_osu_id = osu.sql_tg2osu_id(message.from_user.id)
+            if get_osu_id is False:
+                bot.send_chat_action(message.chat.id, 'typing')
+                bot.reply_to(message,"呜呜呜...指令有问题\n(缺少参数 */guosu_taiko [OSU ID/用户名]* )")
             else:
-                bot.delete_message(chatjson_out.chat.id, chatjson_out.message_id)
-                chatjson_out = bot.reply_to(message,"查询图片生成出错,请重试=-=")
-                time.sleep(5)
-                bot.delete_message(chatjson_out.chat.id, chatjson_out.message_id)
+                bot.send_chat_action(message.chat.id, 'typing')
+                chatjson_out = bot.reply_to(message,"正在查询,请稍后...")
+                osu_img_bool =  osu.get_osu_img(get_osu_id,"taiko",False,message.from_user.id)
+                if osu_img_bool:
+                    sti = open('./tmp/'+osu_img_bool, 'rb')
+                    bot.send_photo(message.chat.id, sti,reply_to_message_id=message.message_id)
+                    sti.close()
+                    os.remove('./tmp/'+osu_img_bool)
+                    bot.delete_message(chatjson_out.chat.id, chatjson_out.message_id)
+                else:
+                    bot.delete_message(chatjson_out.chat.id, chatjson_out.message_id)
+                    chatjson_out = bot.reply_to(message,"查询图片生成出错,请重试=-=")
+                    time.sleep(5)
+                    bot.delete_message(chatjson_out.chat.id, chatjson_out.message_id)
+        else:
+            get_osu_id = osu.sql_tg2osu_id(message.sender_chat.id)
+            if get_osu_id is False:
+                bot.send_chat_action(message.chat.id, 'typing')
+                bot.reply_to(message,"呜呜呜...指令有问题\n(缺少参数 */guosu_taiko [OSU ID/用户名]* )")
+            else:
+                bot.send_chat_action(message.chat.id, 'typing')
+                chatjson_out = bot.reply_to(message,"正在查询,请稍后...")
+                osu_img_bool =  osu.get_osu_img(get_osu_id,"taiko",False,message.from_user.id)
+                if osu_img_bool:
+                    sti = open('./tmp/'+osu_img_bool, 'rb')
+                    bot.send_photo(message.chat.id, sti,reply_to_message_id=message.message_id)
+                    sti.close()
+                    os.remove('./tmp/'+osu_img_bool)
+                    bot.delete_message(chatjson_out.chat.id, chatjson_out.message_id)
+                else:
+                    bot.delete_message(chatjson_out.chat.id, chatjson_out.message_id)
+                    chatjson_out = bot.reply_to(message,"查询图片生成出错,请重试=-=")
+                    time.sleep(5)
+                    bot.delete_message(chatjson_out.chat.id, chatjson_out.message_id)
 
     else:
         bot.send_chat_action(message.chat.id, 'typing')
@@ -499,25 +624,46 @@ def osu_taiko(message):
 @bot.message_handler(commands=['guosu_catch'])
 def osu_catch(message):
     if get_zl_text(message.text) == False:
-        get_osu_id = osu.sql_tg2osu_id(message.from_user.id)
-        if get_osu_id is False:
-            bot.send_chat_action(message.chat.id, 'typing')
-            bot.reply_to(message,"呜呜呜...指令有问题\n(缺少参数 */guosu_catch_mini [OSU ID/用户名]* )")
-        else:
-            bot.send_chat_action(message.chat.id, 'typing')
-            chatjson_out = bot.reply_to(message,"正在查询,请稍后...")
-            osu_img_bool =  osu.get_osu_img(get_osu_id,"catch",False,message.from_user.id)
-            if osu_img_bool:
-                sti = open('./tmp/'+osu_img_bool, 'rb')
-                bot.send_photo(message.chat.id, sti,reply_to_message_id=message.message_id)
-                sti.close()
-                os.remove('./tmp/'+osu_img_bool)
-                bot.delete_message(chatjson_out.chat.id, chatjson_out.message_id)
+        if message.from_user.username != "Channel_Bot":
+            get_osu_id = osu.sql_tg2osu_id(message.from_user.id)
+            if get_osu_id is False:
+                bot.send_chat_action(message.chat.id, 'typing')
+                bot.reply_to(message,"呜呜呜...指令有问题\n(缺少参数 */guosu_catch_mini [OSU ID/用户名]* )")
             else:
-                bot.delete_message(chatjson_out.chat.id, chatjson_out.message_id)
-                chatjson_out = bot.reply_to(message,"查询图片生成出错,请重试=-=")
-                time.sleep(5)
-                bot.delete_message(chatjson_out.chat.id, chatjson_out.message_id)
+                bot.send_chat_action(message.chat.id, 'typing')
+                chatjson_out = bot.reply_to(message,"正在查询,请稍后...")
+                osu_img_bool =  osu.get_osu_img(get_osu_id,"catch",False,message.from_user.id)
+                if osu_img_bool:
+                    sti = open('./tmp/'+osu_img_bool, 'rb')
+                    bot.send_photo(message.chat.id, sti,reply_to_message_id=message.message_id)
+                    sti.close()
+                    os.remove('./tmp/'+osu_img_bool)
+                    bot.delete_message(chatjson_out.chat.id, chatjson_out.message_id)
+                else:
+                    bot.delete_message(chatjson_out.chat.id, chatjson_out.message_id)
+                    chatjson_out = bot.reply_to(message,"查询图片生成出错,请重试=-=")
+                    time.sleep(5)
+                    bot.delete_message(chatjson_out.chat.id, chatjson_out.message_id)
+        else:
+            get_osu_id = osu.sql_tg2osu_id(message.sender_chat.id)
+            if get_osu_id is False:
+                bot.send_chat_action(message.chat.id, 'typing')
+                bot.reply_to(message,"呜呜呜...指令有问题\n(缺少参数 */guosu_catch_mini [OSU ID/用户名]* )")
+            else:
+                bot.send_chat_action(message.chat.id, 'typing')
+                chatjson_out = bot.reply_to(message,"正在查询,请稍后...")
+                osu_img_bool =  osu.get_osu_img(get_osu_id,"catch",False,message.from_user.id)
+                if osu_img_bool:
+                    sti = open('./tmp/'+osu_img_bool, 'rb')
+                    bot.send_photo(message.chat.id, sti,reply_to_message_id=message.message_id)
+                    sti.close()
+                    os.remove('./tmp/'+osu_img_bool)
+                    bot.delete_message(chatjson_out.chat.id, chatjson_out.message_id)
+                else:
+                    bot.delete_message(chatjson_out.chat.id, chatjson_out.message_id)
+                    chatjson_out = bot.reply_to(message,"查询图片生成出错,请重试=-=")
+                    time.sleep(5)
+                    bot.delete_message(chatjson_out.chat.id, chatjson_out.message_id)
 
     else:
         bot.send_chat_action(message.chat.id, 'typing')
@@ -544,25 +690,46 @@ def osu_catch(message):
 @bot.message_handler(commands=['guosu_mania'])
 def osu_mania(message):
     if get_zl_text(message.text) == False:
-        get_osu_id = osu.sql_tg2osu_id(message.from_user.id)
-        if get_osu_id is False:
-            bot.send_chat_action(message.chat.id, 'typing')
-            bot.reply_to(message,"呜呜呜...指令有问题\n(缺少参数 */guosu_mania [OSU ID/用户名]* )")
-        else:
-            bot.send_chat_action(message.chat.id, 'typing')
-            chatjson_out = bot.reply_to(message,"正在查询,请稍后...")
-            osu_img_bool =  osu.get_osu_img(get_osu_id,"mania",False,message.from_user.id)
-            if osu_img_bool:
-                sti = open('./tmp/'+osu_img_bool, 'rb')
-                bot.send_photo(message.chat.id, sti,reply_to_message_id=message.message_id)
-                sti.close()
-                os.remove('./tmp/'+osu_img_bool)
-                bot.delete_message(chatjson_out.chat.id, chatjson_out.message_id)
+        if message.from_user.username != "Channel_Bot":
+            get_osu_id = osu.sql_tg2osu_id(message.from_user.id)
+            if get_osu_id is False:
+                bot.send_chat_action(message.chat.id, 'typing')
+                bot.reply_to(message,"呜呜呜...指令有问题\n(缺少参数 */guosu_mania [OSU ID/用户名]* )")
             else:
-                bot.delete_message(chatjson_out.chat.id, chatjson_out.message_id)
-                chatjson_out = bot.reply_to(message,"查询图片生成出错,请重试=-=")
-                time.sleep(5)
-                bot.delete_message(chatjson_out.chat.id, chatjson_out.message_id)
+                bot.send_chat_action(message.chat.id, 'typing')
+                chatjson_out = bot.reply_to(message,"正在查询,请稍后...")
+                osu_img_bool =  osu.get_osu_img(get_osu_id,"mania",False,message.from_user.id)
+                if osu_img_bool:
+                    sti = open('./tmp/'+osu_img_bool, 'rb')
+                    bot.send_photo(message.chat.id, sti,reply_to_message_id=message.message_id)
+                    sti.close()
+                    os.remove('./tmp/'+osu_img_bool)
+                    bot.delete_message(chatjson_out.chat.id, chatjson_out.message_id)
+                else:
+                    bot.delete_message(chatjson_out.chat.id, chatjson_out.message_id)
+                    chatjson_out = bot.reply_to(message,"查询图片生成出错,请重试=-=")
+                    time.sleep(5)
+                    bot.delete_message(chatjson_out.chat.id, chatjson_out.message_id)
+        else:
+            get_osu_id = osu.sql_tg2osu_id(message.sender_chat.id)
+            if get_osu_id is False:
+                bot.send_chat_action(message.chat.id, 'typing')
+                bot.reply_to(message,"呜呜呜...指令有问题\n(缺少参数 */guosu_mania [OSU ID/用户名]* )")
+            else:
+                bot.send_chat_action(message.chat.id, 'typing')
+                chatjson_out = bot.reply_to(message,"正在查询,请稍后...")
+                osu_img_bool =  osu.get_osu_img(get_osu_id,"mania",False,message.from_user.id)
+                if osu_img_bool:
+                    sti = open('./tmp/'+osu_img_bool, 'rb')
+                    bot.send_photo(message.chat.id, sti,reply_to_message_id=message.message_id)
+                    sti.close()
+                    os.remove('./tmp/'+osu_img_bool)
+                    bot.delete_message(chatjson_out.chat.id, chatjson_out.message_id)
+                else:
+                    bot.delete_message(chatjson_out.chat.id, chatjson_out.message_id)
+                    chatjson_out = bot.reply_to(message,"查询图片生成出错,请重试=-=")
+                    time.sleep(5)
+                    bot.delete_message(chatjson_out.chat.id, chatjson_out.message_id)
 
     else:
         bot.send_chat_action(message.chat.id, 'typing')
@@ -588,40 +755,73 @@ def osu_mania(message):
 
 @bot.message_handler(commands=['guosu_bind'])
 def osu_bind(message):
-    get_osu_id = osu.sql_tg2osu_id(message.from_user.id)
-    if get_osu_id is not False:
-        get_osu_name = osu.get_osuid(get_osu_id)
-        bot.send_chat_action(message.chat.id, 'typing')
-        bot.reply_to(message,"您已经绑定了 *"+str(get_osu_name["username"])+"* \n 如需解绑请使用 */guosu_unbind* 指令")
-        return None
-
-    if get_zl_text(message.text) == False:
-        bot.send_chat_action(message.chat.id, 'typing')
-        bot.reply_to(message,"呜呜呜...指令有问题\n(指令格式 */guosu_bind [ID/用户名]* 来绑定)")
-    else:
+    if message.from_user.username != "Channel_Bot":
         get_osu_id = osu.sql_tg2osu_id(message.from_user.id)
         if get_osu_id is not False:
             get_osu_name = osu.get_osuid(get_osu_id)
             bot.send_chat_action(message.chat.id, 'typing')
             bot.reply_to(message,"您已经绑定了 *"+str(get_osu_name["username"])+"* \n 如需解绑请使用 */guosu_unbind* 指令")
-        else:
+            return None
+    else:
+        get_osu_id = osu.sql_tg2osu_id(message.sender_chat.id)
+        if get_osu_id is not False:
+            get_osu_name = osu.get_osuid(get_osu_id)
             bot.send_chat_action(message.chat.id, 'typing')
-            chatjson_bind = bot.reply_to(message,"正在绑定...")
-            try:
-                get_osu_id = osu.get_osuid(get_zl_text(message.text))
-                if osu.sql_osu2tg_id(get_osu_id["user_id"]) is False:
-                    osu.sql_wq(message.from_user.id,get_osu_id["user_id"])
-                    bot.edit_message_text("*绑定成功!*",chatjson_bind.chat.id, chatjson_bind.message_id)
+            bot.reply_to(message,"您已经绑定了 *"+str(get_osu_name["username"])+"* \n 如需解绑请使用 */guosu_unbind* 指令")
+            return None
+
+    if get_zl_text(message.text) == False:
+        bot.send_chat_action(message.chat.id, 'typing')
+        bot.reply_to(message,"呜呜呜...指令有问题\n(指令格式 */guosu_bind [ID/用户名]* 来绑定)")
+    else:
+        if message.from_user.username != "Channel_Bot":
+            get_osu_id = osu.sql_tg2osu_id(message.from_user.id)
+            if get_osu_id is not False:
+                get_osu_name = osu.get_osuid(get_osu_id)
+                bot.send_chat_action(message.chat.id, 'typing')
+                bot.reply_to(message,"您已经绑定了 *"+str(get_osu_name["username"])+"* \n 如需解绑请使用 */guosu_unbind* 指令")
+            else:
+                bot.send_chat_action(message.chat.id, 'typing')
+                chatjson_bind = bot.reply_to(message,"正在绑定...")
+                try:
+                    get_osu_id = osu.get_osuid(get_zl_text(message.text))
+                    if osu.sql_osu2tg_id(get_osu_id["user_id"]) is False:
+                        osu.sql_wq(message.from_user.id,get_osu_id["user_id"])
+                        bot.edit_message_text("*绑定成功!*",chatjson_bind.chat.id, chatjson_bind.message_id)
+                        time.sleep(10)
+                        bot.delete_message(chatjson_bind.chat.id, chatjson_bind.message_id)
+                    else:
+                        bot.edit_message_text("抱歉,该 OSU ID 已经绑定其他 Telegram ID,如需绑定请联系机器人管理员!",chatjson_bind.chat.id, chatjson_bind.message_id)
+                        time.sleep(10)
+                        bot.delete_message(chatjson_bind.chat.id, chatjson_bind.message_id)
+                except Exception as err:
+                    bot.edit_message_text("*绑定失败*,请检查 OSU ID 是否正确或者联系机器人管理员!",chatjson_bind.chat.id, chatjson_bind.message_id)
                     time.sleep(10)
                     bot.delete_message(chatjson_bind.chat.id, chatjson_bind.message_id)
-                else:
-                    bot.edit_message_text("抱歉,该 OSU ID 已经绑定其他 Telegram ID,如需绑定请联系机器人管理员!",chatjson_bind.chat.id, chatjson_bind.message_id)
+        else:
+            get_osu_id = osu.sql_tg2osu_id(message.sender_chat.id)
+            if get_osu_id is not False:
+                get_osu_name = osu.get_osuid(get_osu_id)
+                bot.send_chat_action(message.chat.id, 'typing')
+                bot.reply_to(message,"您已经绑定了 *"+str(get_osu_name["username"])+"* \n 如需解绑请使用 */guosu_unbind* 指令")
+            else:
+                bot.send_chat_action(message.chat.id, 'typing')
+                chatjson_bind = bot.reply_to(message,"正在绑定...")
+                try:
+                    get_osu_id = osu.get_osuid(get_zl_text(message.text))
+                    if osu.sql_osu2tg_id(get_osu_id["user_id"]) is False:
+                        osu.sql_wq(message.sender_chat.id,get_osu_id["user_id"])
+                        bot.edit_message_text("*绑定成功!*",chatjson_bind.chat.id, chatjson_bind.message_id)
+                        time.sleep(10)
+                        bot.delete_message(chatjson_bind.chat.id, chatjson_bind.message_id)
+                    else:
+                        bot.edit_message_text("抱歉,该 OSU ID 已经绑定其他 Telegram ID,如需绑定请联系机器人管理员!",chatjson_bind.chat.id, chatjson_bind.message_id)
+                        time.sleep(10)
+                        bot.delete_message(chatjson_bind.chat.id, chatjson_bind.message_id)
+                except Exception as err:
+                    bot.edit_message_text("*绑定失败*,请检查 OSU ID 是否正确或者联系机器人管理员!",chatjson_bind.chat.id, chatjson_bind.message_id)
                     time.sleep(10)
                     bot.delete_message(chatjson_bind.chat.id, chatjson_bind.message_id)
-            except Exception as err:
-                bot.edit_message_text("*绑定失败*,请检查 OSU ID 是否正确或者联系机器人管理员!",chatjson_bind.chat.id, chatjson_bind.message_id)
-                time.sleep(10)
-                bot.delete_message(chatjson_bind.chat.id, chatjson_bind.message_id)
 
 @bot.message_handler(commands=['guosu_unbind'])
 def osu_unbind(message):
