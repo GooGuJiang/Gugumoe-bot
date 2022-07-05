@@ -927,7 +927,8 @@ def gu_eat(message):
             img_url = bot.get_file_url(out_img_file_id.photo.big_file_id)
         
     except Exception as err:
-        bot.reply_to(message, "呜呜呜...请使用 */gu_eat* 回复一个人的消息 ")
+        bot.reply_to(message, "呜呜呜...咕小酱获取不到此人的头像 ")
+        bot.delete_message(del_json.chat.id, del_json.message_id)
         return None
     
     if bot_config['proxybool'] == True:
