@@ -46,7 +46,7 @@ def jrrp_text_init(nub_in):
         return "还好还好只有" + str(nub)
     elif nub >= 20:
         return str(nub)+"这数字太....要命了"
-    elif nub >= 1:
+    elif nub >= 0:
         return "抽大奖¿"
 
 def jrrp_text(nub_in):
