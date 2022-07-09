@@ -914,6 +914,13 @@ def gu_eat(message):
     #print(message)
     bot.send_chat_action(message.chat.id, 'typing')
     jsonjx = json.loads(json.dumps(message.json))
+    
+    try:
+        jsonjx['reply_to_message']
+    except:
+        bot.reply_to(message, "呜呜呜...请使用 */gu_eat* 回复一个人的消息 ")
+        return None
+
     del_json = bot.reply_to(message, '正在生成图片...')
     try:
         if jsonjx['reply_to_message']["from"]["id"] != 136817688:
