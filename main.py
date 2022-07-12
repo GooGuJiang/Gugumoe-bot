@@ -852,12 +852,17 @@ def osu_played(message):
             get_osu_id = osu.sql_tg2osu_id(message.from_user.id)
             if get_osu_id is False:
                 bot.send_chat_action(message.chat.id, 'typing')
-                bot.reply_to(message,"呜呜呜...指令有问题\n(缺少参数 */guosu_new [OSU ID/用户名]* )")
+                bot.reply_to(message,"呜呜呜...指令有问题\n(缺少参数 */guosu_played [OSU ID/用户名]* )")
             else:
                 bot.send_chat_action(message.chat.id, 'typing')
                 chatjson_out = bot.reply_to(message,"正在查询,请稍后...")
-                get_osu_new_info = osu.get_osu_new_played(get_osu_id)
-                get_osu_map_json = osu.get_osu_beatmaps(get_osu_new_info["beatmap_id"])
+                try:
+                    get_osu_new_info = osu.get_osu_new_played(get_json["user_id"])
+                    get_osu_map_json = osu.get_osu_beatmaps(get_osu_new_info["beatmap_id"])
+                except:
+                    bot.edit_message_text("*查询失败*,没有查询到您的最近游玩记录!",chatjson_out.chat.id, chatjson_out.message_id)
+                    return None
+
                 try:
                     get_pp = str(get_osu_new_info["pp"])
                 except:
@@ -875,8 +880,13 @@ def osu_played(message):
             else:
                 bot.send_chat_action(message.chat.id, 'typing')
                 chatjson_out = bot.reply_to(message,"正在查询,请稍后...")
-                get_osu_new_info = osu.get_osu_new_played(get_osu_id)
-                get_osu_map_json = osu.get_osu_beatmaps(get_osu_new_info["beatmap_id"])
+                try:
+                    get_osu_new_info = osu.get_osu_new_played(get_json["user_id"])
+                    get_osu_map_json = osu.get_osu_beatmaps(get_osu_new_info["beatmap_id"])
+                except:
+                    bot.edit_message_text("*查询失败*,没有查询到您的最近游玩记录!",chatjson_out.chat.id, chatjson_out.message_id)
+                    return None
+                    
                 try:
                     get_pp = str(get_osu_new_info["pp"])
                 except:
@@ -892,8 +902,13 @@ def osu_played(message):
         chatjson_out = bot.reply_to(message,"正在查询,请稍后...")
         try:
             get_json = osu.get_osuid(get_zl_text(message.text))
-            get_osu_new_info = osu.get_osu_new_played(get_json["user_id"])
-            get_osu_map_json = osu.get_osu_beatmaps(get_osu_new_info["beatmap_id"])
+            try:
+                get_osu_new_info = osu.get_osu_new_played(get_json["user_id"])
+                get_osu_map_json = osu.get_osu_beatmaps(get_osu_new_info["beatmap_id"])
+            except:
+                bot.edit_message_text("*查询失败*,没有查询到此玩家的最近游玩记录!",chatjson_out.chat.id, chatjson_out.message_id)
+                return None
+
             try:
                 get_pp = str(get_osu_new_info["pp"])
             except:
