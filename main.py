@@ -844,6 +844,75 @@ def osu_unbind(message):
                 time.sleep(10)
                 bot.delete_message(chatjson_bind.chat.id, chatjson_bind.message_id)
 
+
+@bot.message_handler(commands=['guosu_played'])
+def osu_played(message):
+    if get_zl_text(message.text) == False:
+        if message.from_user.username != "Channel_Bot":
+            get_osu_id = osu.sql_tg2osu_id(message.from_user.id)
+            if get_osu_id is False:
+                bot.send_chat_action(message.chat.id, 'typing')
+                bot.reply_to(message,"呜呜呜...指令有问题\n(缺少参数 */guosu_new [OSU ID/用户名]* )")
+            else:
+                bot.send_chat_action(message.chat.id, 'typing')
+                chatjson_out = bot.reply_to(message,"正在查询,请稍后...")
+                get_osu_new_info = osu.get_osu_new_played(get_osu_id)
+                get_osu_map_json = osu.get_osu_beatmaps(get_osu_new_info["beatmap_id"])
+                try:
+                    get_pp = str(get_osu_new_info["pp"])
+                except:
+                    get_pp = "0"
+
+                out_text = f"*最新游玩成绩*\n{get_osu_map_json['title_unicode']} - {get_osu_map_json['artist_unicode']}\n获得PP: *{get_pp}*\n评级: *{get_osu_new_info['rank']}*\n分数: *{get_osu_new_info['score']}*\n最大连击数: *{get_osu_new_info['maxcombo']}*"
+                out_text +=f"\n300G: *{get_osu_new_info['countgeki']}*\n300: *{get_osu_new_info['count300']}*\n100K: *{get_osu_new_info['countkatu']}*\n100: *{get_osu_new_info['count100']}*\n50: *{get_osu_new_info['count50']}*\nMiss: *{get_osu_new_info['countmiss']}*\n"
+                out_text +=f"游玩时间: *{osu.time_cn(get_osu_new_info['date'])}*"
+                bot.edit_message_text(out_text,chatjson_out.chat.id, chatjson_out.message_id)
+        else:
+            get_osu_id = osu.sql_tg2osu_id(message.sender_chat.id)
+            if get_osu_id is False:
+                bot.send_chat_action(message.chat.id, 'typing')
+                bot.reply_to(message,"呜呜呜...指令有问题\n(缺少参数 */guosu_mania [OSU ID/用户名]* )")
+            else:
+                bot.send_chat_action(message.chat.id, 'typing')
+                chatjson_out = bot.reply_to(message,"正在查询,请稍后...")
+                get_osu_new_info = osu.get_osu_new_played(get_osu_id)
+                get_osu_map_json = osu.get_osu_beatmaps(get_osu_new_info["beatmap_id"])
+                try:
+                    get_pp = str(get_osu_new_info["pp"])
+                except:
+                    get_pp = "0"
+
+                out_text = f"*最新游玩成绩*\n{get_osu_map_json['title_unicode']} - {get_osu_map_json['artist_unicode']}\n获得PP: *{get_pp}*\n评级: *{get_osu_new_info['rank']}*\n分数: *{get_osu_new_info['score']}*\n最大连击数: *{get_osu_new_info['maxcombo']}*"
+                out_text +=f"\n300G: *{get_osu_new_info['countgeki']}*\n300: *{get_osu_new_info['count300']}*\n100K: *{get_osu_new_info['countkatu']}*\n100: *{get_osu_new_info['count100']}*\n50: *{get_osu_new_info['count50']}*\nMiss: *{get_osu_new_info['countmiss']}*\n"
+                out_text +=f"游玩时间: *{osu.time_cn(get_osu_new_info['date'])}*"
+                bot.edit_message_text(out_text,chatjson_out.chat.id, chatjson_out.message_id)
+
+    else:
+        bot.send_chat_action(message.chat.id, 'typing')
+        chatjson_out = bot.reply_to(message,"正在查询,请稍后...")
+        try:
+            get_json = osu.get_osuid(get_zl_text(message.text))
+            get_osu_new_info = osu.get_osu_new_played(get_json["user_id"])
+            get_osu_map_json = osu.get_osu_beatmaps(get_osu_new_info["beatmap_id"])
+            try:
+                get_pp = str(get_osu_new_info["pp"])
+            except:
+                get_pp = "0"
+
+            out_text = f"*最新游玩成绩*\n{get_osu_map_json['title_unicode']} - {get_osu_map_json['artist_unicode']}\n获得PP: *{get_pp}*\n评级: *{get_osu_new_info['rank']}*\n分数: *{get_osu_new_info['score']}*\n最大连击数: *{get_osu_new_info['maxcombo']}*"
+            out_text +=f"\n300G: *{get_osu_new_info['countgeki']}*\n300: *{get_osu_new_info['count300']}*\n100K: *{get_osu_new_info['countkatu']}*\n100: *{get_osu_new_info['count100']}*\n50: *{get_osu_new_info['count50']}*\nMiss: *{get_osu_new_info['countmiss']}*\n"
+            out_text +=f"游玩时间: *{osu.time_cn(get_osu_new_info['date'])}*"
+            bot.edit_message_text(out_text,chatjson_out.chat.id, chatjson_out.message_id)
+
+           
+        except Exception as err:
+            print(err)
+            bot.edit_message_text("*查询失败*,请检查 OSU ID 是否正确或者联系机器人管理员!",chatjson_out.chat.id, chatjson_out.message_id)
+            time.sleep(10)
+            bot.delete_message(chatjson_out.chat.id, chatjson_out.message_id)
+
+
+
 @bot.message_handler(commands=['guosu_help'])
 def osu_help(message):
     bot.send_chat_action(message.chat.id, 'typing')
@@ -857,6 +926,7 @@ def osu_help(message):
 */guosu_taiko 查询太鼓模式*
 */guosu_catch 查询接水果模式*
 */guosu_mania 查询下落模式*
+*/guosu_played 查询最新游玩成绩(测试)*
 */guosu_bind 绑定 OSU ID*
 */guosu_unbind 解除绑定 OSU ID*
 */guosu_help 查看本帮助*

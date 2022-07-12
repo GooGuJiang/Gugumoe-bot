@@ -4,6 +4,8 @@ import yaml
 import cairosvg
 import os
 import sqlite3
+import time
+from datetime import datetime,timezone,timedelta
 
 if os.path.exists("./user/osu/data.db") is False: #初始化
     osu_con = sqlite3.connect("./user/osu/data.db")
@@ -66,6 +68,44 @@ def get_osuid(name):
         return json.loads(get_res.text)[0]
     except Exception as err:
         return False
+
+def get_osu_new_played(name):
+    try:
+        
+        with open('config.yml', 'r') as f: #读取配置文件?
+            bottok = yaml.load(f.read(),Loader=yaml.FullLoader)
+        token = bottok['osuToken'] 
+        url="https://osu.ppy.sh/api/get_user_recent?k="+token+"&u="+str(name)
+        if bottok['proxybool'] == True:
+            proxies = bottok['proxy'] 
+        else:
+            proxies = None
+        get_res = requests.get(url, proxies=proxies)
+        return json.loads(get_res.text)[0]
+    except Exception as err:
+        return False
+
+def get_osu_beatmaps(mapid):
+    try:
+        
+        with open('config.yml', 'r') as f: #读取配置文件?
+            bottok = yaml.load(f.read(),Loader=yaml.FullLoader)
+        token = bottok['osuToken'] 
+        url="https://osu.ppy.sh/api/get_beatmaps?k="+token+"&b="+str(mapid)
+        if bottok['proxybool'] == True:
+            proxies = bottok['proxy'] 
+        else:
+            proxies = None
+        get_res = requests.get(url, proxies=proxies)
+        return json.loads(get_res.text)[0]
+    except Exception as err:
+        return False
+
+def time_cn(timein):
+    timeArray = time.strptime(timein, "%Y-%m-%d %H:%M:%S")
+    given_datetime = datetime(timeArray.tm_year, timeArray.tm_mon, timeArray.tm_mday,timeArray.tm_hour, timeArray.tm_min, timeArray.tm_sec) # 指定时间datetime.datetime(2022, 3, 31, 16, 0, 1)
+    given_datetime_by_tzinfo = given_datetime.replace(tzinfo=timezone.utc) 
+    return str(given_datetime_by_tzinfo.astimezone(timezone(timedelta(hours=8))))[:-6]
 
 def sql_tg2osu_id(telegram_id):
     try:
