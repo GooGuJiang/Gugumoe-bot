@@ -857,7 +857,7 @@ def osu_played(message):
                 bot.send_chat_action(message.chat.id, 'typing')
                 chatjson_out = bot.reply_to(message,"正在查询,请稍后...")
                 try:
-                    get_osu_new_info = osu.get_osu_new_played(get_json["user_id"])
+                    get_osu_new_info = osu.get_osu_new_played(get_osu_id)
                     get_osu_map_json = osu.get_osu_beatmaps(get_osu_new_info["beatmap_id"])
                 except:
                     bot.edit_message_text("*查询失败*,没有查询到您的最近游玩记录!",chatjson_out.chat.id, chatjson_out.message_id)
@@ -866,9 +866,9 @@ def osu_played(message):
                 try:
                     get_pp = str(get_osu_new_info["pp"])
                 except:
-                    get_pp = "0"
+                    get_pp = "暂不可用"
 
-                out_text = f"*最新游玩成绩*\n{get_osu_map_json['title_unicode']} - {get_osu_map_json['artist_unicode']}\n获得PP: *{get_pp}*\n评级: *{get_osu_new_info['rank']}*\n分数: *{get_osu_new_info['score']}*\n最大连击数: *{get_osu_new_info['maxcombo']}*"
+                out_text = f"*最新游玩成绩*\n *{get_osu_map_json['title_unicode']} - {get_osu_map_json['artist_unicode']}*\n获得PP: *{get_pp}*\n评级: *{get_osu_new_info['rank']}*\n分数: *{get_osu_new_info['score']}*\n最大连击数: *{get_osu_new_info['maxcombo']}*"
                 out_text +=f"\n300G: *{get_osu_new_info['countgeki']}*\n300: *{get_osu_new_info['count300']}*\n100K: *{get_osu_new_info['countkatu']}*\n100: *{get_osu_new_info['count100']}*\n50: *{get_osu_new_info['count50']}*\nMiss: *{get_osu_new_info['countmiss']}*\n"
                 out_text +=f"游玩时间: *{osu.time_cn(get_osu_new_info['date'])}*"
                 bot.edit_message_text(out_text,chatjson_out.chat.id, chatjson_out.message_id)
@@ -881,16 +881,15 @@ def osu_played(message):
                 bot.send_chat_action(message.chat.id, 'typing')
                 chatjson_out = bot.reply_to(message,"正在查询,请稍后...")
                 try:
-                    get_osu_new_info = osu.get_osu_new_played(get_json["user_id"])
+                    get_osu_new_info = osu.get_osu_new_played(get_osu_id)
                     get_osu_map_json = osu.get_osu_beatmaps(get_osu_new_info["beatmap_id"])
                 except:
                     bot.edit_message_text("*查询失败*,没有查询到您的最近游玩记录!",chatjson_out.chat.id, chatjson_out.message_id)
                     return None
-                    
                 try:
                     get_pp = str(get_osu_new_info["pp"])
                 except:
-                    get_pp = "0"
+                    get_pp = "暂不可用"
 
                 out_text = f"*最新游玩成绩*\n{get_osu_map_json['title_unicode']} - {get_osu_map_json['artist_unicode']}\n获得PP: *{get_pp}*\n评级: *{get_osu_new_info['rank']}*\n分数: *{get_osu_new_info['score']}*\n最大连击数: *{get_osu_new_info['maxcombo']}*"
                 out_text +=f"\n300G: *{get_osu_new_info['countgeki']}*\n300: *{get_osu_new_info['count300']}*\n100K: *{get_osu_new_info['countkatu']}*\n100: *{get_osu_new_info['count100']}*\n50: *{get_osu_new_info['count50']}*\nMiss: *{get_osu_new_info['countmiss']}*\n"
@@ -912,7 +911,7 @@ def osu_played(message):
             try:
                 get_pp = str(get_osu_new_info["pp"])
             except:
-                get_pp = "0"
+                get_pp = "暂不可用"
 
             out_text = f"*最新游玩成绩*\n{get_osu_map_json['title_unicode']} - {get_osu_map_json['artist_unicode']}\n获得PP: *{get_pp}*\n评级: *{get_osu_new_info['rank']}*\n分数: *{get_osu_new_info['score']}*\n最大连击数: *{get_osu_new_info['maxcombo']}*"
             out_text +=f"\n300G: *{get_osu_new_info['countgeki']}*\n300: *{get_osu_new_info['count300']}*\n100K: *{get_osu_new_info['countkatu']}*\n100: *{get_osu_new_info['count100']}*\n50: *{get_osu_new_info['count50']}*\nMiss: *{get_osu_new_info['countmiss']}*\n"
