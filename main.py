@@ -25,12 +25,12 @@ if os.path.exists("./config.yml") is False: # 初始化Bot
         f.close()
     logger.info(f"创建文件夹")
     dir_list = ["./img","./tmp","./user","./user/jrrp","./user/shoutmp","./user/osu","./output"]
-    for i in range(0,len(dir_list)):
-        if os.path.exists(dir_list[i]) == False:
-            logger.info(f"正在创建 "+str(dir_list[i]))
-            os.mkdir(dir_list[i])
+    for d in dir_list:
+        if not os.path.exists(d):
+            logger.info("正在创建 " + d)
+            os.makedirs(d, exist_ok=True)
         else:
-            logger.info(f"已存在"+str(dir_list[i]))
+            logger.info("已存在 " + d)
     logger.info(f"文件夹创建完毕")
     logger.info(f"开始下载表情包文件")
     r =  requests.get("https://gmoe.cc/bot/img.zip")
