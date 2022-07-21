@@ -15,26 +15,26 @@
 ## 👉功能
 | 功能 | 是否实现 |
 | ------- | ------- |
-|今日人品|√|
-|咕|√|
-|能不能好好说话?|√|
-|OSU查询功能|√|
-|Http.Cat|√|
-|IP 测试|√|
-|网易云音乐下载|0%|
+| 今日人品 | ☑️ |
+| 咕 | ☑️ |
+| 能不能好好说话? | ☑️ |
+| OSU查询功能 | ☑️ |
+| Http.Cat | ☑️ |
+| IP 测试 | ☑️ |
+| 网易云音乐下载 | 0% |
 
 ## 👉指令列表
 
-|指令|功能|
+|指令 | 功能 |
 | ------- | ------- |
-|gu | 咕咕咕! |
-|jrrp | 今日人品？|
-|guhhsh | 能不能好好说话?|
-|httpcat | Http.Cat|
-|moetrace  | 番剧截图搜索|
-|guosu_help | OSU功能帮助菜单|
-|guip_ping | Ping|
-|guip_traceroute | 路由跟踪|
+| gu | 咕咕咕! |
+| jrrp | 今日人品？ |
+| guhhsh | 能不能好好说话? |
+| httpcat | Http.Cat |
+| moetrace  | 番剧截图搜索 |
+| guosu_help | OSU功能帮助菜单 |
+| guip_ping | Ping |
+| guip_traceroute | 路由跟踪 |
 
 # 💁‍♀️ 怎么部署?
 1. 确保 `python` 的版本为 3.x
@@ -81,8 +81,8 @@ $ python3 main.py
 | osuToken | OSU API KEY  | str | 56a3261XXXXX109XXXXX79 |
 | proxybool | 是否通过代理 | bool | True |
 | proxy | 代理配置 | json | {'http': 'socks5://127.0.0.1:8089','https': 'socks5://127.0.0.1:8089'} |
-|musicapi|网易云第三方API地址(暂时没用)| str |  http://XXXX:3000 |
-|musicphone|网易云手机号(暂时没用)|int|11451419198|
-|musicpwd|网易云登录密码(暂时没用)|str|XXXXXXXX| 
+| musicapi | 网易云第三方API地址(暂时没用) | str |  http://XXXX:3000 |
+| musicphone | 网易云手机号(暂时没用) | int | 11451419198 |
+| musicpwd | 网易云登录密码(暂时没用) | str | XXXXXXXX | 
 
 **第三方API基于 [NeteaseCloudMusicApi](https://github.com/Binaryify/NeteaseCloudMusicApi) 使用网上公共API请注意安全哦！**
