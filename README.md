@@ -70,7 +70,7 @@ $ python3 main.py
 
 [GTK+ For Windows](https://github.com/tschoonj/GTK-for-Windows-Runtime-Environment-Installer)
 
-`Linux`解决方案使用下面命令安装库即可
+`Linux`解决方案使用下面命令安装`libcairo2`库即可
 
 ```shell
 sudo apt install libffi-dev -y
