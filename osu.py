@@ -1,11 +1,14 @@
 import requests
 import json
 import yaml
-import cairosvg
 import os
 import sqlite3
 import time
 from datetime import datetime,timezone,timedelta
+try:
+    import cairosvg
+except OSError:
+    raise RuntimeError("加载 osu 模块出错啦~ 请安装 GTK+ Runtime Environment!")
 
 if os.path.exists("./user/osu/data.db") is False: #初始化
     osu_con = sqlite3.connect("./user/osu/data.db")
