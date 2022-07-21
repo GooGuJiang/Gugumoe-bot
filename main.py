@@ -11,11 +11,7 @@ import time
 import json
 import glob
 import random
-#额外
-import jrrp
-import hhsh
-import guip
-import make_img
+import traceback
 
 if os.path.exists("./config.yml") is False: # 初始化Bot
     logger.info(f"开始第一次初始化")
@@ -25,12 +21,12 @@ if os.path.exists("./config.yml") is False: # 初始化Bot
         f.close()
     logger.info(f"创建文件夹")
     dir_list = ["./img","./tmp","./user","./user/jrrp","./user/shoutmp","./user/osu","./output"]
-    for i in range(0,len(dir_list)):
-        if os.path.exists(dir_list[i]) == False:
-            logger.info(f"正在创建 "+str(dir_list[i]))
-            os.mkdir(dir_list[i])
+    for d in dir_list:
+        if not os.path.exists(d):
+            logger.info("正在创建 " + d)
+            os.makedirs(d, exist_ok=True)
         else:
-            logger.info(f"已存在"+str(dir[i]))
+            logger.info("已存在 " + d)
     logger.info(f"文件夹创建完毕")
     logger.info(f"开始下载表情包文件")
     r =  requests.get("https://gmoe.cc/bot/img.zip")
@@ -83,6 +79,11 @@ else:
 #初始化结束
 #函数
 
+import jrrp
+import hhsh
+import guip
+import make_img
+
 def get_zl_text(textlt): #指令提取
     try:
         textcomm = textlt
@@ -123,7 +124,7 @@ def send_gu(message):
     except Exception as errr:
         bot.send_chat_action(message.chat.id, 'typing')
         bot.reply_to(message, '呜呜呜....图片没上传及时.......')
-        print(errr)
+        traceback.print_exc()
 
 @bot.message_handler(commands=['guhhsh'])
 def send_nbnhhsh(message):
@@ -219,10 +220,11 @@ def httpcat(message):
             except:
                 chatjson_img = bot.send_photo(message.chat.id, "https://http.cat/404",reply_to_message_id=message.message_id)
         except Exception as boterr:
-            #print(boterr)
+            #traceback.print_exc()
             bot.send_chat_action(message.chat.id, 'typing')
             #bot.edit_message_text('呜呜呜...咕小酱遇到了严重问题......\n错误日志: '+str(boterr),chatjson_img.chat.id, chatjson_img.message_id)
-            chatjson_img = bot.reply_to(message,'呜呜呜...咕小酱遇到了严重问题......\n错误日志: '+str(boterr))
+            #chatjson_img = bot.reply_to(message,'呜呜呜...咕小酱遇到了严重问题......\n错误日志: '+str(boterr))
+            chatjson_img = bot.reply_to(message,'呜呜呜...咕小酱遇到了严重问题......\n错误日志: '+traceback.format_exc())
             time.sleep(3)
             bot.delete_message(chatjson_img.chat.id, chatjson_img.message_id)
 
@@ -920,7 +922,7 @@ def osu_played(message):
 
            
         except Exception as err:
-            print(err)
+            traceback.print_exc()
             bot.edit_message_text("*查询失败*,请检查 OSU ID 是否正确或者联系机器人管理员!",chatjson_out.chat.id, chatjson_out.message_id)
             time.sleep(10)
             bot.delete_message(chatjson_out.chat.id, chatjson_out.message_id)
@@ -1048,7 +1050,7 @@ def gu_eat(message):
         bot.delete_message(del_json.chat.id, del_json.message_id)
         bot.send_chat_action(message.chat.id, 'typing')
         bot.reply_to(message, '呜呜呜....图片没上传及时.......')
-        print(errr)
+        traceback.print_exc()
     
 @bot.inline_handler(lambda query: query.query == 'jrrp')
 def query_jrrpt(inline_query):
@@ -1062,7 +1064,7 @@ def query_jrrpt(inline_query):
         r = types.InlineQueryResultArticle('1', f'今日人品 {localtime.tm_year}-{localtime.tm_mon}-{localtime.tm_mday}', types.InputTextMessageContent("你今天的人品是: {0}\n{1}".format(get_jrrp,jrrp.jrrp_text_init(get_jrrp))),thumb_url="https://s3.bmp.ovh/imgs/2022/07/02/e15481817c097493.jpg",description="测测你今天的人品!",reply_markup=markup)
         bot.answer_inline_query(inline_query.id, [r], cache_time=1)
     except Exception as e:
-        print(e)
+        traceback.print_exc()
 
 @bot.inline_handler(lambda query: True)
 def query_mr(inline_query):
@@ -1076,7 +1078,7 @@ def query_mr(inline_query):
         r = types.InlineQueryResultArticle('5', f'今日人品 {localtime.tm_year}-{localtime.tm_mon}-{localtime.tm_mday}', types.InputTextMessageContent("你今天的人品是: {0}\n{1}".format(get_jrrp,jrrp.jrrp_text_init(get_jrrp))),thumb_url="https://s3.bmp.ovh/imgs/2022/07/02/e15481817c097493.jpg",description="测测你今天的人品!",reply_markup=markup)
         bot.answer_inline_query(inline_query.id, [r], cache_time=1)
     except Exception as e:
-        print(e)
+        traceback.print_exc()
 
 
 
@@ -1091,5 +1093,6 @@ if __name__ == '__main__':
             
 
         except Exception as err:
-            logger.error(f"遇到错误正在重启:"+str(err))
+            logger.error(f"遇到错误正在重启:")
+            traceback.print_exc()
         time.sleep(1)
