@@ -12,7 +12,7 @@ def jrrp_oneload():
         os.makedirs(path, exist_ok=True)
     jrrp_sql_con = sqlite3.connect(path + "/data.db")
     jrrp_sql_cur = jrrp_sql_con.cursor()
-    sql = "CREATE TABLE IF NOT EXISTS jrrp(tg_id TEXT PRIMARY KEY,nub INTEGER,time TEXT)"
+    sql = "CREATE TABLE jrrp(tg_id TEXT PRIMARY KEY,nub INTEGER,time TEXT)"
     jrrp_sql_cur.execute(sql)
     # 关闭游标
     jrrp_sql_cur.close()
@@ -24,7 +24,8 @@ if not os.path.exists("./user/jrrp/data.db"): #初始化
 
 def get_random(userid):
     try:
-        url='https://www.random.org/integers/?num=1&min=0&max=100&col=1&base=10&format=plain&rnd=new'
+        # 使用 `大气噪声` 算法进行随机数生成
+        url = 'https://www.random.org/integers/?num=1&min=0&max=100&col=1&base=10&format=plain&rnd=new'
         res = requests.get(url)
         return res.text.strip("\n")
     except:
@@ -48,41 +49,29 @@ def get_random(userid):
 
 def jrrp_text_init(nub_in):
     nub = int(nub_in)
-    if nub == 100:
-        return "100 人品好评!!!"
-    elif nub >= 90:
-        return "今天的人品非常不错呢"
-    elif nub >= 70:
-        return "哇,人品还挺好的!"
-    elif nub >= 60:
-        return "今天是 非常¿ 不错的一天呢!"
-    elif nub >= 50:
-        return "五五开！"
-    elif nub >= 40:
-        return "还好还好只有" + str(nub)
-    elif nub >= 20:
-        return str(nub)+"这数字太....要命了"
-    elif nub >= 0:
-        return "抽大奖¿"
+    return {
+        nub >= 0:   "抽大奖¿",
+        nub >= 20:  f"{nub} 这数字太....要命了",
+        nub >= 40:  f"还好还好只有 {nub}",
+        nub >= 50:  "五五开！",
+        nub >= 60:  "今天是 非常¿ 不错的一天呢!",
+        nub >= 70:  "哇,人品还挺好的!",
+        nub >= 90:  "今天的人品非常不错呢",
+        nub == 100: "100 人品好评!!!"
+    }[True]
 
 def jrrp_text(nub_in):
     nub = int(nub_in)
-    if nub == 100:
-        return "*100 人品好评!!!*"
-    elif nub >= 90:
-        return "今天的人品非常不错呢"
-    elif nub >= 70:
-        return "哇,人品还挺好的!"
-    elif nub >= 60:
-        return "今天是 *非常¿* 不错的一天呢!"
-    elif nub >= 50:
-        return "五五开！"
-    elif nub >= 40:
-        return "还好还好只有" + str(nub)
-    elif nub >= 20:
-        return str(nub)+"这数字太....要命了"
-    elif nub >= 1:
-        return "*抽大奖¿*"
+    return {
+        nub >= 0:   "*抽大奖¿*",
+        nub >= 20:  f"{nub} 这数字太....要命了",
+        nub >= 40:  f"还好还好只有 {nub}",
+        nub >= 50:  "五五开！",
+        nub >= 60:  "今天是 *非常¿* 不错的一天呢!",
+        nub >= 70:  "哇,人品还挺好的!",
+        nub >= 90:  "今天的人品非常不错呢",
+        nub == 100: "*100 人品好评!!!*"
+    }[True]
 
 def jrrp_get(tgid):
     jrrp_sql_con = sqlite3.connect("./user/jrrp/data.db")
