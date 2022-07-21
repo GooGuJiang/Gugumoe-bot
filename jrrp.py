@@ -5,6 +5,22 @@ import time
 import os
 import requests
 
+def jrrp_oneload():
+    # 检查 `./user/jrrp` 路径是否存在，不存在则创建
+    path = "./user/jrrp"
+    if not os.path.exists(path):
+        os.makedirs(path, exist_ok=True)
+    jrrp_sql_con = sqlite3.connect(path + "/data.db")
+    jrrp_sql_cur = jrrp_sql_con.cursor()
+    sql = "CREATE TABLE IF NOT EXISTS jrrp(tg_id TEXT PRIMARY KEY,nub INTEGER,time TEXT)"
+    jrrp_sql_cur.execute(sql)
+    # 关闭游标
+    jrrp_sql_cur.close()
+    # 断开数据库连接
+    jrrp_sql_con.close()
+
+if not os.path.exists("./user/jrrp/data.db"): #初始化
+    jrrp_oneload()
 
 def get_random(userid):
     try:
@@ -68,20 +84,6 @@ def jrrp_text(nub_in):
     elif nub >= 1:
         return "*抽大奖¿*"
 
-def jrrp_oneload():
-    # 检查 `./user/jrrp` 路径是否存在，不存在则创建
-    path = "./user/jrrp"
-    if not os.path.exists(path):
-        os.makedirs("./user/jrrp", exist_ok=True)
-    jrrp_sql_con = sqlite3.connect(path + "data.db")
-    jrrp_sql_cur = jrrp_sql_con.cursor()
-    sql = "CREATE TABLE IF NOT EXISTS jrrp(tg_id TEXT PRIMARY KEY,nub INTEGER,time TEXT)"
-    jrrp_sql_cur.execute(sql)
-    # 关闭游标
-    jrrp_sql_cur.close()
-    # 断开数据库连接
-    jrrp_sql_con.close()
-
 def jrrp_get(tgid):
     jrrp_sql_con = sqlite3.connect("./user/jrrp/data.db")
     jrrp_sql_cur = jrrp_sql_con.cursor()
@@ -117,7 +119,3 @@ def jrrp_get(tgid):
         jrrp_sql_con.close()
         return random_get
     #print(get_sql)
-
-
-if os.path.exists("./user/jrrp/data.db") is False: #初始化
-    jrrp_oneload()

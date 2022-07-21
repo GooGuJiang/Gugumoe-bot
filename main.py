@@ -1093,5 +1093,6 @@ if __name__ == '__main__':
             
 
         except Exception as err:
-            logger.error(f"遇到错误正在重启:"+str(err))
+            logger.error(f"遇到错误正在重启:")
+            traceback.print_exc()
         time.sleep(1)
