@@ -68,8 +68,9 @@ $ python3 main.py
 # ⚠️注意事项
 在使用该机器人之前，请先安装 ***`GTK+ Runtime Environment`***！否则会出现部分功能 **无法使用、运行报错** 等问题！
 
-[For Windows](https://github.com/tschoonj/GTK-for-Windows-Runtime-Environment-Installer)
-[For Linux](https://github.com/GNOME/gtk)
+[GTK+ For Windows](https://github.com/tschoonj/GTK-for-Windows-Runtime-Environment-Installer)
+
+[GTK+ For Linux](https://github.com/GNOME/gtk)
 
 # 😊配置文件说明
 **请严格使用 YAML 的书写规范进行配置**
