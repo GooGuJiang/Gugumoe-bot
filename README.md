@@ -36,9 +36,8 @@
 + IP 测试 ✅
 + 网易云音乐下载 ❌
 
-
-# 💁‍♀️ 如何部署?
-1. 确保 `python` 的版本为 >= 3.x
+# 💁‍♀️ 怎么部署?
+1. 确保 `python` 的版本为 3.x
 
 2. 将本仓库 `clone` 到本地:
 
@@ -52,22 +51,28 @@ $ git clone https://github.com/GooGuJiang/Gu-Random-Image.git
 $ pip install -r requirements.txt
 ```
 
-3.5. 执行初始化
+4. 执行初始化
 
 ```bash
 $ python3 main.py
 ```
 
-4. 配置 config.yml
+5. 配置 config.yml
 
-5. 启动机器人
+6. 启动机器人
 
 ```bash
 $ python3 main.py
 ```
 
+## ⚠️注意事项
+在使用该机器人之前，请先安装 ***`GTK+ Runtime Environment`***！否则会出现部分功能 **无法使用、运行报错** 等问题！
 
-## 👉指令列表
+[GTK+ For Windows](https://github.com/tschoonj/GTK-for-Windows-Runtime-Environment-Installer)
+
+[GTK+ For Linux](https://github.com/GNOME/gtk)
+
+# 👉指令列表
 
 |指令|功能|
 | ------- | ------- |
