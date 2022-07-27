@@ -1,4 +1,0 @@
-from query_resource_points import get_resource_map_mes,get_resource_list_mes,init_point_list_and_map
-
-
-get_resource_map_mes("test")
