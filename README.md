@@ -70,7 +70,7 @@ $ python3 main.py
 
 [GTK+ For Windows](https://github.com/tschoonj/GTK-for-Windows-Runtime-Environment-Installer)
 
-[GTK+ For Linux](https://github.com/GNOME/gtk)
+[Linux解决方案](https://gmoe.cc/419.html)
 
 # 👉指令列表
 
