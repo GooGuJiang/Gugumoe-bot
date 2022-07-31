@@ -116,7 +116,8 @@ def send_jrrp(message):
 @bot.message_handler(commands=['gu'])
 def send_gu(message):
     try:
-        path_file_name=glob.glob(pathname='./img/*.webp') #获取当前文件夹下个数
+        path_file_name_wjj=os.listdir("./img/") #获取当前文件夹下个数
+        path_file_name=glob.glob(pathname=f'./img/{path_file_name_wjj[random.randint(0,len(path_file_name_wjj)-1)]}/*.webp') #获取当前文件夹下个数
         sti = open(path_file_name[random.randint(0,len(path_file_name)-1)], 'rb')
         bot.send_chat_action(message.chat.id, 'upload_photo')
         bot.send_sticker(message.chat.id, sti,reply_to_message_id=message.message_id)
@@ -950,6 +951,8 @@ def osu_help(message):
 
 @bot.message_handler(commands=['guip_traceroute'])
 def guip_traceroute(message):
+    #bot.reply_to(message,"此功能功能暂不开放")
+    #return None
     input_ip = get_zl_text(message.text)
     if input_ip is False:
         bot.send_chat_action(message.chat.id, 'typing')
@@ -1079,8 +1082,6 @@ def query_mr(inline_query):
         bot.answer_inline_query(inline_query.id, [r], cache_time=1)
     except Exception as e:
         traceback.print_exc()
-
-
 
 #Main   
 if __name__ == '__main__':
