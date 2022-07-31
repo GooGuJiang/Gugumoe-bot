@@ -29,6 +29,7 @@ def get_random(userid):
         res = requests.get(url)
         return res.text.strip("\n")
     except:
+        r = random.SystemRandom()
         out_hash = hash(str(datetime.datetime.now())+str(userid))
         if out_hash < 0:
             out_hash=out_hash*-1
@@ -38,14 +39,14 @@ def get_random(userid):
             if random.randint(0,1) == 1:
                 return 100
             else:
-                return out_str
+                return int(round(r.random()*100,0))
         elif out_str <= 11:
             if random.randint(0,1) == 1:
                 return random.randint(0,10)
             else:
-                return out_str
+                return int(round(r.random()*100,0))
         else:
-            return out_str
+            return int(round(r.random()*100,0))
 
 def jrrp_text_init(nub_in):
     nub = int(nub_in)
