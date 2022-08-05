@@ -12,6 +12,7 @@ import json
 import glob
 import random
 import traceback
+from generator import genImage
 
 if os.path.exists("./config.yml") is False: # 初始化Bot
     logger.info(f"开始第一次初始化")
@@ -1055,6 +1056,40 @@ def gu_eat(message):
         bot.reply_to(message, '呜呜呜....图片没上传及时.......')
         traceback.print_exc()
     
+
+@bot.message_handler(commands=['gu_5000choyen'])
+def gu_5000choyen(message):
+    try:
+        get_text = get_zl_text(message.text)
+        if get_text == False:
+            bot.reply_to(message, "呜呜呜...请使用 */gu_5000choyen* (上半句)|(下半句) 来生成图片 ")
+            return None
+        keyword = get_text
+        del_json = bot.reply_to(message, "咕小酱正在努力生成请稍后...")
+        if '｜' in keyword:
+            keyword=keyword.replace('｜','|')
+        elif '|' in keyword:
+            pass
+        else:
+            bot.reply_to(message, "未检测到分句 格式 (上半句)|(下半句)")
+            return None
+        if message.from_user.username != "Channel_Bot":
+            file_id= message.from_user.id
+        else:
+            file_id= message.sender_chat.id
+        upper=keyword.split("|")[0]
+        downer=keyword.split("|")[1]
+
+        img=genImage(word_a=upper, word_b=downer)
+        img.save(f"./tmp/temp{file_id}.png")
+        sti = open(f"./tmp/temp{file_id}.png", 'rb')
+        bot.send_sticker(message.chat.id, sti,reply_to_message_id=message.message_id)
+        bot.delete_message(del_json.chat.id, del_json.message_id)
+        sti.close()
+        os.remove(f"./tmp/temp{file_id}.png")
+    except:
+         bot.reply_to(message, "呜呜呜...生成图片错误了惹,请尝试重新生成...")
+
 @bot.inline_handler(lambda query: query.query == 'jrrp')
 def query_jrrpt(inline_query):
     try:
