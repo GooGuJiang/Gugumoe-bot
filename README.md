@@ -77,6 +77,8 @@ $ python3 main.py
 |指令|功能|
 | ------- | ------- |
 |gu | 咕咕咕! |
+|gu_eat | 生成一张吃头像贴纸|
+|gu_5000choyen | 生成一张 想要5000兆日元 贴纸|
 |jrrp | 今日人品？|
 |guhhsh | 能不能好好说话?|
 |httpcat | Http.Cat|
