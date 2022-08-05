@@ -120,7 +120,7 @@ def send_gu(message):
         path_file_name_wjj=os.listdir("./img/") #获取当前文件夹下个数
         path_file_name=glob.glob(pathname=f'./img/{path_file_name_wjj[random.randint(0,len(path_file_name_wjj)-1)]}/*.webp') #获取当前文件夹下个数
         sti = open(path_file_name[random.randint(0,len(path_file_name)-1)], 'rb')
-        bot.send_chat_action(message.chat.id, 'upload_photo')
+        bot.send_chat_action(message.chat.id, 'choose_sticker')
         bot.send_sticker(message.chat.id, sti,reply_to_message_id=message.message_id)
         sti.close()
     except Exception as errr:
@@ -1044,7 +1044,7 @@ def gu_eat(message):
 
     try:
         sti = open(out_rl, 'rb')
-        bot.send_chat_action(message.chat.id, 'upload_photo')
+        bot.send_chat_action(message.chat.id, 'choose_sticker')
         bot.send_sticker(message.chat.id, sti,reply_to_message_id=message.message_id)
         bot.delete_message(del_json.chat.id, del_json.message_id)
         sti.close()
@@ -1060,6 +1060,7 @@ def gu_eat(message):
 @bot.message_handler(commands=['gu_5000choyen'])
 def gu_5000choyen(message):
     try:
+        bot.send_chat_action(message.chat.id, 'typing')
         get_text = get_zl_text(message.text)
         if get_text == False:
             bot.reply_to(message, "呜呜呜...请使用 */gu_5000choyen* (上半句)|(下半句) 来生成图片 ")
@@ -1079,7 +1080,7 @@ def gu_5000choyen(message):
             file_id= message.sender_chat.id
         upper=keyword.split("|")[0]
         downer=keyword.split("|")[1]
-
+        bot.send_chat_action(message.chat.id, 'choose_sticker')
         img=genImage(word_a=upper, word_b=downer)
         img.save(f"./tmp/temp{file_id}.png")
         sti = open(f"./tmp/temp{file_id}.png", 'rb')
