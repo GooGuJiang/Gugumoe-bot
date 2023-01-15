@@ -50,8 +50,6 @@ if os.path.exists("./config.yml") is False:  # 初始化Bot
     logger.info(f"文件解压完毕")
     logger.info(f"清除缓存")
     os.remove("./tmp/img.zip")
-    import jrrp
-    jrrp.jrrp_oneload()
     logger.info(f"初始化完毕请填写配置文件然后重新运行本程序!")
     sys.exit()
 else:
