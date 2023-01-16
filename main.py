@@ -1193,9 +1193,9 @@ def gu_test(message):
         mkjson = '{"ip":"'+str(get_text)+'","u":"'+str(user_id)+'","do":"'+str(do_list[i])+'"}'
         btn = types.InlineKeyboardButton(name_list[i], callback_data=str(mkjson))
         markup.add(btn)
-        print(len(mkjson.encode('utf-8')),mkjson)
+        #print(len(mkjson.encode('utf-8')),mkjson)
     if len(mkjson.encode('utf-8')) > 64:
-        bot.edit_message_text(f"抱歉域名长度不能超过{64-len(mkjson.encode('utf-8'))}个字符,如果超过请使用IP地址",sc_text_go.chat.id, sc_text_go.message_id)
+        bot.edit_message_text(f"抱歉域名长度不能超过 *29* 个字符,如果超过请使用IP地址",sc_text_go.chat.id, sc_text_go.message_id)
         return None
     bot.edit_message_text("请选择需要测试网际协议版本:",sc_text_go.chat.id, sc_text_go.message_id,reply_markup=markup)
 
