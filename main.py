@@ -1182,7 +1182,7 @@ def callback_handle(call):
             if guip.yes_or_no_ip(out_json["ip"]) == False:
                 ips_record = dns_query.dns_lookup(out_json["ip"])
                 if len(ips_record.answer) == 0:
-                    bot.edit_message_text("无法解析该地址,请检查域名是否正确",call.json["message"]["chat"]["id"],call.message.id)
+                    bot.edit_message_text("无法解析该地址,请检查域名或地址是否正确",call.json["message"]["chat"]["id"],call.message.id)
                     return None
                 bot.edit_message_text(f"正在路由追踪(V4) *{ips_record.answer[0]}* 请稍后...",call.json["message"]["chat"]["id"],call.message.id)
                 p=subprocess.Popen(f"nexttrace {ips_record.answer[0]}", shell=True, stdout=subprocess.PIPE,stderr=subprocess.STDOUT)
@@ -1206,7 +1206,7 @@ def callback_handle(call):
                 bot.edit_message_text(f"正在上传图片请稍后...",call.json["message"]["chat"]["id"],call.message.id)
                 bot.send_photo(call.json["message"]["chat"]["id"], open(f'./tmp/{call.from_user.id}-ip.jpg', 'rb'),reply_to_message_id=call.message.id)
                 os.remove(f'./tmp/{call.from_user.id}-ip.jpg')
-                bot.edit_message_text(f"已完成测试",call.json["message"]["chat"]["id"],call.message.id)
+                bot.edit_message_text(f"已完成路由跟踪",call.json["message"]["chat"]["id"],call.message.id)
     
     if out_json["do"] == "iptest_v6":#识别
         #if guip.yes_or_no_ip(out_json["ip"]) == True:
@@ -1227,7 +1227,7 @@ def callback_handle(call):
             if guip.yes_or_no_ip6(out_json["ip"]) == False:
                 ips_record = dns_query.dns_lookup6(out_json["ip"])
                 if len(ips_record.answer) == 0:
-                    bot.edit_message_text("无法解析该地址,请检查域名是否正确",call.json["message"]["chat"]["id"],call.message.id)
+                    bot.edit_message_text("无法解析该地址,请检查域名或地址是否正确",call.json["message"]["chat"]["id"],call.message.id)
                     return None
                 bot.edit_message_text(f"正在路由追踪(V6) *{ips_record.answer[0]}* 请稍后...",call.json["message"]["chat"]["id"],call.message.id)
                 p=subprocess.Popen(f"nexttrace {ips_record.answer[0]}", shell=True, stdout=subprocess.PIPE,stderr=subprocess.STDOUT)
@@ -1251,7 +1251,7 @@ def callback_handle(call):
                 bot.edit_message_text(f"正在上传图片请稍后...",call.json["message"]["chat"]["id"],call.message.id)
                 bot.send_photo(call.json["message"]["chat"]["id"], open(f'./tmp/{call.from_user.id}-ip.jpg', 'rb'),reply_to_message_id=call.message.id)
                 os.remove(f'./tmp/{call.from_user.id}-ip.jpg')
-                bot.edit_message_text(f"已完成测试",call.json["message"]["chat"]["id"],call.message.id)
+                bot.edit_message_text(f"已完成路由跟踪",call.json["message"]["chat"]["id"],call.message.id)
 
 
 @bot.inline_handler(lambda query: query.query == 'jrrp')
