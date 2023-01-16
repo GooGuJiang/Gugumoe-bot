@@ -1118,25 +1118,85 @@ def gu_5000choyen(message):
 
 @bot.message_handler(commands=['guip_trace'])
 def gu_test(message):
-    get_text = get_zl_text(message.text,True)
-    if get_text is False:
-        bot.send_chat_action(message.chat.id, 'typing')
-        bot.reply_to(message, "呜呜呜...指令有问题\n(指令格式 */guip_trace [ip]*)")
-        return None
-    markup = types.InlineKeyboardMarkup()
-    get_text = shlex.quote(get_text)
-    sc_text_go=bot.reply_to(message,"请稍等...")
-    do_list = ["iptest_v4","iptest_v6","iptest_qs"]
-    name_list = ["V4","V6","取消"]
     if message.from_user.username == "Channel_Bot":
         bot.edit_message_text("该功能不支持频道马甲使用...",sc_text_go.chat.id, sc_text_go.message_id)
         return None
     else:
         user_id = message.from_user.id
+
+    get_text = get_zl_text(message.text,True)
+    if get_text is False:
+        bot.send_chat_action(message.chat.id, 'typing')
+        bot.reply_to(message, "呜呜呜...指令有问题\n(指令格式 */guip_trace [ip]*)")
+        return None
+
+    markup = types.InlineKeyboardMarkup()
+    get_text = shlex.quote(get_text)
+    sc_text_go=bot.reply_to(message,"请稍等...")
+
+    if guip.yes_or_no_ip(get_text) == True:
+        import subprocess
+        bot.edit_message_text(f"正在路由追踪(V4) *{get_text}* 请稍后...",sc_text_go.chat.id,sc_text_go.message_id)
+        p=subprocess.Popen(f"nexttrace {get_text}", shell=True, stdout=subprocess.PIPE,stderr=subprocess.STDOUT)
+        tmp_text = ""
+        while p.poll() is None:
+            line=p.stdout.readline().decode("utf8")
+            line=line.replace('\n', '')
+            tmp_text += line + "\n"
+            #print(line)
+
+        for i in range(50):#去除多余空行
+            tmp_text= tmp_text.strip("\n")
+        
+        bot.edit_message_text(f"正在生成图片请稍后...",sc_text_go.chat.id,sc_text_go.message_id)
+        text_list_tmp = tmp_text.split("\n")
+        make_img_bool = guip.make_ip_img(text_list_tmp,user_id)
+        if make_img_bool == True:
+            bot.edit_message_text(f"正在上传图片请稍后...",sc_text_go.chat.id,sc_text_go.message_id)
+            bot.send_photo(sc_text_go.chat.id, open(f'./tmp/{user_id}-ip.jpg', 'rb'),reply_to_message_id=sc_text_go.message_id)
+            os.remove(f'./tmp/{user_id}-ip.jpg')
+            bot.edit_message_text(f"已完成路由跟踪",sc_text_go.chat.id,sc_text_go.message_id)
+        else:
+            bot.edit_message_text(f"生成图片失败,请稍后再试",sc_text_go.chat.id,sc_text_go.message_id)
+        return None
+
+    if guip.yes_or_no_ip6(get_text) == True:
+        import subprocess
+        bot.edit_message_text(f"正在路由追踪(V6) *{get_text}* 请稍后...",sc_text_go.chat.id,sc_text_go.message_id)
+        p=subprocess.Popen(f"nexttrace {get_text}", shell=True, stdout=subprocess.PIPE,stderr=subprocess.STDOUT)
+        tmp_text = ""
+        while p.poll() is None:
+            line=p.stdout.readline().decode("utf8")
+            line=line.replace('\n', '')
+            tmp_text += line + "\n"
+            #print(line)
+
+        for i in range(50):#去除多余空行
+            tmp_text= tmp_text.strip("\n")
+        
+        bot.edit_message_text(f"正在生成图片请稍后...",sc_text_go.chat.id,sc_text_go.message_id)
+        text_list_tmp = tmp_text.split("\n")
+        make_img_bool = guip.make_ip_img(text_list_tmp,user_id)
+        if make_img_bool == True:
+            bot.edit_message_text(f"正在上传图片请稍后...",sc_text_go.chat.id,sc_text_go.message_id)
+            bot.send_photo(sc_text_go.chat.id, open(f'./tmp/{user_id}-ip.jpg', 'rb'),reply_to_message_id=sc_text_go.message_id)
+            os.remove(f'./tmp/{user_id}-ip.jpg')
+            bot.edit_message_text(f"已完成路由跟踪",sc_text_go.chat.id,sc_text_go.message_id)
+        else:
+            bot.edit_message_text(f"生成图片失败,请稍后再试",sc_text_go.chat.id,sc_text_go.message_id)
+        return None
+
+    do_list = ["4","6","q"]
+    name_list = ["V4","V6","取消"]
+    
     for i in range(0,3):
         mkjson = '{"ip":"'+str(get_text)+'","u":"'+str(user_id)+'","do":"'+str(do_list[i])+'"}'
         btn = types.InlineKeyboardButton(name_list[i], callback_data=str(mkjson))
         markup.add(btn)
+        print(len(mkjson.encode('utf-8')),mkjson)
+    if len(mkjson.encode('utf-8')) > 64:
+        bot.edit_message_text(f"抱歉域名长度不能超过{64-len(mkjson.encode('utf-8'))}个字符,如果超过请使用IP地址",sc_text_go.chat.id, sc_text_go.message_id)
+        return None
     bot.edit_message_text("请选择需要测试网际协议版本:",sc_text_go.chat.id, sc_text_go.message_id,reply_markup=markup)
 
 # -----------------------------------------
@@ -1158,12 +1218,12 @@ def callback_handle(call):
 
     bot.answer_callback_query(call.id, "正在通知咕小酱...")
     
-    if out_json["do"] == "iptest_qs":#识别
+    if out_json["do"] == "q":#识别
         bot.edit_message_text("已取消测试",call.json["message"]["chat"]["id"],call.message.id)
         return None
         #bot.delete_message(out_json["cd"], out_json["ud"])
 
-    if out_json["do"] == "iptest_v4":#识别
+    if out_json["do"] == "4":#识别
         #if guip.yes_or_no_ip(out_json["ip"]) == True:
         ips_record = dns_query.dns_lookup(out_json["ip"])
         if len(ips_record.answer) > 1:
@@ -1207,8 +1267,10 @@ def callback_handle(call):
                 bot.send_photo(call.json["message"]["chat"]["id"], open(f'./tmp/{call.from_user.id}-ip.jpg', 'rb'),reply_to_message_id=call.message.id)
                 os.remove(f'./tmp/{call.from_user.id}-ip.jpg')
                 bot.edit_message_text(f"已完成路由跟踪",call.json["message"]["chat"]["id"],call.message.id)
-    
-    if out_json["do"] == "iptest_v6":#识别
+            else:
+                bot.edit_message_text(f"生成图片失败,请稍后再试",call.json["message"]["chat"]["id"],call.message.id)
+
+    if out_json["do"] == "6":#识别
         #if guip.yes_or_no_ip(out_json["ip"]) == True:
         ips_record = dns_query.dns_lookup6(out_json["ip"])
         if len(ips_record.answer) > 1:
@@ -1252,7 +1314,8 @@ def callback_handle(call):
                 bot.send_photo(call.json["message"]["chat"]["id"], open(f'./tmp/{call.from_user.id}-ip.jpg', 'rb'),reply_to_message_id=call.message.id)
                 os.remove(f'./tmp/{call.from_user.id}-ip.jpg')
                 bot.edit_message_text(f"已完成路由跟踪",call.json["message"]["chat"]["id"],call.message.id)
-
+            else:
+                bot.edit_message_text(f"生成图片失败,请稍后再试",call.json["message"]["chat"]["id"],call.message.id)
 
 @bot.inline_handler(lambda query: query.query == 'jrrp')
 def query_jrrpt(inline_query):
