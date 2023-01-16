@@ -13,6 +13,9 @@ import telebot
 import yaml
 from loguru import logger
 from telebot import types
+from nslookup import Nslookup
+import shlex
+
 
 import jrrp
 from generator import genImage
@@ -82,7 +85,7 @@ import guip
 import make_img
 
 
-def get_zl_text(textlt) -> Union[str, bool]:  # 指令提取
+def get_zl_text(textlt,colon_bool=False) -> Union[str, bool]:  # 指令提取
     try:
         textcomm = textlt
         if ' ' in textlt:
@@ -92,7 +95,10 @@ def get_zl_text(textlt) -> Union[str, bool]:  # 指令提取
             if outip is None:
                 return False
             else:
-                return outip
+                if colon_bool:
+                    return outip.replace('"', "").replace("'", "")
+                else:
+                    return outip
         else:
             return False
     except:
@@ -990,32 +996,6 @@ def osu_help(message):
 """)
 
 
-@bot.message_handler(commands=['guip_traceroute'])
-def guip_traceroute(message):
-    # bot.reply_to(message,"此功能功能暂不开放")
-    # return None
-    input_ip = get_zl_text(message.text)
-    if input_ip is False:
-        bot.send_chat_action(message.chat.id, 'typing')
-        bot.reply_to(message, "呜呜呜...指令有问题\n(指令格式 */guip_traceroute [ip]*)")
-        return None
-
-    get_lo = guip.is_localhost_ip(input_ip)
-
-    if get_lo is True:
-        bot.reply_to(message, "呜呜呜...咕小酱发现此 *地址* 为 *本地主机* 地址,无法检测")
-        return None
-
-    bot.send_chat_action(message.chat.id, 'typing')
-    chatjson_ip = bot.reply_to(message, "正在进行路由跟踪...")
-    get_gu = guip.gu_traceroute(input_ip)
-    if get_gu is False:
-        bot.edit_message_text("呜呜呜...咕小酱无法访问此 *地址* 或者 这个地址就根本 *不存在* !", chatjson_ip.chat.id,
-                              chatjson_ip.message_id)
-        return None
-
-    bot.edit_message_text(f"跟踪信息如下:\n```\n{get_gu}\n```", chatjson_ip.chat.id, chatjson_ip.message_id)
-
 
 @bot.message_handler(commands=['guip_ping'])
 def guip_ping(message):
@@ -1136,6 +1116,144 @@ def gu_5000choyen(message):
         bot.reply_to(message, "呜呜呜...生成图片错误了惹,请尝试重新生成...")
 
 
+@bot.message_handler(commands=['guip_trace'])
+def gu_test(message):
+    get_text = get_zl_text(message.text,True)
+    if get_text is False:
+        bot.send_chat_action(message.chat.id, 'typing')
+        bot.reply_to(message, "呜呜呜...指令有问题\n(指令格式 */guip_trace [ip]*)")
+        return None
+    markup = types.InlineKeyboardMarkup()
+    get_text = shlex.quote(get_text)
+    sc_text_go=bot.reply_to(message,"请稍等...")
+    do_list = ["iptest_v4","iptest_v6","iptest_qs"]
+    name_list = ["V4","V6","取消"]
+    if message.from_user.username == "Channel_Bot":
+        bot.edit_message_text("该功能不支持频道马甲使用...",sc_text_go.chat.id, sc_text_go.message_id)
+        return None
+    else:
+        user_id = message.from_user.id
+    for i in range(0,3):
+        mkjson = '{"ip":"'+str(get_text)+'","u":"'+str(user_id)+'","do":"'+str(do_list[i])+'"}'
+        btn = types.InlineKeyboardButton(name_list[i], callback_data=str(mkjson))
+        markup.add(btn)
+    bot.edit_message_text("请选择需要测试网际协议版本:",sc_text_go.chat.id, sc_text_go.message_id,reply_markup=markup)
+
+# -----------------------------------------
+
+# DNS库预加载
+dns_query = Nslookup()
+dns_query = Nslookup(dns_servers=["8.8.8.8","223.5.5.5"], verbose=False, tcp=False)
+
+
+# -----------------------------------------
+
+@bot.callback_query_handler(func=lambda call: True)
+def callback_handle(call):
+    out_json = json.loads(str(call.data))
+    #print(out_json)
+    if str(call.from_user.id) != out_json["u"]:
+        bot.answer_callback_query(call.id, "抱歉你不是指令发起人,无法操作")
+        return None
+
+    bot.answer_callback_query(call.id, "正在通知咕小酱...")
+    
+    if out_json["do"] == "iptest_qs":#识别
+        bot.edit_message_text("已取消测试",call.json["message"]["chat"]["id"],call.message.id)
+        return None
+        #bot.delete_message(out_json["cd"], out_json["ud"])
+
+    if out_json["do"] == "iptest_v4":#识别
+        #if guip.yes_or_no_ip(out_json["ip"]) == True:
+        ips_record = dns_query.dns_lookup(out_json["ip"])
+        if len(ips_record.answer) > 1:
+            markup = types.InlineKeyboardMarkup()
+            for i in range(0,len(ips_record.answer)):
+                mkjson = '{"ip":"'+str(ips_record.answer[i])+'","u":"'+str(out_json["u"])+'","do":"iptest_v4"}'
+                btn = types.InlineKeyboardButton(str(ips_record.answer[i]), callback_data=str(mkjson))
+                markup.add(btn)
+            mkjson = '{"ip":"'+str(ips_record.answer[i])+'","u":"'+str(out_json["u"])+'","do":"iptest_qs"}'
+            btn = types.InlineKeyboardButton("取消", callback_data=str(mkjson))
+            markup.add(btn)
+            bot.edit_message_text("检测到该域名有多个IP地址,请选择一个进行测试:",call.json["message"]["chat"]["id"],call.message.id,reply_markup=markup)
+        else:
+            import subprocess
+            #print(out_json["ip"])
+            if guip.yes_or_no_ip(out_json["ip"]) == False:
+                ips_record = dns_query.dns_lookup(out_json["ip"])
+                if len(ips_record.answer) == 0:
+                    bot.edit_message_text("无法解析该地址,请检查域名是否正确",call.json["message"]["chat"]["id"],call.message.id)
+                    return None
+                bot.edit_message_text(f"正在路由追踪(V4) *{ips_record.answer[0]}* 请稍后...",call.json["message"]["chat"]["id"],call.message.id)
+                p=subprocess.Popen(f"nexttrace {ips_record.answer[0]}", shell=True, stdout=subprocess.PIPE,stderr=subprocess.STDOUT)
+            else:
+                bot.edit_message_text(f"正在路由追踪(V4) *{out_json['ip']}* 请稍后...",call.json["message"]["chat"]["id"],call.message.id)
+                p=subprocess.Popen(f"nexttrace {out_json['ip']}", shell=True, stdout=subprocess.PIPE,stderr=subprocess.STDOUT)
+            tmp_text = ""
+            while p.poll() is None:
+                line=p.stdout.readline().decode("utf8")
+                line=line.replace('\n', '')
+                tmp_text += line + "\n"
+                #print(line)
+
+            for i in range(50):#去除多余空行
+                tmp_text= tmp_text.strip("\n")
+            
+            bot.edit_message_text(f"正在生成图片请稍后...",call.json["message"]["chat"]["id"],call.message.id)
+            text_list_tmp = tmp_text.split("\n")
+            make_img_bool = guip.make_ip_img(text_list_tmp,call.from_user.id)
+            if make_img_bool == True:
+                bot.edit_message_text(f"正在上传图片请稍后...",call.json["message"]["chat"]["id"],call.message.id)
+                bot.send_photo(call.json["message"]["chat"]["id"], open(f'./tmp/{call.from_user.id}-ip.jpg', 'rb'),reply_to_message_id=call.message.id)
+                os.remove(f'./tmp/{call.from_user.id}-ip.jpg')
+                bot.edit_message_text(f"已完成测试",call.json["message"]["chat"]["id"],call.message.id)
+    
+    if out_json["do"] == "iptest_v6":#识别
+        #if guip.yes_or_no_ip(out_json["ip"]) == True:
+        ips_record = dns_query.dns_lookup6(out_json["ip"])
+        if len(ips_record.answer) > 1:
+            markup = types.InlineKeyboardMarkup()
+            for i in range(0,len(ips_record.answer)):
+                mkjson = '{"ip":"'+str(ips_record.answer[i])+'","u":"'+str(out_json["u"])+'","do":"iptest_v6"}'
+                btn = types.InlineKeyboardButton(str(ips_record.answer[i]), callback_data=str(mkjson))
+                markup.add(btn)
+            mkjson = '{"ip":"'+str(ips_record.answer[i])+'","u":"'+str(out_json["u"])+'","do":"iptest_qs"}'
+            btn = types.InlineKeyboardButton("取消", callback_data=str(mkjson))
+            markup.add(btn)
+            bot.edit_message_text("检测到该域名有多个IP地址,请选择一个进行测试:",call.json["message"]["chat"]["id"],call.message.id,reply_markup=markup)
+        else:
+            import subprocess
+            #print(out_json["ip"])
+            if guip.yes_or_no_ip6(out_json["ip"]) == False:
+                ips_record = dns_query.dns_lookup6(out_json["ip"])
+                if len(ips_record.answer) == 0:
+                    bot.edit_message_text("无法解析该地址,请检查域名是否正确",call.json["message"]["chat"]["id"],call.message.id)
+                    return None
+                bot.edit_message_text(f"正在路由追踪(V6) *{ips_record.answer[0]}* 请稍后...",call.json["message"]["chat"]["id"],call.message.id)
+                p=subprocess.Popen(f"nexttrace {ips_record.answer[0]}", shell=True, stdout=subprocess.PIPE,stderr=subprocess.STDOUT)
+            else:
+                bot.edit_message_text(f"正在路由追踪(V6) *{out_json['ip']}* 请稍后...",call.json["message"]["chat"]["id"],call.message.id)
+                p=subprocess.Popen(f"nexttrace {out_json['ip']}", shell=True, stdout=subprocess.PIPE,stderr=subprocess.STDOUT)
+            tmp_text = ""
+            while p.poll() is None:
+                line=p.stdout.readline().decode("utf8")
+                line=line.replace('\n', '')
+                tmp_text += line + "\n"
+                #print(line)
+
+            for i in range(50):#去除多余空行
+                tmp_text= tmp_text.strip("\n")
+            
+            bot.edit_message_text(f"正在生成图片请稍后...",call.json["message"]["chat"]["id"],call.message.id)
+            text_list_tmp = tmp_text.split("\n")
+            make_img_bool = guip.make_ip_img(text_list_tmp,call.from_user.id)
+            if make_img_bool == True:
+                bot.edit_message_text(f"正在上传图片请稍后...",call.json["message"]["chat"]["id"],call.message.id)
+                bot.send_photo(call.json["message"]["chat"]["id"], open(f'./tmp/{call.from_user.id}-ip.jpg', 'rb'),reply_to_message_id=call.message.id)
+                os.remove(f'./tmp/{call.from_user.id}-ip.jpg')
+                bot.edit_message_text(f"已完成测试",call.json["message"]["chat"]["id"],call.message.id)
+
+
 @bot.inline_handler(lambda query: query.query == 'jrrp')
 def query_jrrpt(inline_query):
     try:
@@ -1158,6 +1276,7 @@ def query_jrrpt(inline_query):
         bot.answer_inline_query(inline_query.id, [r], cache_time=1)
     except Exception:
         traceback.print_exc()
+
 
 
 @bot.inline_handler(lambda query: True)

@@ -3,9 +3,51 @@ from icmplib import ping
 from qqwry import QQwry
 import socket
 import re
+from PIL import Image, ImageFont, ImageDraw
+
 czip = QQwry()
 czip.load_file('./ip_data/qqwry.dat')
 
+def yes_or_no_ip(str):
+    try:
+        pattern = re.compile(r'^((2(5[0-5]|[0-4]\d))|1\d{2}|[1-9]?\d)(\.((2(5[0-5]|[0-4]\d))|1\d{2}|[1-9]?\d)){3}$')
+        test = pattern.search(str)
+        if str == test.group():
+            return True
+        else:
+            return False
+    except:
+        return False
+
+def yes_or_no_ip6(str):
+    try:
+        ip6_regex = (
+                r'(^(?:[A-F0-9]{1,4}:){7}[A-F0-9]{1,4}$)|'
+                r'(\A([0-9a-f]{1,4}:){1,1}(:[0-9a-f]{1,4}){1,6}\Z)|'
+                r'(\A([0-9a-f]{1,4}:){1,2}(:[0-9a-f]{1,4}){1,5}\Z)|'
+                r'(\A([0-9a-f]{1,4}:){1,3}(:[0-9a-f]{1,4}){1,4}\Z)|'
+                r'(\A([0-9a-f]{1,4}:){1,4}(:[0-9a-f]{1,4}){1,3}\Z)|'
+                r'(\A([0-9a-f]{1,4}:){1,5}(:[0-9a-f]{1,4}){1,2}\Z)|'
+                r'(\A([0-9a-f]{1,4}:){1,6}(:[0-9a-f]{1,4}){1,1}\Z)|'
+                r'(\A(([0-9a-f]{1,4}:){1,7}|:):\Z)|(\A:(:[0-9a-f]{1,4}){1,7}\Z)|'
+                r'(\A((([0-9a-f]{1,4}:){6})(25[0-5]|2[0-4]\d|[0-1]?\d?\d)(\.(25[0-5]|2[0-4]\d|[0-1]?\d?\d)){3})\Z)|'
+                r'(\A(([0-9a-f]{1,4}:){5}[0-9a-f]{1,4}:(25[0-5]|2[0-4]\d|[0-1]?\d?\d)(\.(25[0-5]|2[0-4]\d|[0-1]?\d?\d)){3})\Z)|'
+                r'(\A([0-9a-f]{1,4}:){5}:[0-9a-f]{1,4}:(25[0-5]|2[0-4]\d|[0-1]?\d?\d)(\.(25[0-5]|2[0-4]\d|[0-1]?\d?\d)){3}\Z)|'
+                r'(\A([0-9a-f]{1,4}:){1,1}(:[0-9a-f]{1,4}){1,4}:(25[0-5]|2[0-4]\d|[0-1]?\d?\d)(\.(25[0-5]|2[0-4]\d|[0-1]?\d?\d)){3}\Z)|'
+                r'(\A([0-9a-f]{1,4}:){1,2}(:[0-9a-f]{1,4}){1,3}:(25[0-5]|2[0-4]\d|[0-1]?\d?\d)(\.(25[0-5]|2[0-4]\d|[0-1]?\d?\d)){3}\Z)|'
+                r'(\A([0-9a-f]{1,4}:){1,3}(:[0-9a-f]{1,4}){1,2}:(25[0-5]|2[0-4]\d|[0-1]?\d?\d)(\.(25[0-5]|2[0-4]\d|[0-1]?\d?\d)){3}\Z)|'
+                r'(\A([0-9a-f]{1,4}:){1,4}(:[0-9a-f]{1,4}){1,1}:(25[0-5]|2[0-4]\d|[0-1]?\d?\d)(\.(25[0-5]|2[0-4]\d|[0-1]?\d?\d)){3}\Z)|'
+                r'(\A(([0-9a-f]{1,4}:){1,5}|:):(25[0-5]|2[0-4]\d|[0-1]?\d?\d)(\.(25[0-5]|2[0-4]\d|[0-1]?\d?\d)){3}\Z)|'
+                r'(\A:(:[0-9a-f]{1,4}){1,5}:(25[0-5]|2[0-4]\d|[0-1]?\d?\d)(\.(25[0-5]|2[0-4]\d|[0-1]?\d?\d)){3}\Z)')
+        pattern = re.compile(ip6_regex)
+        test = pattern.search(str)
+        #print(test)
+        if str == test.group():
+            return True
+        else:
+            return False
+    except:
+        return False
 
 def gu_traceroute(ip): # ip路由
     try:
@@ -61,3 +103,37 @@ def is_localhost_ip(domain):
         return True
     
     return False
+
+def make_ip_img(text_list,tgid):
+    try:
+        font = ImageFont.truetype('./font/MiSans-Regular.ttf', 40) # 设置字体及字号
+        #draw = ImageDraw.Draw(image)
+        text_w_list = []
+        text_h_list = []
+        for i in range(len(text_list)):
+            text_w = font.getbbox(text_list[i])#获取长度
+            text_w_list.append(text_w[2])
+            text_h_list.append(text_w[3])
+
+        img_max_w = max(text_w_list)
+        img_max_h = max(text_h_list)
+        img_sum_h = max(text_h_list)*len(text_list)
+        #print(img_max_w,img_max_h)
+        image = Image.new('RGB', (img_max_w+70,img_sum_h+140), (34,33,33)) # 设置画布大小及背景色
+        draw = ImageDraw.Draw(image)
+        color_fill_list = [(255, 95, 86),(255, 189, 46),(39, 201, 63)]
+        color_outline_list = [(224, 68, 62),(222, 161, 35),(26, 171, 41)]
+        for color_num in range(3):
+            x_r = 30 + 60*color_num
+            y_t=  20
+            draw.ellipse(((x_r+10,y_t+10), (x_r+50,y_t+50)), fill=color_fill_list[color_num], outline=color_outline_list[color_num], width=1)
+
+        for i in range(len(text_list)):
+            draw.text((35,(i*img_max_h)+100), text_list[i], (255,255,255), font)
+            #print(i*img_max_h)
+        #draw.text((0,0), '22', 'black', font)
+        image.save(f'./tmp/{tgid}-ip.jpg') # 保存图片
+        return True
+    except Exception as e:
+        print(e)
+        return False
