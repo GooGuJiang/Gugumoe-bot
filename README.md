@@ -50,18 +50,19 @@ $ git clone https://github.com/GooGuJiang/Gu-Random-Image.git
 $ pip install -r requirements.txt
 ```
 
-4. 执行初始化
-
-```bash
-$ python3 main.py
-```
-5. 安装 [NextTrace](https://github.com/sjlleo/nexttrace) (因为重构的路由跟踪功能)
+4. 安装 [NextTrace](https://github.com/sjlleo/nexttrace) (因为重构的路由跟踪功能)
 ```bash
 # Linux one-click install script
 $ bash <(curl -Ls https://raw.githubusercontent.com/sjlleo/nexttrace/main/nt_install.sh)
 
 # macOS brew install command
 $ brew tap xgadget-lab/nexttrace && brew install nexttrace
+```
+
+5. 执行初始化
+
+```bash
+$ python3 main.py
 ```
 
 6. 配置 config.yml
