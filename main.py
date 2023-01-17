@@ -15,6 +15,7 @@ from loguru import logger
 from telebot import types
 from nslookup import Nslookup
 import shlex
+import glob
 
 
 import jrrp
@@ -121,9 +122,9 @@ def send_jrrp(message):
 @bot.message_handler(commands=['gu'])
 def send_gu(message):
     try:
-        file_name_list = os.listdir("./img/")  # 获取当前文件夹下个数
-        file_path = os.path.join(os.getcwd(), 'img', file_name_list[random.randint(0, len(file_name_list) - 1)])
-        sti = open(file_path, 'rb')
+        path_file_name_wjj=os.listdir("./img/") #获取当前文件夹下个数
+        path_file_name=glob.glob(pathname=f'./img/{path_file_name_wjj[random.randint(0,len(path_file_name_wjj)-1)]}/*.webp') #获取当前文件夹下个数
+        sti = open(path_file_name[random.randint(0,len(path_file_name)-1)], 'rb')
         bot.send_chat_action(message.chat.id, 'choose_sticker')
         bot.send_sticker(message.chat.id, sti, reply_to_message_id=message.message_id)
         sti.close()
