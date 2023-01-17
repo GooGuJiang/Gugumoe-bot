@@ -1119,6 +1119,7 @@ def gu_5000choyen(message):
 
 @bot.message_handler(commands=['guip_trace'])
 def gu_test(message):
+    bot.send_chat_action(message.chat.id, 'typing')
     if message.from_user.username == "Channel_Bot":
         bot.edit_message_text("该功能不支持频道马甲使用...",sc_text_go.chat.id, sc_text_go.message_id)
         return None
@@ -1154,6 +1155,7 @@ def gu_test(message):
         make_img_bool = guip.make_ip_img(text_list_tmp,user_id)
         if make_img_bool == True:
             bot.edit_message_text(f"正在上传图片请稍后...",sc_text_go.chat.id,sc_text_go.message_id)
+            bot.send_chat_action(message.chat.id, 'upload_photo')
             bot.send_photo(sc_text_go.chat.id, open(f'./tmp/{user_id}-ip.jpg', 'rb'),reply_to_message_id=sc_text_go.message_id)
             os.remove(f'./tmp/{user_id}-ip.jpg')
             bot.edit_message_text(f"已完成路由跟踪",sc_text_go.chat.id,sc_text_go.message_id)
@@ -1180,6 +1182,7 @@ def gu_test(message):
         make_img_bool = guip.make_ip_img(text_list_tmp,user_id)
         if make_img_bool == True:
             bot.edit_message_text(f"正在上传图片请稍后...",sc_text_go.chat.id,sc_text_go.message_id)
+            bot.send_chat_action(message.chat.id, 'upload_photo')
             bot.send_photo(sc_text_go.chat.id, open(f'./tmp/{user_id}-ip.jpg', 'rb'),reply_to_message_id=sc_text_go.message_id)
             os.remove(f'./tmp/{user_id}-ip.jpg')
             bot.edit_message_text(f"已完成路由跟踪",sc_text_go.chat.id,sc_text_go.message_id)
@@ -1265,6 +1268,7 @@ def callback_handle(call):
             make_img_bool = guip.make_ip_img(text_list_tmp,call.from_user.id)
             if make_img_bool == True:
                 bot.edit_message_text(f"正在上传图片请稍后...",call.json["message"]["chat"]["id"],call.message.id)
+                bot.send_chat_action(call.json["message"]["chat"]["id"], 'upload_photo')
                 bot.send_photo(call.json["message"]["chat"]["id"], open(f'./tmp/{call.from_user.id}-ip.jpg', 'rb'),reply_to_message_id=call.message.id)
                 os.remove(f'./tmp/{call.from_user.id}-ip.jpg')
                 bot.edit_message_text(f"已完成路由跟踪",call.json["message"]["chat"]["id"],call.message.id)
@@ -1312,6 +1316,7 @@ def callback_handle(call):
             make_img_bool = guip.make_ip_img(text_list_tmp,call.from_user.id)
             if make_img_bool == True:
                 bot.edit_message_text(f"正在上传图片请稍后...",call.json["message"]["chat"]["id"],call.message.id)
+                bot.send_chat_action(call.json["message"]["chat"]["id"], 'upload_photo')
                 bot.send_photo(call.json["message"]["chat"]["id"], open(f'./tmp/{call.from_user.id}-ip.jpg', 'rb'),reply_to_message_id=call.message.id)
                 os.remove(f'./tmp/{call.from_user.id}-ip.jpg')
                 bot.edit_message_text(f"已完成路由跟踪",call.json["message"]["chat"]["id"],call.message.id)
