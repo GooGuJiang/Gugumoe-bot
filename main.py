@@ -1229,10 +1229,10 @@ def callback_handle(call):
         if len(ips_record.answer) > 1:
             markup = types.InlineKeyboardMarkup()
             for i in range(0,len(ips_record.answer)):
-                mkjson = '{"ip":"'+str(ips_record.answer[i])+'","u":"'+str(out_json["u"])+'","do":"iptest_v4"}'
+                mkjson = '{"ip":"'+str(ips_record.answer[i])+'","u":"'+str(out_json["u"])+'","do":"4"}'
                 btn = types.InlineKeyboardButton(str(ips_record.answer[i]), callback_data=str(mkjson))
                 markup.add(btn)
-            mkjson = '{"ip":"'+str(ips_record.answer[i])+'","u":"'+str(out_json["u"])+'","do":"iptest_qs"}'
+            mkjson = '{"ip":"'+str(ips_record.answer[i])+'","u":"'+str(out_json["u"])+'","do":"q"}'
             btn = types.InlineKeyboardButton("取消", callback_data=str(mkjson))
             markup.add(btn)
             bot.edit_message_text("检测到该域名有多个IP地址,请选择一个进行测试:",call.json["message"]["chat"]["id"],call.message.id,reply_markup=markup)
@@ -1276,10 +1276,10 @@ def callback_handle(call):
         if len(ips_record.answer) > 1:
             markup = types.InlineKeyboardMarkup()
             for i in range(0,len(ips_record.answer)):
-                mkjson = '{"ip":"'+str(ips_record.answer[i])+'","u":"'+str(out_json["u"])+'","do":"iptest_v6"}'
+                mkjson = '{"ip":"'+str(ips_record.answer[i])+'","u":"'+str(out_json["u"])+'","do":"6"}'
                 btn = types.InlineKeyboardButton(str(ips_record.answer[i]), callback_data=str(mkjson))
                 markup.add(btn)
-            mkjson = '{"ip":"'+str(ips_record.answer[i])+'","u":"'+str(out_json["u"])+'","do":"iptest_qs"}'
+            mkjson = '{"ip":"'+str(ips_record.answer[i])+'","u":"'+str(out_json["u"])+'","do":"q"}'
             btn = types.InlineKeyboardButton("取消", callback_data=str(mkjson))
             markup.add(btn)
             bot.edit_message_text("检测到该域名有多个IP地址,请选择一个进行测试:",call.json["message"]["chat"]["id"],call.message.id,reply_markup=markup)
