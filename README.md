@@ -34,7 +34,6 @@
 + OSU查询功能 ✅
 + Http.Cat ✅
 + IP 测试 ✅
-+ 网易云音乐下载 ❌
 
 # 💁‍♀️ 怎么部署?
 1. 确保 `python` 的版本为 3.x
@@ -51,15 +50,24 @@ $ git clone https://github.com/GooGuJiang/Gu-Random-Image.git
 $ pip install -r requirements.txt
 ```
 
-4. 执行初始化
+4. 安装 [NextTrace](https://github.com/sjlleo/nexttrace) (因为重构的路由跟踪功能)
+```bash
+# Linux one-click install script
+$ bash <(curl -Ls https://raw.githubusercontent.com/sjlleo/nexttrace/main/nt_install.sh)
+
+# macOS brew install command
+$ brew tap xgadget-lab/nexttrace && brew install nexttrace
+```
+
+5. 执行初始化
 
 ```bash
 $ python3 main.py
 ```
 
-5. 配置 config.yml
+6. 配置 config.yml
 
-6. 启动机器人
+7. 启动机器人
 
 ```bash
 $ python3 main.py
@@ -85,7 +93,7 @@ $ python3 main.py
 |moetrace  | 番剧截图搜索|
 |guosu_help | OSU功能帮助菜单|
 |guip_ping | Ping|
-|guip_traceroute | 路由跟踪|
+|guip_trace | 路由跟踪|
 
 # 😊配置文件说明
 **请严格使用 YAML 的书写规范进行配置**
