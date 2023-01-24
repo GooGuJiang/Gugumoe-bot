@@ -7,6 +7,7 @@ import time
 import traceback
 import zipfile
 from typing import Union
+import datetime
 
 import requests
 import telebot
@@ -1116,6 +1117,16 @@ def gu_5000choyen(message):
     except:
         bot.reply_to(message, "呜呜呜...生成图片错误了惹,请尝试重新生成...")
 
+# -----------------------------------------
+
+# DNS库预加载
+dns_query = Nslookup()
+dns_query = Nslookup(dns_servers=["8.8.8.8","223.5.5.5"], verbose=False, tcp=False)
+
+
+# -----------------------------------------
+
+fj_nub = 5
 
 @bot.message_handler(commands=['guip_trace'])
 def gu_test(message):
@@ -1125,7 +1136,112 @@ def gu_test(message):
         return None
     else:
         user_id = message.from_user.id
+    
+    if os.path.exists(f"./tmp/guip-tra-{user_id}.json") is False:
+        with open(f"./tmp/guip-tra-{user_id}.json", 'w') as guguf:
+            user_data ={
+                "user_id":user_id,
+                "user_num":1,
+                "is_ban":False,
+                "ban_time":"1987-01-28 06:07:08"
+            }
+            guguf.write(json.dumps(user_data))
+            guguf.close()
+    else:
+        out_tmpppp =False
+        with open(f"./tmp/guip-tra-{user_id}.json", 'r') as gu_file_tmp:
+            gu_nub = json.loads(gu_file_tmp.read())
+            #print(gu_nub)
+            gu_file_tmp.close()
+        is_ban=gu_nub["is_ban"]
+        fj_num_time = gu_nub["ban_time"]
+        if gu_nub["is_ban"] is True:
+            now = datetime.datetime.now()
+            s = now.strftime('%Y-%m-%d %H:%M:%S')
+            s = datetime.datetime.strptime(s,"%Y-%m-%d %H:%M:%S")
+            c = datetime.datetime.strptime(gu_nub["ban_time"],"%Y-%m-%d %H:%M:%S")
+            #print(s >= c)
+            if s >= c:
+                try:
+                    os.remove(f"./tmp/guip-tra-{user_id}.json")
+                    
+                except Exception as err:
+                    print(err)
 
+                out_tmpppp = True
+
+            else:
+                bot.reply_to(message, f"咕小酱禁止你使用此功能了,请等待 *{gu_nub['ban_time']}* 后再使用。")
+                return None
+
+        if gu_nub["user_num"] >= fj_nub:
+            is_ban = True
+            get_random = random.randint(0,2)
+            gumoe_user_id = user_id
+            if get_random == 0:
+                if os.path.exists(f"./tmp/guip-tra-{gumoe_user_id}.json") is False:
+                    return None
+                timeStruce = time.localtime(t)
+                times = time.strftime('%Y-%m-%d %H:%M:%S', timeStruce)
+                c = datetime.datetime.strptime(times,"%Y-%m-%d %H:%M:%S")
+                time_fj_tmp = datetime.timedelta(days=1)
+                time_fj_tmp = (time_fj_tmp+c).strftime("%Y-%m-%d %H:%M:%S")
+                #print(time_fj_tmp)
+                bot.reply_to(message, f"咕小酱禁止你使用此功能了,请等待 *{time_fj_tmp}* 后再使用。")
+                fj_num_time = time_fj_tmp
+            elif get_random == 1:
+                if os.path.exists(f"./tmp/guip-tra-{gumoe_user_id}.json") is False:
+                    return None
+                t = os.path.getmtime(f"./tmp/guip-tra-{user_id}.json")
+                timeStruce = time.localtime(t)
+                times = time.strftime('%Y-%m-%d %H:%M:%S', timeStruce)
+                c = datetime.datetime.strptime(times,"%Y-%m-%d %H:%M:%S")
+                time_fj_tmp = datetime.timedelta(hours=1)
+                time_fj_tmp = (time_fj_tmp+c).strftime("%Y-%m-%d %H:%M:%S")
+                #print(time_fj_tmp)
+                bot.reply_to(message, f"咕小酱禁止你使用此功能了,请等待 *{time_fj_tmp}* 后再使用。")
+                fj_num_time = time_fj_tmp
+            elif get_random == 2:
+                if os.path.exists(f"./tmp/guip-tra-{gumoe_user_id}.json") is False:
+                    return None
+                t = os.path.getmtime(f"./tmp/guip-tra-{user_id}.json")
+                timeStruce = time.localtime(t)
+                times = time.strftime('%Y-%m-%d %H:%M:%S', timeStruce)
+                c = datetime.datetime.strptime(times,"%Y-%m-%d %H:%M:%S")
+                time_fj_tmp = datetime.timedelta(minutes=10)
+                time_fj_tmp = (time_fj_tmp+c).strftime("%Y-%m-%d %H:%M:%S")
+                bot.reply_to(message, f"咕小酱禁止你使用此功能了,请等待 *{time_fj_tmp}* 后再使用。")
+                fj_num_time = time_fj_tmp
+
+            with open(f"./tmp/guip-tra-{user_id}.json", 'w') as guguf:
+                user_data_tmp ={
+                    "user_id":user_id,
+                    "user_num":gu_nub["user_num"],
+                    "is_ban":is_ban,
+                    "ban_time":fj_num_time
+                }
+                guguf.write(json.dumps(user_data_tmp))
+                guguf.close() 
+                
+            return None
+          
+        
+        if out_tmpppp is not True:
+            with open(f"./tmp/guip-tra-{user_id}.json", 'w') as guguf:
+                user_data_tmp ={
+                    "user_id":user_id,
+                    "user_num":gu_nub["user_num"]+1,
+                    "is_ban":is_ban,
+                    "ban_time":fj_num_time
+                }
+                guguf.write(json.dumps(user_data_tmp))
+                guguf.close()
+            bot.reply_to(message, "抱歉,咕小酱发现您有一个正在执行的路由跟踪任务,请等待结束后再执行新的跟踪任务。")
+            return None
+        else:
+            bot.reply_to(message, "咕小酱已经解封对您的限制,请重新发送命令以使用路由追踪功能。")
+    
+    
     get_text = get_zl_text(message.text,True)
     if get_text is False:
         bot.send_chat_action(message.chat.id, 'typing')
@@ -1161,6 +1277,18 @@ def gu_test(message):
             bot.edit_message_text(f"已完成路由跟踪",sc_text_go.chat.id,sc_text_go.message_id)
         else:
             bot.edit_message_text(f"生成图片失败,请稍后再试",sc_text_go.chat.id,sc_text_go.message_id)
+        
+        gumoe_user_id = user_id
+        if os.path.exists(f"./tmp/guip-tra-{gumoe_user_id}.json") is True:
+            with open(f"./tmp/guip-tra-{gumoe_user_id}.json", 'r') as gu_file_tmp:
+                gu_nub = json.loads(gu_file_tmp.read())
+                gu_file_tmp.close()
+            if gu_nub["is_ban"] == False:
+                try:
+                    os.remove(f"./tmp/guip-tra-{gumoe_user_id}.tmp")
+                except:
+                    pass
+        
         return None
 
     if guip.yes_or_no_ip6(get_text) == True:
@@ -1188,6 +1316,17 @@ def gu_test(message):
             bot.edit_message_text(f"已完成路由跟踪",sc_text_go.chat.id,sc_text_go.message_id)
         else:
             bot.edit_message_text(f"生成图片失败,请稍后再试",sc_text_go.chat.id,sc_text_go.message_id)
+            
+        gumoe_user_id = user_id
+        with open(f"./tmp/guip-tra-{gumoe_user_id}.json", 'r') as gu_file_tmp:
+            gu_nub = json.loads(gu_file_tmp.read())
+            gu_file_tmp.close()
+        if gu_nub["is_ban"] == False:
+            try:
+                os.remove(f"./tmp/guip-tra-{gumoe_user_id}.tmp")
+            except:
+                pass
+        
         return None
 
     do_list = ["4","6","q"]
@@ -1200,17 +1339,20 @@ def gu_test(message):
         #print(len(mkjson.encode('utf-8')),mkjson)
     if len(mkjson.encode('utf-8')) > 64:
         bot.edit_message_text(f"抱歉域名长度不能超过 *29* 个字符,如果超过请使用IP地址",sc_text_go.chat.id, sc_text_go.message_id)
+        gumoe_user_id = user_id
+        if os.path.exists(f"./tmp/guip-tra-{gumoe_user_id}.json") is True:
+            with open(f"./tmp/guip-tra-{gumoe_user_id}.json", 'r') as gu_file_tmp:
+                gu_nub = json.loads(gu_file_tmp.read())
+                gu_file_tmp.close()
+            if gu_nub["is_ban"] == False:
+                try:
+                    os.remove(f"./tmp/guip-tra-{gumoe_user_id}.tmp")
+                except:
+                    pass
         return None
     bot.edit_message_text("请选择需要测试网际协议版本:",sc_text_go.chat.id, sc_text_go.message_id,reply_markup=markup)
 
-# -----------------------------------------
 
-# DNS库预加载
-dns_query = Nslookup()
-dns_query = Nslookup(dns_servers=["8.8.8.8","223.5.5.5"], verbose=False, tcp=False)
-
-
-# -----------------------------------------
 
 @bot.callback_query_handler(func=lambda call: True)
 def callback_handle(call):
@@ -1224,6 +1366,18 @@ def callback_handle(call):
     
     if out_json["do"] == "q":#识别
         bot.edit_message_text("已取消测试",call.json["message"]["chat"]["id"],call.message.id)
+        
+        gumoe_user_id = call.from_user.id
+        if os.path.exists(f"./tmp/guip-tra-{gumoe_user_id}.json") is True:
+            with open(f"./tmp/guip-tra-{gumoe_user_id}.json", 'r') as gu_file_tmp:
+                gu_nub = json.loads(gu_file_tmp.read())
+                gu_file_tmp.close()
+            if gu_nub["is_ban"] == False:
+                try:
+                    os.remove(f"./tmp/guip-tra-{gumoe_user_id}.tmp")
+                except:
+                    pass
+        
         return None
         #bot.delete_message(out_json["cd"], out_json["ud"])
 
@@ -1247,6 +1401,18 @@ def callback_handle(call):
                 ips_record = dns_query.dns_lookup(out_json["ip"])
                 if len(ips_record.answer) == 0:
                     bot.edit_message_text("无法解析该地址,请检查域名或地址是否正确",call.json["message"]["chat"]["id"],call.message.id)
+                    
+                    gumoe_user_id = call.from_user.id
+                    if os.path.exists(f"./tmp/guip-tra-{gumoe_user_id}.json") is True:
+                        with open(f"./tmp/guip-tra-{gumoe_user_id}.json", 'r') as gu_file_tmp:
+                            gu_nub = json.loads(gu_file_tmp.read())
+                            gu_file_tmp.close()
+                        if gu_nub["is_ban"] == False:
+                            try:
+                                os.remove(f"./tmp/guip-tra-{gumoe_user_id}.tmp")
+                            except:
+                                pass
+                    
                     return None
                 bot.edit_message_text(f"正在路由追踪(V4) *{ips_record.answer[0]}* 请稍后...",call.json["message"]["chat"]["id"],call.message.id)
                 p=subprocess.Popen(f"nexttrace {ips_record.answer[0]}", shell=True, stdout=subprocess.PIPE,stderr=subprocess.STDOUT)
@@ -1270,10 +1436,39 @@ def callback_handle(call):
                 bot.edit_message_text(f"正在上传图片请稍后...",call.json["message"]["chat"]["id"],call.message.id)
                 bot.send_chat_action(call.json["message"]["chat"]["id"], 'upload_photo')
                 bot.send_photo(call.json["message"]["chat"]["id"], open(f'./tmp/{call.from_user.id}-ip.jpg', 'rb'),reply_to_message_id=call.message.id)
-                os.remove(f'./tmp/{call.from_user.id}-ip.jpg')
+                gumoe_user_id = call.from_user.id
+                if os.path.exists(f"./tmp/guip-tra-{gumoe_user_id}.json") is True:
+                    with open(f"./tmp/guip-tra-{gumoe_user_id}.json", 'r') as gu_file_tmp:
+                        gu_nub = json.loads(gu_file_tmp.read())
+                        gu_file_tmp.close()
+                    if gu_nub["is_ban"] == False:
+                        try:
+                            os.remove(f"./tmp/guip-tra-{gumoe_user_id}.tmp")
+                        except:
+                            pass
                 bot.edit_message_text(f"已完成路由跟踪",call.json["message"]["chat"]["id"],call.message.id)
+                
+                try:
+                    os.remove(f"./tmp/guip-tra-{call.from_user.id}.tmp")
+                except Exception as err:
+                    print(err)
+                
+                return None
             else:
                 bot.edit_message_text(f"生成图片失败,请稍后再试",call.json["message"]["chat"]["id"],call.message.id)
+                
+                gumoe_user_id = call.from_user.id
+                if os.path.exists(f"./tmp/guip-tra-{gumoe_user_id}.json") is True:
+                    with open(f"./tmp/guip-tra-{gumoe_user_id}.json", 'r') as gu_file_tmp:
+                        gu_nub = json.loads(gu_file_tmp.read())
+                        gu_file_tmp.close()
+                    if gu_nub["is_ban"] == False:
+                        try:
+                            os.remove(f"./tmp/guip-tra-{gumoe_user_id}.tmp")
+                        except:
+                            pass
+            
+                return None
 
     if out_json["do"] == "6":#识别
         #if guip.yes_or_no_ip(out_json["ip"]) == True:
@@ -1295,6 +1490,18 @@ def callback_handle(call):
                 ips_record = dns_query.dns_lookup6(out_json["ip"])
                 if len(ips_record.answer) == 0:
                     bot.edit_message_text("无法解析该地址,请检查域名或地址是否正确",call.json["message"]["chat"]["id"],call.message.id)
+                    
+                    gumoe_user_id = call.from_user.id
+                    if os.path.exists(f"./tmp/guip-tra-{gumoe_user_id}.json") is True:
+                        with open(f"./tmp/guip-tra-{gumoe_user_id}.json", 'r') as gu_file_tmp:
+                            gu_nub = json.loads(gu_file_tmp.read())
+                            gu_file_tmp.close()
+                        if gu_nub["is_ban"] == False:
+                            try:
+                                os.remove(f"./tmp/guip-tra-{gumoe_user_id}.tmp")
+                            except:
+                                pass
+                    
                     return None
                 bot.edit_message_text(f"正在路由追踪(V6) *{ips_record.answer[0]}* 请稍后...",call.json["message"]["chat"]["id"],call.message.id)
                 p=subprocess.Popen(f"nexttrace {ips_record.answer[0]}", shell=True, stdout=subprocess.PIPE,stderr=subprocess.STDOUT)
@@ -1320,8 +1527,29 @@ def callback_handle(call):
                 bot.send_photo(call.json["message"]["chat"]["id"], open(f'./tmp/{call.from_user.id}-ip.jpg', 'rb'),reply_to_message_id=call.message.id)
                 os.remove(f'./tmp/{call.from_user.id}-ip.jpg')
                 bot.edit_message_text(f"已完成路由跟踪",call.json["message"]["chat"]["id"],call.message.id)
+                gumoe_user_id = call.from_user.id
+                if os.path.exists(f"./tmp/guip-tra-{gumoe_user_id}.json") is True:
+                    with open(f"./tmp/guip-tra-{gumoe_user_id}.json", 'r') as gu_file_tmp:
+                        gu_nub = json.loads(gu_file_tmp.read())
+                        gu_file_tmp.close()
+                    if gu_nub["is_ban"] == False:
+                        try:
+                            os.remove(f"./tmp/guip-tra-{gumoe_user_id}.tmp")
+                        except:
+                            pass
+                return None
             else:
                 bot.edit_message_text(f"生成图片失败,请稍后再试",call.json["message"]["chat"]["id"],call.message.id)
+                if os.path.exists(f"./tmp/guip-tra-{gumoe_user_id}.json") is True:
+                    with open(f"./tmp/guip-tra-{gumoe_user_id}.json", 'r') as gu_file_tmp:
+                        gu_nub = json.loads(gu_file_tmp.read())
+                        gu_file_tmp.close()
+                    if gu_nub["is_ban"] == False:
+                        try:
+                            os.remove(f"./tmp/guip-tra-{gumoe_user_id}.tmp")
+                        except:
+                            pass
+                return None
 
 @bot.inline_handler(lambda query: query.query == 'jrrp')
 def query_jrrpt(inline_query):
@@ -1373,10 +1601,11 @@ def query_mr(inline_query):
 
 # Main
 if __name__ == '__main__':
+    #import logging
     while True:
         try:
-            # logger = telebot.logger
-            # telebot.logger.setLevel(logging.DEBUG) # Outputs debug messages to console.
+            #logger = telebot.logger
+            #telebot.logger.setLevel(logging.DEBUG) # Outputs debug messages to console.
             logger.info(f"启动成功!")
             bot.polling()
 
