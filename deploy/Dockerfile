@@ -10,10 +10,9 @@ ENV LC_ALL=en_US.UTF-8 \
 # Installing poetry
 RUN pip install poetry==1.4.2
 
-RUN pip install loguru
 
 # Configuring poetry
-RUN poetry config virtualenvs.create false
+RUN poetry config virtualenvs.create true
 
 # Installing additional dependencies
 RUN apt-get update && apt-get install -y curl libffi-dev libcairo2
