@@ -1,0 +1,24 @@
+[tool.poetry]
+name = "gugumoe-bot"
+version = "0.1.0"
+description = ""
+authors = ["咕谷酱 <gu@gmoe.cc>"]
+readme = "README.md"
+packages = [{include = "gugumoe_bot"}]
+
+[tool.poetry.dependencies]
+python = "^3.11"
+pytelegrambotapi = "^4.12.0"
+loguru = "^0.7.0"
+aiohttp-socks = "^0.8.0"
+aiohttp = "^3.8.5"
+requests = "^2.31.0"
+gunicorn = "^21.2.0"
+pysocks = "^1.7.1"
+urllib3 = "^2.0.4"
+pydantic-settings = "^2.0.2"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
