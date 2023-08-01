@@ -31,7 +31,6 @@ COPY . /app/
 RUN poetry install --no-dev
 
 
-
 CMD ["/usr/bin/python3", "-m", "gugumoe_bot"]
 
 FROM base as dev

@@ -1,19 +1,21 @@
+import asyncio
+import importlib
+import os
 import sys
 
+from loguru import logger
+from telebot import asyncio_helper
 from telebot.async_telebot import AsyncTeleBot
 from telebot.types import Message, CallbackQuery
-import asyncio
-from telebot import asyncio_helper
+
 from gugumoe_bot.settings import settings
-import os
-import importlib
-from loguru import logger
 
 # 插件目录
 PLUGIN_DIR = 'plugins'
 
 # 初始化 TeleBot
-asyncio_helper.proxy = settings.proxy
+if settings.proxy:
+    asyncio_helper.proxy = settings.proxy
 bot = AsyncTeleBot(settings.token)
 
 # 设置日志格式和级别
@@ -37,6 +39,11 @@ logger.info('All plugins loaded, bot is starting...')
 async def handle_all_text_messages(message: Message) -> None:
     if message.text.startswith('/'):
         command = message.text.split(' ', 1)[0][1:]
+        # Add these lines to handle commands in the form of /command@botusername
+        if '@' in command:
+            command, at_botusername = command.split('@', 1)
+            if at_botusername != settings.username:
+                return  # Ignore commands for other bots
         for plugin in plugins:
             if plugin.command == command:
                 logger.info(f'Handling command: {command}')

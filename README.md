@@ -2,7 +2,7 @@
 
 <div align="center">
 
-![https://github.com/GooGuJiang/Gugumoe-bot](https://i0.hdslb.com/bfs/album/18f28e3a7b5c74dbe628166ddeadc02516d3c5ce.jpg)
+<img src="https://www.gmoe.cc/wp-content/uploads/2023/08/d9a87c4686590512168d06bbcb9ae3bc.png" width="150" style="border-radius: 30px"/>
 
 这是咕谷酱的Telegram机器人 (咕小酱)。是基于 [pyTelegramBotAPI](https://github.com/eternnoir/pyTelegramBotAPI) 的一个 Python 机器人。
 
