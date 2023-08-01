@@ -7,7 +7,7 @@ readme = "README.md"
 packages = [{include = "gugumoe_bot"}]
 
 [tool.poetry.dependencies]
-python = "^3.11"
+python = "^3.10"
 pytelegrambotapi = "^4.12.0"
 loguru = "^0.7.0"
 aiohttp-socks = "^0.8.0"
