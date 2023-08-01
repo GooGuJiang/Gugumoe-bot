@@ -8,7 +8,7 @@ ENV LC_ALL=en_US.UTF-8 \
     LANGUAGE=en_US.UTF-8
 
 # Installing poetry
-RUN pip install poetry==1.4.2
+RUN pip install poetry==1.5.1
 
 # Configuring poetry
 RUN poetry config virtualenvs.create false
