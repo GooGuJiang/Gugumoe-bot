@@ -17,6 +17,7 @@ gunicorn = "^21.2.0"
 pysocks = "^1.7.1"
 urllib3 = "^2.0.4"
 pydantic-settings = "^2.0.2"
+httpx = "^0.24.1"
 
 
 [build-system]
