@@ -1,4 +1,4 @@
-FROM ubuntu:20.04 as base
+FROM python:3.11 as base
 
 # Setting up locales
 RUN apt-get update && apt-get install -y locales && \
@@ -6,9 +6,6 @@ RUN apt-get update && apt-get install -y locales && \
 ENV LC_ALL=en_US.UTF-8 \
     LANG=en_US.UTF-8 \
     LANGUAGE=en_US.UTF-8
-
-# Installing python and pip
-RUN apt-get install -y python3.11 python3-pip
 
 # Installing poetry
 RUN pip install poetry==1.5.1
