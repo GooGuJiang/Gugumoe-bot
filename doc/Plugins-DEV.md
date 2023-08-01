@@ -2,11 +2,16 @@
 
 ## 1. 介绍
 
-GuguMoe Bot 使用插件化设计，方便开发者为其添加新功能。这份文档将指导你如何创建一个新插件。
+为方便开发者为其添加新功能, GuguMoe Bot使用插件化设计. 这份文档将指导你如何为GuguMoe创建一个新插件.
+
+**注意**
+程序本体基于[pyTelegramBotAPI](https://github.com/eternnoir/pyTelegramBotAPI)运行, 关于数据类型以及其它方法的使用,
+请参考[官方文档](https://pytba.readthedocs.io/en/latest/index.html), 这里只做简单的介绍以及GuguMoe本地化说明
 
 ## 2. 插件结构
 
-一个插件由一个 Python 文件构成，必须定义一个继承自 `PluginInterface` 的类，且这个类必须实现 `handle_message` 方法。下面是一个基本的插件文件的结构：
+一个插件由一个 **Python文件** 构成,其必须包含一个继承自 `PluginInterface` 的类,且实现 `handle_message`
+方法.下面是一个基本的插件文件的结构：
 
 ```python
 class MyPlugin(PluginInterface):
@@ -16,11 +21,13 @@ class MyPlugin(PluginInterface):
         # TODO: 在此处理所有的文本消息
 ```
 
-在这个例子中，`MyPlugin` 是插件类的名字，`my_command` 是这个插件的命令。插件类中的 `handle_message` 方法将处理所有的文本消息。
+在这个例子中,`MyPlugin` 是插件类的名字,`my_command` 是此插件的命令.
+
+**注意** 请将插件放至 `gugumoe_bot\plugins` 文件夹中
 
 ## 3. 命令处理
 
-如果你的插件需要处理特定的命令，你需要在插件类中定义一个 `handle_command` 方法：
+`handle_command`方法是整个插件的入口, 你可以在这里引用你的数据逻辑
 
 ```python
 class MyPlugin(PluginInterface):
@@ -30,11 +37,12 @@ class MyPlugin(PluginInterface):
         # TODO: 在此处理特定的命令
 ```
 
-在这个例子中，当用户发送 `/my_command` 时，`handle_command` 方法将被调用。
+当用户发送 `/my_command` 时,`handle_command` 方法将被调用.
 
 ## 4. 其他消息类型
 
-除了文本消息和命令，GuguMoe Bot 还支持处理其他类型的消息，比如音频、视频、图片等。要处理这些消息，你需要在插件类中定义相应的处理方法，比如 `handle_audio`、`handle_video` 等：
+处理其他类型的消息时,比如 音频|视频|图片, 你需要定义相应的处理方法,比如 `handle_audio`|`handle_video`
+等：
 
 ```python
 class MyPlugin(PluginInterface):
@@ -45,14 +53,15 @@ class MyPlugin(PluginInterface):
         # TODO: 在此处理视频消息
 ```
 
-这些处理方法将在收到相应类型的消息时被调用。
+这些处理方法将在收到相应类型的消息时被调用.
 
 ## 5. 权限检查
 
-如果你希望只有特定的用户可以使用你的插件，你可以在插件的处理方法中添加权限检查：
+如果你希望只有特定的用户可以使用你的插件,你可以在插件的处理方法中添加权限检查：
 
 ```python
 from gugumoe_bot.settings import settings
+
 
 class MyPlugin(PluginInterface):
     command = 'my_command'
@@ -64,23 +73,18 @@ class MyPlugin(PluginInterface):
             await bot.reply_to(message, 'You are not an admin.')
 ```
 
-在这个例子中，只有在管理员列表中的用户可以使用这个插件。
+在这个例子中,只有管理员可以使用这个插件.
 
 ## 6. 错误处理
 
-你的插件应该能够正确处理可能发生的错误。为了这个目标，你可以使用 Python 的 `try/except` 语句：
+由于Async方法的原因, 某些错误发生时并不会影响到主程序, 因此你的插件应当自主发现并处理错误信息, 你可以使用 Python
+的 `try/except` 语句：
 
 ```python
 class MyPlugin(PluginInterface):
     async def handle_message(self, bot, message):
         try:
-            # TODO: 在此处理消息
+        # TODO: 在此处理消息
         except Exception as e:
             await bot.reply_to(message, 'An error occurred.')
 ```
-
-在这个例子中，如果在处理消息时发生错误，插件将向用户发送一条错误消息。
-
-## 7. 总结
-
-这就是 GuguMoe Bot 插件的基本结构。你可以根据这个指南创建你自己的插件。
