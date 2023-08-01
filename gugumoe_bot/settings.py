@@ -20,7 +20,7 @@ class Settings(BaseSettings):
 
     # MongoDB settings
     mongodb_host: str = "192.168.31.181"
-    mongodb_port: int = 27017
+    mongodb_port: str = ""
     mongodb_user_name: str = ""
     mongodb_password: str = ""
     mongodb_db_name: str = "gugumoe_bot"

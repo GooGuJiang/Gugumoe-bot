@@ -14,7 +14,7 @@ from gugumoe_bot.settings import settings
 PLUGIN_DIR = 'plugins'
 
 # 初始化 TeleBot
-if settings.proxy:
+if settings.proxy is "":
     asyncio_helper.proxy = settings.proxy
 bot = AsyncTeleBot(settings.token)
 
