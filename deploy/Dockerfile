@@ -14,8 +14,8 @@ RUN pip install poetry==1.5.1
 RUN poetry config virtualenvs.create false
 
 # Installing additional dependencies
-RUN apt-get install -y curl libffi-dev libcairo2 && \
-    bash <(curl -Ls https://raw.githubusercontent.com/sjlleo/nexttrace/main/nt_install.sh)
+RUN apt-get update && apt-get install -y curl libffi-dev libcairo2
+RUN bash -c "$(curl -Ls https://raw.githubusercontent.com/sjlleo/nexttrace/main/nt_install.sh)"
 
 # Setting Working directory
 WORKDIR /app
