@@ -15,7 +15,7 @@ class Settings(BaseSettings):
 
     # Bot token
     token: str = ""
-    proxy: str | int = None
+    proxy: str = ""
     username: str = ""
 
     # MongoDB settings
