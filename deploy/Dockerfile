@@ -20,14 +20,17 @@ RUN bash -c "$(curl -Ls https://raw.githubusercontent.com/sjlleo/nexttrace/main/
 # Setting Working directory
 WORKDIR /app
 
+
 # Copying requirements of a project
 COPY pyproject.toml poetry.lock /app/
+
+# Copying actual application
+COPY . /app/
 
 # Installing requirements
 RUN poetry install --no-dev
 
-# Copying actual application
-COPY . /app/
+
 
 CMD ["/usr/bin/python3", "-m", "gugumoe_bot"]
 
