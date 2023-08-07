@@ -99,7 +99,7 @@ async def get_jrrp(user_id: int) -> str:
                 await mongo.update_daily_luck(user_id, today, luck_number)
             else:
                 await mongo.store_daily_luck(user_id, today, luck_number)
-            return f'<span class="tg-spoiler"><b>今天的人品是：</b>{luck_number}\n{await jrrp_text_init(luck_number)}</span>'
+            return f'<b>今天的人品是：</b>{luck_number}\n{await jrrp_text_init(luck_number)}'
     except Exception as e:
         logger.error(f"Error while getting jrrp: {e}")
         return "获取人品失败了呢"
