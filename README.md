@@ -18,11 +18,15 @@
 
 </div>
 
-## 安装
+## 部署
 
-本项目使用 [Python](https://www.python.org/) 和 [poetry](https://python-poetry.org/)。请确保你本地安装了它们。
+咕小酱 提供了多种部署方式，你可以根据自己的需求选择合适的部署方式。
 
-注意：需要 Python 3.11 或以上版本。
+### 本地部署
+
+本项目使用 [Python](https://www.python.org/) 和 [poetry](https://python-poetry.org/)。请确保你本地安装了它们，当然你也可以选择其他部署方式。
+
+注意：需要 Python 3.10 或以上版本。
 
 ```sh
 # 检查 Python 版本
