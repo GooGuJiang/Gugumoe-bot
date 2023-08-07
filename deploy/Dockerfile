@@ -8,7 +8,17 @@ RUN apt-get update && apt-get install -y locales python3 python3-pip curl libffi
     locale-gen en_US.UTF-8
 ENV LC_ALL=en_US.UTF-8 \
     LANG=en_US.UTF-8 \
-    LANGUAGE=en_US.UTF-8
+    LANGUAGE=en_US.UTF-8 \
+    GUGUMOE_BOT_TOKEN="" \
+    GUGUMOE_BOT_USERNAME="" \
+    GUGUMOE_BOT_MONGODB_URL="" \
+    GUGUMOE_BOT_PROXY="" \
+
+
+
+# Setting up timezone
+RUN ln -fs /usr/share/zoneinfo/Asia/Shanghai /etc/localtime && \
+    dpkg-reconfigure --frontend noninteractive tzdata
 
 # Installing poetry
 RUN pip install poetry==1.4.2

@@ -7,10 +7,7 @@ from motor.motor_asyncio import AsyncIOMotorClient
 from gugumoe_bot.settings import settings
 
 CONFIG_MONGODB = {
-    "host": settings.mongodb_host,
-    "port": settings.mongodb_port,
-    "user_name": settings.mongodb_user_name,
-    "password": settings.mongodb_password,
+    "host": settings.mongodb_url,
     "db_name": settings.mongodb_db_name,
     "collection_jrrp": settings.mongodb_collection_jrrp,
 }
@@ -22,11 +19,7 @@ class MongoDBHelper:
     def __init__(self) -> None:
         """Initializes the MongoDBHelper instance."""
         self.client = AsyncIOMotorClient(
-            "mongodb://"
-            f'{CONFIG_MONGODB["user_name"]}:'
-            f'{CONFIG_MONGODB["password"]}@'
-            f'{CONFIG_MONGODB["host"]}:'
-            f'{CONFIG_MONGODB["port"]}',
+            CONFIG_MONGODB["host"],
         )
         self.db = self.client[CONFIG_MONGODB["db_name"]]
         self.jrrp_collection = self.db[CONFIG_MONGODB["collection_jrrp"]]
