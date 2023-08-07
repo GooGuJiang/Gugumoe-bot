@@ -86,14 +86,19 @@ async def get_jrrp(user_id: int) -> str:
 
         user_id = str(user_id)
         document = await mongo.get_daily_luck(user_id)
-        if document:
+        # 只取日期, 不取时间
+        if document is not None and document["date"].date() == today:
             return f'<b>今天的人品是：</b>{document["jrrp_nub"]}\n你今天已经抽过人品了哦'
         else:
             try:
                 luck_number = await get_random_number()
             except Exception as e:
                 luck_number = hash(str(user_id) + str(today)) % 100
-            await mongo.store_daily_luck(user_id, today, luck_number)
+            # 如果日期不是今天，就存入数据库
+            if document is not None and document["date"].date() != today:
+                await mongo.update_daily_luck(user_id, today, luck_number)
+            else:
+                await mongo.store_daily_luck(user_id, today, luck_number)
             return f'<span class="tg-spoiler"><b>今天的人品是：</b>{luck_number}\n{await jrrp_text_init(luck_number)}</span>'
     except Exception as e:
         logger.error(f"Error while getting jrrp: {e}")

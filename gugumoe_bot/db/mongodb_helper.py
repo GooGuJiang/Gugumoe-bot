@@ -80,20 +80,18 @@ class MongoDBHelper:
             logger.error(f"Failed to get daily luck: {e}")
             return None
 
-    async def update_daily_luck(self, user_id: str, date: datetime.date, new_luck_number: Optional[int] = None,
-                                new_date: Optional[datetime.date] = None) -> bool:
+    async def update_daily_luck(self, user_id: str, new_date: Optional[datetime.date] = None,
+                                new_luck_number: Optional[int] = None,
+                                ) -> bool:
         """Update the date or luck number for a given user ID."""
+        # 基于UID更新日期和幸运数值
         try:
-            datetime_obj = datetime.datetime(date.year, date.month, date.day)
-            update_fields = {}
-            if new_date is not None:
-                new_datetime_obj = datetime.datetime(new_date.year, new_date.month, new_date.day)
-                update_fields["date"] = new_datetime_obj
-            if new_luck_number is not None:
-                update_fields["jrrp_nub"] = new_luck_number
-            if update_fields:
-                await self.jrrp_collection.update_one({"user_id": user_id, "date": datetime_obj},
-                                                      {'$set': update_fields})
+            # datetime_obj = datetime.datetime(date.year, date.month, date.day)
+            new_datetime_obj = datetime.datetime(new_date.year, new_date.month, new_date.day)
+            await self.jrrp_collection.update_one(
+                {"user_id": user_id},
+                {"$set": {"date": new_datetime_obj, "jrrp_nub": new_luck_number}},
+            )
             return True
         except Exception as e:
             logger.error(f"Failed to update daily luck: {e}")
