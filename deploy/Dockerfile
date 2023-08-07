@@ -16,8 +16,9 @@ ENV LC_ALL=en_US.UTF-8 \
 
 
 
-# Setting up timezone
-RUN ln -fs /usr/share/zoneinfo/Asia/Shanghai /etc/localtime && \
+# Installing tzdata and configuring timezone
+RUN apt-get update && apt-get install -y tzdata && \
+    ln -fs /usr/share/zoneinfo/Asia/Shanghai /etc/localtime && \
     dpkg-reconfigure --frontend noninteractive tzdata
 
 # Installing poetry
