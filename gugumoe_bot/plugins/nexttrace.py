@@ -17,5 +17,5 @@ class NexttracePlugin(PluginInterface):
         host = message.text.split()[1]
         get_identify_and_extract_ip = nslookup_helper.identify_and_extract_ip(host)
         if get_identify_and_extract_ip[0] == "Unknown":
-            await bot.reply_to(message, "抱歉，我无法识别这个地址的类型。")
+            await bot.reply_to(message, "抱歉，咕小酱貌似无法识别这个地址的类型呢。")
             return

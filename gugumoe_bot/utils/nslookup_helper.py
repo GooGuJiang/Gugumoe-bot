@@ -4,7 +4,7 @@ import re
 import dns.resolver
 
 
-def identify_and_extract(input_str):
+def identify_and_extract_ip(input_str):
     # Patterns
     ipv4_pattern = r'^(?:[0-9]{1,3}\.){3}[0-9]{1,3}$'
     ipv6_pattern = r'^(?:[A-Fa-f0-9]{1,4}:){7}[A-Fa-f0-9]{1,4}$'
