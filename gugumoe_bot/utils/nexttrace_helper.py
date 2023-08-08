@@ -85,6 +85,7 @@ class NextTraceHelper:
             "as_number": "#3ed7b9",
             "as_number_asterisk": "#1fb065",
             "location": "#e2e3e8",
+            "response_times_text": "#8d91a5",
             "response_times": "#44a7ff",
             "asterisk": "#e2e3e8",
             "website": "#1bb568",
@@ -138,7 +139,7 @@ class NextTraceHelper:
                 response_times_text = item.get("response_times", "").split(" ", 1)[0]
                 x_1 = align_x - font.getlength(response_times_ms)
                 draw_colored_text(draw, x_1, y, response_times_ms, "response_times", bold_font)
-                draw_colored_text(draw, 50, y, response_times_text, "response_times", bold_font)
+                draw_colored_text(draw, 50, y, response_times_text, "response_times_text", bold_font)
             else:
                 x = align_x - font.getlength(item.get("response_times", ""))
                 y += font_size + 10  # 移动到下一行
@@ -166,6 +167,6 @@ class NextTraceHelper:
 
 if __name__ == '__main__':
     helper = NextTraceHelper()
-    img_bytes = helper.execute_and_generate_image("1.1.1.1")
+    img_bytes = helper.execute_and_generate_image("127.0.0.1")
     with open("traceroute_result.png", "wb") as f:
         f.write(img_bytes)
