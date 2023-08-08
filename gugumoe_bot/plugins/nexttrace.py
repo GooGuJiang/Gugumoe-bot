@@ -52,9 +52,11 @@ class NexttracePlugin(PluginInterface):
                 return
             if len(get_records['A']) == 1 and len(get_records['AAAA']) == 0:
                 ipv4 = get_records['A'][0]
-                bot.edit_message_text("咕小酱已经成功解析域名，正在尝试进行下路由追踪，请稍等哦。", message.chat.id,
+                await bot.edit_message_text("咕小酱已经成功解析域名，正在尝试进行下路由追踪，请稍等哦。", message.chat.id,
                                       msg_tmp.message_id)
-                # TODO: Add nexttrace
+                image_data = self.nexttrace_helper.execute_and_generate_image(ipv4)
+                await bot.send_photo(message.chat.id, image_data, reply_to_message_id=message.message_id)
+                return
             if len(get_records['A']) == 0 and len(get_records['AAAA']) == 1:
                 ipv6 = get_records['AAAA'][0]
                 bot.edit_message_text("咕小酱已经成功解析域名，正在尝试进行路由追踪，请稍等哦。", message.chat.id,
@@ -158,3 +160,4 @@ class NexttracePlugin(PluginInterface):
                 await bot.edit_message_text("咕小酱解析发现该域名存在多个地址，请选择一个进行路由跟踪",
                                             call.message.chat.id,
                                             call.message.message_id, reply_markup=keyboard)
+                return

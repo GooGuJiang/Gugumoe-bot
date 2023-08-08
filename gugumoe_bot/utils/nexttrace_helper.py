@@ -110,9 +110,9 @@ class NextTraceHelper:
         response_times_width = max([bold_font.getlength(item.get("response_times", "")) for item in json_list])
 
         # 根据最大宽度来计算整个图片的最大宽度
-        max_width = 10 + number_width + ip_width + as_number_width + location_width + website_width + response_times_width / 4
+        max_width = 10 + number_width + ip_width + as_number_width + location_width + website_width + response_times_width
 
-        max_width = math.ceil(max_width) + 20  # 加上左右的间距
+        max_width = math.ceil(max_width) + 130  # 加上左右的间距
         ip_width = max([bold_font.getlength("{:<15}".format(item["ip"])) for item in json_list])
 
         # 绘制每一行
