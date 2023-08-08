@@ -66,6 +66,7 @@ class NexttracePlugin(PluginInterface):
                     "ipv4": get_records['A'],
                     "message_id": msg_tmp.message_id,
                     "chat_id": message.chat.id,
+                    "user_id": message.from_user.id,
                     "host": host
                 }
                 make_json_v6 = {
@@ -73,6 +74,7 @@ class NexttracePlugin(PluginInterface):
                     "ipv6": get_records['AAAA'],
                     "message_id": msg_tmp.message_id,
                     "chat_id": message.chat.id,
+                    "user_id": message.from_user.id,
                     "host": host
                 }
                 cancel_json = {
@@ -99,4 +101,15 @@ class NexttracePlugin(PluginInterface):
                 return
 
     async def handle_callback_query(self, bot, call):
-        await bot.answer_callback_query(call.id, "正在通知咕小酱响应事件，请稍等哦。")
+        # await bot.answer_callback_query(call.id, "正在通知咕小酱响应事件，请稍等哦。")
+        get_data = await self.redis_helper.get_object(call.data)
+        if get_data is None:
+            await bot.answer_callback_query(call.id, "抱歉，此请求无法找到或已失效。", show_alert=True)
+            # 删除消息
+            await bot.delete_message(call.message.chat.id, call.message.message_id)
+            return
+        if get_data['user_id'] != call.from_user.id:
+            await bot.answer_callback_query(call.id, "抱歉，此请求不属于你。", show_alert=True)
+            return
+        if get_data['action'] == "nexttrace":
+            pass
