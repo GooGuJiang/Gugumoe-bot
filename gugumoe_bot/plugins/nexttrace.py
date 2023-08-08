@@ -63,30 +63,36 @@ class NexttracePlugin(PluginInterface):
             if len(get_records['A']) >= 1 and len(get_records['AAAA']) >= 1:
                 make_json_v4 = {
                     "action": "nexttrace",
-                    "ipv4": get_records['A'],
+                    "ips": get_records['A'],
                     "message_id": msg_tmp.message_id,
                     "chat_id": message.chat.id,
                     "user_id": message.from_user.id,
+                    "tmp_message_id": msg_tmp.message_id,
                     "host": host
                 }
                 make_json_v6 = {
                     "action": "nexttrace",
-                    "ipv6": get_records['AAAA'],
+                    "ips": get_records['AAAA'],
                     "message_id": msg_tmp.message_id,
                     "chat_id": message.chat.id,
                     "user_id": message.from_user.id,
+                    "tmp_message_id": msg_tmp.message_id,
                     "host": host
-                }
-                cancel_json = {
-                    "action": "cancel",
-                    "message_id": msg_tmp.message_id,
-                    "chat_id": message.chat.id
                 }
                 make_hash_v4 = generate_hash(str(make_json_v4))
                 make_hash_v6 = generate_hash(str(make_json_v6))
-                cancel_hash = generate_hash(str(cancel_json))
+
                 await self.redis_helper.set_object(make_hash_v4, make_json_v4, expire=CANCEL_SEC)
                 await self.redis_helper.set_object(make_hash_v6, make_json_v6, expire=CANCEL_SEC)
+                cancel_json = {
+                    "action": "cancel",
+                    "message_id": msg_tmp.message_id,
+                    "chat_id": message.chat.id,
+                    "user_id": message.from_user.id,
+                    "tmp_message_id": msg_tmp.message_id,
+                    "delete_hash_list": [make_hash_v4, make_hash_v6]
+                }
+                cancel_hash = generate_hash(str(cancel_json))
                 await self.redis_helper.set_object(cancel_hash, cancel_json, expire=CANCEL_SEC)
                 keyboard = InlineKeyboardMarkup()
                 keyboard.add(
@@ -111,5 +117,44 @@ class NexttracePlugin(PluginInterface):
         if get_data['user_id'] != call.from_user.id:
             await bot.answer_callback_query(call.id, "抱歉，此请求不属于你。", show_alert=True)
             return
+        if get_data['action'] == "cancel":
+            await bot.answer_callback_query(call.id, "正在通知咕小酱响应事件，请稍等哦。")
+            delete_hash_list = get_data["delete_hash_list"]
+            for i in delete_hash_list:
+                await self.redis_helper.delete_object(i)
+            await bot.delete_message(call.message.chat.id, call.message.message_id)
+            return
         if get_data['action'] == "nexttrace":
-            pass
+            if len(get_data["ips"]) > 1:
+                await bot.answer_callback_query(call.id, "正在通知咕小酱响应事件，请稍等哦。")
+                ips_list = get_data["ips"]
+                keyboard = InlineKeyboardMarkup()
+                delete_hash_list = []
+                for i in range(min(len(ips_list), 5)):
+                    ips_data = {
+                        "action": "nexttrace-start",
+                        "ip": ips_list[i],
+                        "message_id": get_data["message_id"],
+                        "chat_id": get_data["chat_id"],
+                        "user_id": get_data["user_id"],
+                        "tmp_message_id": get_data["tmp_message_id"],
+                        "host": get_data["host"]
+                    }
+                    ips_hash = generate_hash(str(ips_data))
+                    await self.redis_helper.set_object(ips_hash, ips_data, expire=CANCEL_SEC)
+                    keyboard.add(InlineKeyboardButton(ips_list[i], callback_data=ips_hash))
+                    delete_hash_list.append(ips_hash)
+                cancel_json = {
+                    "action": "cancel",
+                    "message_id": get_data["message_id"],
+                    "chat_id": get_data["chat_id"],
+                    "user_id": get_data["user_id"],
+                    "tmp_message_id": get_data["tmp_message_id"],
+                    "delete_hash_list": delete_hash_list
+                }
+                cancel_hash = generate_hash(str(cancel_json))
+                await self.redis_helper.set_object(cancel_hash, cancel_json, expire=CANCEL_SEC)
+                keyboard.add(InlineKeyboardButton("取消", callback_data=cancel_hash))
+                await bot.edit_message_text("咕小酱解析发现该域名存在多个地址，请选择一个进行路由跟踪",
+                                            call.message.chat.id,
+                                            call.message.message_id, reply_markup=keyboard)
