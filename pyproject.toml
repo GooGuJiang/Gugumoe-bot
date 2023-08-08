@@ -22,6 +22,7 @@ pytz = "^2023.3"
 ntplib = "^0.4.0"
 httpx = "^0.24.1"
 pillow = "^10.0.0"
+redis = { extras = ["hiredis"], version = "^4.6.0" }
 
 
 [build-system]

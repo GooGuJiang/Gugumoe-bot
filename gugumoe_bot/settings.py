@@ -23,6 +23,11 @@ class Settings(BaseSettings):
     mongodb_db_name: str = "gugumoe_bot"
     mongodb_collection_jrrp: str = "jrrp"
 
+    # Redis settings
+    redis_host: str = "localhost"
+    redis_port: int = 6379
+    redis_password: str = ""
+
     model_config = SettingsConfigDict(
         env_file=".env",
         env_prefix="GUGUMOE_BOT_",
