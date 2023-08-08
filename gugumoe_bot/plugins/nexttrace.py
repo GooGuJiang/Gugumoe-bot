@@ -61,9 +61,6 @@ class NexttracePlugin(PluginInterface):
                                       msg_tmp.message_id)
                 # TODO: Add nexttrace
             if len(get_records['A']) >= 1 and len(get_records['AAAA']) >= 1:
-                await bot.edit_message_text("咕小酱检测到这个域名同时存在IPv4和IPv6地址，请选择要检测的类型：",
-                                            message.chat.id,
-                                            msg_tmp.message_id)
                 make_json_v4 = {
                     "action": "nexttrace",
                     "ipv4": get_records['A'],
@@ -90,12 +87,16 @@ class NexttracePlugin(PluginInterface):
                 await self.redis_helper.set_object(make_hash_v6, make_json_v6, expire=CANCEL_SEC)
                 await self.redis_helper.set_object(cancel_hash, cancel_json, expire=CANCEL_SEC)
                 keyboard = InlineKeyboardMarkup()
-                keyboard.row(InlineKeyboardButton("IPv4", callback_data=make_hash_v4),
-                             InlineKeyboardButton("IPv6", callback_data=make_hash_v6),
-                             InlineKeyboardButton("取消", callback_data=cancel_hash)
-                             )
+                keyboard.add(
+                    InlineKeyboardButton("IPv4", callback_data=make_hash_v4),
+                    InlineKeyboardButton("IPv6", callback_data=make_hash_v6)
+                )
+                keyboard.add(InlineKeyboardButton("取消", callback_data=cancel_hash))
                 await bot.edit_message_text(
                     f"咕小酱检测到这个域名同时存在IPv4和IPv6地址，请在 {CANCEL_SEC} 秒内选择要检测的类型：",
                     message.chat.id,
                     msg_tmp.message_id, reply_markup=keyboard)
                 return
+
+    async def handle_callback_query(self, bot, call):
+        await bot.answer_callback_query(call.id, "正在通知咕小酱响应事件，请稍等哦。")
