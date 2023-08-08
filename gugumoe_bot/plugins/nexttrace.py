@@ -19,3 +19,11 @@ class NexttracePlugin(PluginInterface):
         if get_identify_and_extract_ip[0] == "Unknown":
             await bot.reply_to(message, "抱歉，咕小酱貌似无法识别这个地址的类型呢。")
             return
+
+        if get_identify_and_extract_ip[0] == "Loopback":
+            await bot.reply_to(message, "抱歉，咕小酱认为这个地址是本地回环地址，已经拒绝你的请求啦。")
+            return
+
+        if get_identify_and_extract_ip[0] == "Private":
+            await bot.reply_to(message, "抱歉，咕小酱认为这个地址是私有地址，已经拒绝你的请求啦。")
+            return
