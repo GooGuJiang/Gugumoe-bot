@@ -1,4 +1,48 @@
+import ipaddress
+import re
+
 import dns.resolver
+
+
+def identify_and_extract(input_str):
+    # Patterns
+    ipv4_pattern = r'^(?:[0-9]{1,3}\.){3}[0-9]{1,3}$'
+    ipv6_pattern = r'^(?:[A-Fa-f0-9]{1,4}:){7}[A-Fa-f0-9]{1,4}$'
+    domain_pattern = r'^[a-zA-Z0-9][-a-zA-Z0-9]{0,62}(\.[a-zA-Z0-9][-a-zA-Z0-9]{0,62})+\.?$'
+    url_pattern = r'https?://([\w\-\.]+)/?'
+
+    # Check IPv4
+    if re.match(ipv4_pattern, input_str):
+        ip = ipaddress.ip_address(input_str)
+        if ip.is_loopback:
+            return "Loopback", input_str
+        elif ip.is_private:
+            return "Private", input_str
+        else:
+            return "IPv4", input_str
+
+    # Check IPv6
+    if re.match(ipv6_pattern, input_str):
+        ip = ipaddress.ip_address(input_str)
+        if ip.is_loopback:
+            return "Loopback", input_str
+        elif ip.is_private:
+            return "Private", input_str
+        else:
+            return "IPv6", input_str
+
+    # Check URL
+    match = re.match(url_pattern, input_str)
+    if match:
+        domain = match.group(1)
+        if re.match(domain_pattern, domain):
+            return "Domain", domain
+
+    # Check Domain
+    if re.match(domain_pattern, input_str):
+        return "Domain", input_str
+
+    return "Unknown", None
 
 
 def get_records(domain, nameserver="8.8.8.8"):
