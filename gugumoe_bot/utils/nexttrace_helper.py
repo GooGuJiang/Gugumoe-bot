@@ -102,11 +102,11 @@ class NextTraceHelper:
         font = ImageFont.truetype(f"{BASE_DIR}/fonts/Sarasa-Mono-SC-Semibold-Nerd.ttf", font_size)
         bold_font = ImageFont.truetype(f"{BASE_DIR}/fonts/Sarasa-Mono-SC-Bold-Nerd.ttf", font_size)
         # 计算每一项的最大宽度
-        number_width = max([bold_font.getlength("{:<4}".format(item["number"])) for item in json_list])
-        ip_width = max([bold_font.getlength(item["ip"]) for item in json_list])
+        number_width = max([bold_font.getlength("{:<4}".format(item["number"])) for item in json_list]) + 10
+        ip_width = max([bold_font.getlength(item["ip"]) for item in json_list]) + 10
         as_number_width = max([bold_font.getlength(item.get("as_number") or "*") for item in json_list])
         location_width = max([bold_font.getlength(item.get("location", "")) for item in json_list])
-        website_width = max([font.getlength(item.get("website") or "") for item in json_list])
+        website_width = max([font.getlength(item.get("website") or "") for item in json_list]) + 10
         response_times_width = max([bold_font.getlength(item.get("response_times", "")) for item in json_list])
 
         # 根据最大宽度来计算整个图片的最大宽度
@@ -167,6 +167,6 @@ class NextTraceHelper:
 
 if __name__ == '__main__':
     helper = NextTraceHelper()
-    img_bytes = helper.execute_and_generate_image("127.0.0.1")
+    img_bytes = helper.execute_and_generate_image("58.49.243.65")
     with open("traceroute_result.png", "wb") as f:
         f.write(img_bytes)
