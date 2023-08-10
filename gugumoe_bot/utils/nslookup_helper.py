@@ -43,7 +43,7 @@ def identify_and_extract_ip(input_str):
     return "Unknown", None
 
 
-def get_records(domain, nameserver="8.8.8.8"):
+def get_records(domain, nameserver="1.1.1.1"):
     # 创建一个解析器实例
     resolver = dns.resolver.Resolver()
 
