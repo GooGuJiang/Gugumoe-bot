@@ -48,13 +48,13 @@ class NexttracePlugin(PluginInterface):
             msg_tmp = await bot.reply_to(message, "咕小酱正在尝试解析域名，请稍等哦。")
             get_records = nslookup_helper.get_records(host)
             if len(get_records['A']) == 0 and len(get_records['AAAA']) == 0:
-                bot.edit_message_text("抱歉，咕小酱貌似无法解析这个域名呢。", message.chat.id, msg_tmp.message_id)
+                await bot.edit_message_text("抱歉，咕小酱貌似无法解析这个域名呢。", message.chat.id, msg_tmp.message_id)
                 return
             if len(get_records['A']) == 1 and len(get_records['AAAA']) == 0:
                 ipv4 = get_records['A'][0]
                 gu_tmp_msg = await bot.edit_message_text("咕小酱已经成功解析域名，正在尝试进行下路由追踪，请稍等哦。",
                                                          message.chat.id,
-                                      msg_tmp.message_id)
+                                                         msg_tmp.message_id)
                 image_data = self.nexttrace_helper.execute_and_generate_image(ipv4)
                 await bot.send_chat_action(message.chat.id, 'upload_photo')
                 await bot.send_photo(message.chat.id, image_data, reply_to_message_id=message.message_id)
@@ -64,7 +64,7 @@ class NexttracePlugin(PluginInterface):
                 ipv6 = get_records['AAAA'][0]
                 gu_tmp_msg = bot.edit_message_text("咕小酱已经成功解析域名，正在尝试进行路由追踪，请稍等哦。",
                                                    message.chat.id,
-                                      msg_tmp.message_id)
+                                                   msg_tmp.message_id)
                 image_data = self.nexttrace_helper.execute_and_generate_image(ipv6)
                 await bot.send_chat_action(message.chat.id, 'upload_photo')
                 await bot.send_photo(message.chat.id, image_data, reply_to_message_id=message.message_id)
@@ -123,7 +123,6 @@ class NexttracePlugin(PluginInterface):
             await bot.send_photo(message.chat.id, image_data, reply_to_message_id=message.message_id)
             await bot.delete_message(message.chat.id, msg_tmp.message_id)
             return
-
 
     async def handle_callback_query(self, bot, call):
         # await bot.answer_callback_query(call.id, "正在通知咕小酱响应事件，请稍等哦。")
