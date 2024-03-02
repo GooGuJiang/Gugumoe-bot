@@ -60,7 +60,7 @@ def get_ntp_time_sync(host="pool.ntp.org"):
         return get_local_time_in_utc_plus_8()
 
 
-async def get_ntp_time(host="pool.ntp.org"):
+async def get_ntp_time(host="time.apple.com"):
     loop = asyncio.get_running_loop()
 
     with concurrent.futures.ThreadPoolExecutor() as pool:
